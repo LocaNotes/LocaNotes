@@ -1,0 +1,585 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		45681EEB25D51AC700F76A52 /* LocaNotesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45681EEA25D51AC700F76A52 /* LocaNotesApp.swift */; };
+		45681EED25D51AC700F76A52 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45681EEC25D51AC700F76A52 /* ContentView.swift */; };
+		45681EEF25D51ACA00F76A52 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45681EEE25D51ACA00F76A52 /* Assets.xcassets */; };
+		45681EF225D51ACA00F76A52 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45681EF125D51ACA00F76A52 /* Preview Assets.xcassets */; };
+		45681EFD25D51ACA00F76A52 /* LocaNotesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45681EFC25D51ACA00F76A52 /* LocaNotesTests.swift */; };
+		45681F0825D51ACA00F76A52 /* LocaNotesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45681F0725D51ACA00F76A52 /* LocaNotesUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		45681EF925D51ACA00F76A52 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 45681EDF25D51AC700F76A52 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 45681EE625D51AC700F76A52;
+			remoteInfo = LocaNotes;
+		};
+		45681F0425D51ACA00F76A52 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 45681EDF25D51AC700F76A52 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 45681EE625D51AC700F76A52;
+			remoteInfo = LocaNotes;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		45681EE725D51AC700F76A52 /* LocaNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LocaNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		45681EEA25D51AC700F76A52 /* LocaNotesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocaNotesApp.swift; sourceTree = "<group>"; };
+		45681EEC25D51AC700F76A52 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		45681EEE25D51ACA00F76A52 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		45681EF125D51ACA00F76A52 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		45681EF325D51ACA00F76A52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		45681EF825D51ACA00F76A52 /* LocaNotesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocaNotesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		45681EFC25D51ACA00F76A52 /* LocaNotesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocaNotesTests.swift; sourceTree = "<group>"; };
+		45681EFE25D51ACA00F76A52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		45681F0325D51ACA00F76A52 /* LocaNotesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocaNotesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		45681F0725D51ACA00F76A52 /* LocaNotesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocaNotesUITests.swift; sourceTree = "<group>"; };
+		45681F0925D51ACA00F76A52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		45681EE425D51AC700F76A52 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		45681EF525D51ACA00F76A52 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		45681F0025D51ACA00F76A52 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		45681EDE25D51AC700F76A52 = {
+			isa = PBXGroup;
+			children = (
+				45681EE925D51AC700F76A52 /* LocaNotes */,
+				45681EFB25D51ACA00F76A52 /* LocaNotesTests */,
+				45681F0625D51ACA00F76A52 /* LocaNotesUITests */,
+				45681EE825D51AC700F76A52 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		45681EE825D51AC700F76A52 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				45681EE725D51AC700F76A52 /* LocaNotes.app */,
+				45681EF825D51ACA00F76A52 /* LocaNotesTests.xctest */,
+				45681F0325D51ACA00F76A52 /* LocaNotesUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		45681EE925D51AC700F76A52 /* LocaNotes */ = {
+			isa = PBXGroup;
+			children = (
+				45681EEA25D51AC700F76A52 /* LocaNotesApp.swift */,
+				45681EEC25D51AC700F76A52 /* ContentView.swift */,
+				45681EEE25D51ACA00F76A52 /* Assets.xcassets */,
+				45681EF325D51ACA00F76A52 /* Info.plist */,
+				45681EF025D51ACA00F76A52 /* Preview Content */,
+			);
+			path = LocaNotes;
+			sourceTree = "<group>";
+		};
+		45681EF025D51ACA00F76A52 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				45681EF125D51ACA00F76A52 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		45681EFB25D51ACA00F76A52 /* LocaNotesTests */ = {
+			isa = PBXGroup;
+			children = (
+				45681EFC25D51ACA00F76A52 /* LocaNotesTests.swift */,
+				45681EFE25D51ACA00F76A52 /* Info.plist */,
+			);
+			path = LocaNotesTests;
+			sourceTree = "<group>";
+		};
+		45681F0625D51ACA00F76A52 /* LocaNotesUITests */ = {
+			isa = PBXGroup;
+			children = (
+				45681F0725D51ACA00F76A52 /* LocaNotesUITests.swift */,
+				45681F0925D51ACA00F76A52 /* Info.plist */,
+			);
+			path = LocaNotesUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		45681EE625D51AC700F76A52 /* LocaNotes */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 45681F0C25D51ACA00F76A52 /* Build configuration list for PBXNativeTarget "LocaNotes" */;
+			buildPhases = (
+				45681EE325D51AC700F76A52 /* Sources */,
+				45681EE425D51AC700F76A52 /* Frameworks */,
+				45681EE525D51AC700F76A52 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LocaNotes;
+			productName = LocaNotes;
+			productReference = 45681EE725D51AC700F76A52 /* LocaNotes.app */;
+			productType = "com.apple.product-type.application";
+		};
+		45681EF725D51ACA00F76A52 /* LocaNotesTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 45681F0F25D51ACA00F76A52 /* Build configuration list for PBXNativeTarget "LocaNotesTests" */;
+			buildPhases = (
+				45681EF425D51ACA00F76A52 /* Sources */,
+				45681EF525D51ACA00F76A52 /* Frameworks */,
+				45681EF625D51ACA00F76A52 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				45681EFA25D51ACA00F76A52 /* PBXTargetDependency */,
+			);
+			name = LocaNotesTests;
+			productName = LocaNotesTests;
+			productReference = 45681EF825D51ACA00F76A52 /* LocaNotesTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		45681F0225D51ACA00F76A52 /* LocaNotesUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 45681F1225D51ACA00F76A52 /* Build configuration list for PBXNativeTarget "LocaNotesUITests" */;
+			buildPhases = (
+				45681EFF25D51ACA00F76A52 /* Sources */,
+				45681F0025D51ACA00F76A52 /* Frameworks */,
+				45681F0125D51ACA00F76A52 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				45681F0525D51ACA00F76A52 /* PBXTargetDependency */,
+			);
+			name = LocaNotesUITests;
+			productName = LocaNotesUITests;
+			productReference = 45681F0325D51ACA00F76A52 /* LocaNotesUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		45681EDF25D51AC700F76A52 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1240;
+				LastUpgradeCheck = 1240;
+				TargetAttributes = {
+					45681EE625D51AC700F76A52 = {
+						CreatedOnToolsVersion = 12.4;
+					};
+					45681EF725D51ACA00F76A52 = {
+						CreatedOnToolsVersion = 12.4;
+						TestTargetID = 45681EE625D51AC700F76A52;
+					};
+					45681F0225D51ACA00F76A52 = {
+						CreatedOnToolsVersion = 12.4;
+						TestTargetID = 45681EE625D51AC700F76A52;
+					};
+				};
+			};
+			buildConfigurationList = 45681EE225D51AC700F76A52 /* Build configuration list for PBXProject "LocaNotes" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 45681EDE25D51AC700F76A52;
+			productRefGroup = 45681EE825D51AC700F76A52 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				45681EE625D51AC700F76A52 /* LocaNotes */,
+				45681EF725D51ACA00F76A52 /* LocaNotesTests */,
+				45681F0225D51ACA00F76A52 /* LocaNotesUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		45681EE525D51AC700F76A52 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45681EF225D51ACA00F76A52 /* Preview Assets.xcassets in Resources */,
+				45681EEF25D51ACA00F76A52 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		45681EF625D51ACA00F76A52 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		45681F0125D51ACA00F76A52 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		45681EE325D51AC700F76A52 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45681EED25D51AC700F76A52 /* ContentView.swift in Sources */,
+				45681EEB25D51AC700F76A52 /* LocaNotesApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		45681EF425D51ACA00F76A52 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45681EFD25D51ACA00F76A52 /* LocaNotesTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		45681EFF25D51ACA00F76A52 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45681F0825D51ACA00F76A52 /* LocaNotesUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		45681EFA25D51ACA00F76A52 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 45681EE625D51AC700F76A52 /* LocaNotes */;
+			targetProxy = 45681EF925D51ACA00F76A52 /* PBXContainerItemProxy */;
+		};
+		45681F0525D51ACA00F76A52 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 45681EE625D51AC700F76A52 /* LocaNotes */;
+			targetProxy = 45681F0425D51ACA00F76A52 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		45681F0A25D51ACA00F76A52 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		45681F0B25D51ACA00F76A52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		45681F0D25D51ACA00F76A52 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"LocaNotes/Preview Content\"";
+				DEVELOPMENT_TEAM = 47UU8PWRAY;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = LocaNotes/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = eli.LocaNotes;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		45681F0E25D51ACA00F76A52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"LocaNotes/Preview Content\"";
+				DEVELOPMENT_TEAM = 47UU8PWRAY;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = LocaNotes/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = eli.LocaNotes;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		45681F1025D51ACA00F76A52 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 47UU8PWRAY;
+				INFOPLIST_FILE = LocaNotesTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = eli.LocaNotesTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LocaNotes.app/LocaNotes";
+			};
+			name = Debug;
+		};
+		45681F1125D51ACA00F76A52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 47UU8PWRAY;
+				INFOPLIST_FILE = LocaNotesTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = eli.LocaNotesTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LocaNotes.app/LocaNotes";
+			};
+			name = Release;
+		};
+		45681F1325D51ACA00F76A52 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 47UU8PWRAY;
+				INFOPLIST_FILE = LocaNotesUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = eli.LocaNotesUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LocaNotes;
+			};
+			name = Debug;
+		};
+		45681F1425D51ACA00F76A52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 47UU8PWRAY;
+				INFOPLIST_FILE = LocaNotesUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = eli.LocaNotesUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LocaNotes;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		45681EE225D51AC700F76A52 /* Build configuration list for PBXProject "LocaNotes" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				45681F0A25D51ACA00F76A52 /* Debug */,
+				45681F0B25D51ACA00F76A52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		45681F0C25D51ACA00F76A52 /* Build configuration list for PBXNativeTarget "LocaNotes" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				45681F0D25D51ACA00F76A52 /* Debug */,
+				45681F0E25D51ACA00F76A52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		45681F0F25D51ACA00F76A52 /* Build configuration list for PBXNativeTarget "LocaNotesTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				45681F1025D51ACA00F76A52 /* Debug */,
+				45681F1125D51ACA00F76A52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		45681F1225D51ACA00F76A52 /* Build configuration list for PBXNativeTarget "LocaNotesUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				45681F1325D51ACA00F76A52 /* Debug */,
+				45681F1425D51ACA00F76A52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 45681EDF25D51AC700F76A52 /* Project object */;
+}
