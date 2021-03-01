@@ -8,13 +8,40 @@
 import SwiftUI
 
 struct CreateNoteView: View {
+        
+    var noteViewModel: NoteViewModel
+    
+    @State private var publiclyVisible = false
+    
+    @State private var noteContent = ""
+    
+    init (noteViewModel: NoteViewModel) {
+        self.noteViewModel = noteViewModel
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            Text("New Note")
+            Form {
+                Toggle(isOn: $publiclyVisible, label: {
+                    Text("Public or Private?")
+                })
+                TextEditor(text: $noteContent)
+            }
+            Button(action: {insertNote()}) {
+                Text("Finish")
+            }
+        }
+    }
+    
+    // is it worth using the NotificationCenter instead of invoking the call?
+    private func insertNote() {
+        noteViewModel.insertNote(body: noteContent)
     }
 }
 
 struct CreateNoteView_Previews: PreviewProvider {
     static var previews: some View {
-        CreateNoteView()
+        CreateNoteView(noteViewModel: NoteViewModel())
     }
 }
