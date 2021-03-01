@@ -8,7 +8,7 @@
 import Foundation
 
 struct Note {
-    let id: Int32
+    let noteId: Int32
     let userId: Int32
     let longitude: NSString
     let latitude: NSString
@@ -20,12 +20,13 @@ extension Note: SQLTable {
     static var createStatement: String {
         return """
             CREATE TABLE Note(
-                NoteId INT NOT NULL INDENTITY PRIMARY KEY,
-                UserId INT NOT NULL FOREIGN KEY REFERENCES User(UserId),
+                NoteId INTEGER NOT NULL PRIMARY KEY,
+                UserId INTEGER NOT NULL,
                 Latitude VARCHAR(10) NOT NULL,
                 Longitude VARCHAR(10) NOT NULL,
                 Timestamp INT NOT NULL,
-                Body VARCHAR(500) NOT NULL
+                Body VARCHAR(500) NOT NULL,
+                FOREIGN KEY(UserId) REFERENCES User(UserId)
             );
         """
     }
