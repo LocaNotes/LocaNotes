@@ -8,13 +8,16 @@
 import SwiftUI
 
 struct PrivateNoteDetailView: View {
+    
+    let note: Note
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Text(String(note.body))
     }
 }
 
 struct PrivateNoteDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        PrivateNoteDetailView()
+        PrivateNoteDetailView(note: Note(noteId: 1, userId: 1, longitude: "23.9889", latitude: "82.2322", timestamp: 23, body: "test"))
     }
 }
