@@ -18,10 +18,19 @@ struct PrivateNoteListView: View {
     var body: some View {
         NavigationView {
             List {
-                ForEach(viewModel.notes, id: \.noteId) { note in
-                    NoteCell(note: note)
+                if !viewModel.nearbyNotes.isEmpty {
+                    Section(header: Text("Nearby")) {
+                        ForEach(viewModel.nearbyNotes, id: \.noteId) { note in
+                            NoteCell(note: note)
+                        }
+                    }
                 }
-                .onDelete(perform: viewModel.deleteNote)
+                Section(header: Text("All")) {
+                    ForEach(viewModel.notes, id: \.noteId) { note in
+                        NoteCell(note: note)
+                    }
+                    .onDelete(perform: viewModel.deleteNote)
+                }
             }
             .navigationTitle("private notes")
             .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
