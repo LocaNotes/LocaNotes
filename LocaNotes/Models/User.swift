@@ -20,7 +20,7 @@ extension User: SQLTable {
     static var createStatement: String {
         return """
             CREATE TABLE User(
-                UserId INT NOT NULL IDENTITY PRIMARY KEY,
+                UserId INTEGER NOT NULL PRIMARY KEY,
                 FirstName VARCHAR(20) NOT NULL,
                 LastName VARCHAR(20) NOT NULL,
                 Email VARCHAR(40) NOT NULL,
