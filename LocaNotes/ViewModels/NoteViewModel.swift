@@ -19,6 +19,8 @@ public class NoteViewModel: ObservableObject {
       
     @Published var notes: [Note] = []
     
+    @Published var nearbyNotes: [Note] = []
+    
     public let databaseService: DatabaseService
     
     public init() {
@@ -31,11 +33,12 @@ public class NoteViewModel: ObservableObject {
             return
         }
         for note in notes {
-            print("\(note.noteId) | \(note.userId) | \(note.longitude) | \(note.latitude) | \(note.timestamp) | \(note.body)")
+            print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.timestamp) | \(note.body)")
         }
         
         self.notes = notes
         
+        filterForNearbyNotes()        
     }
     
     func deleteNote(at offsets: IndexSet) {
@@ -55,6 +58,22 @@ public class NoteViewModel: ObservableObject {
             try databaseService.insertNote(latitude: latitude, longitude: longitude, timestamp: Int32(timestamp), body: body)
         } catch {
             print("couldn't insert: \(error)")
+        }
+    }
+    
+    func filterForNearbyNotes() {
+        nearbyNotes.removeAll()
+        for (index, note) in notes.enumerated() {
+            let userFilterRadiusInMeters = 80467.2 // 50 miles
+            
+            guard let latitude = Double(String(note.latitude)) else { return }
+            guard let longitude = Double(String(note.longitude)) else { return }
+            
+            let distance = locationViewModel.getDistanceBetweenNoteAndUser(latitude: latitude, longitude: longitude)
+                        
+            if (distance < userFilterRadiusInMeters) {
+                nearbyNotes.append(note)
+            }
         }
     }
 }
