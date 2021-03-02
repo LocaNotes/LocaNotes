@@ -17,6 +17,8 @@ enum SQLiteError: Error {
 }
 
 class SQLiteDatabase {
+    let SQLITE_TRANSIENT = unsafeBitCast(OpaquePointer(bitPattern: -1), to: sqlite3_destructor_type.self)
+    
     private let dbPointer: OpaquePointer?
     private init (dbPointer: OpaquePointer?) {
         self.dbPointer = dbPointer
@@ -109,19 +111,19 @@ extension SQLiteDatabase {
             // get user id
             let userId = sqlite3_column_int(queryStatement, 1)
             
-            // get longitude
+            // get latitude
             guard let queryResultCol2 =  sqlite3_column_text(queryStatement, 2) else {
                 print("Query result is nil")
                 return nil
             }
-            let longitude = String(cString: queryResultCol2) as NSString
+            let latitude = String(cString: queryResultCol2) as NSString
             
-            // get latitude
+            // get longitude
             guard let queryResultCol3 =  sqlite3_column_text(queryStatement, 3) else {
                 print("Query result is nil")
                 return nil
             }
-            let latitude = String(cString: queryResultCol3) as NSString
+            let longitude = String(cString: queryResultCol3) as NSString
             
             // get timestamp
             let timestamp = sqlite3_column_int(queryStatement, 4)
@@ -133,7 +135,7 @@ extension SQLiteDatabase {
             }
             let body = String(cString: queryResultCol5) as NSString
             
-            notes.append(Note(noteId: noteId, userId: userId, longitude: longitude, latitude: latitude, timestamp: timestamp, body: body))
+            notes.append(Note(noteId: noteId, userId: userId, latitude: latitude, longitude: longitude, timestamp: timestamp, body: body))
         }
         return notes
     }
@@ -171,10 +173,10 @@ extension SQLiteDatabase {
         }
         guard
             sqlite3_bind_int(insertStatement, 1, userId) == SQLITE_OK &&
-            sqlite3_bind_text(insertStatement, 2, latitude, -1, nil) == SQLITE_OK &&
-            sqlite3_bind_text(insertStatement, 3, longitude, -1, nil) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 2, latitude, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 3, longitude, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
             sqlite3_bind_int(insertStatement, 4, timestamp) == SQLITE_OK &&
-            sqlite3_bind_text(insertStatement, 5, body, -1, nil) == SQLITE_OK
+            sqlite3_bind_text(insertStatement, 5, body, -1, SQLITE_TRANSIENT) == SQLITE_OK
         else {
             throw SQLiteError.Bind(message: errorMessage)
         }
