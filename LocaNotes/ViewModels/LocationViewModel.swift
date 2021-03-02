@@ -24,6 +24,20 @@ class LocationViewModel: NSObject, ObservableObject {
         self.locationManager.requestAlwaysAuthorization()
         self.locationManager.startUpdatingLocation()
     }
+    
+    func getDistanceBetweenNoteAndUser(latitude: Double, longitude: Double) -> Double {
+        let userCoordinate = CLLocation(latitude: userLatitude, longitude: userLongitude)
+        let noteCoordinate = CLLocation(latitude: latitude, longitude: longitude)
+        print("user: lat: \(userLatitude) long: \(userLongitude)")
+        print("note: lat: \(latitude) long: \(longitude)")
+//        print(userCoordinate)
+//        print(noteCoordinate)
+        let distanceInMeters = userCoordinate.distance(from: noteCoordinate)
+        
+        print(distanceInMeters)
+        
+        return distanceInMeters.magnitude
+    }
 }
 
 extension LocationViewModel: CLLocationManagerDelegate {
