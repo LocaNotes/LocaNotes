@@ -42,11 +42,36 @@ public class NoteViewModel: ObservableObject {
     }
     
     func deleteNote(at offsets: IndexSet) {
+        let noteIdToDelete: Int32 = notes[offsets.first!].noteId
         do {
             try databaseService.deleteNoteById(id: notes[offsets.first!].noteId)
             notes.remove(atOffsets: offsets)
         } catch {
             print("couldn't delete: \(error)")
+        }
+        
+        // now delete the note from nearby notes
+        for (i, note) in nearbyNotes.enumerated() {
+            if note.noteId == noteIdToDelete {
+                nearbyNotes.remove(at: i)
+            }
+        }
+    }
+    
+    func deleteNearbyNote(at offsets: IndexSet) {
+        let noteIdToDelete: Int32 = nearbyNotes[offsets.first!].noteId
+        do {
+            try databaseService.deleteNoteById(id: noteIdToDelete)
+            nearbyNotes.remove(atOffsets: offsets)
+        } catch {
+            print("Couldn't delete nearby note: \(error)")
+        }
+        
+        // now delete the note from notes
+        for (i, note) in notes.enumerated() {
+            if note.noteId == noteIdToDelete {
+                notes.remove(at: i)
+            }
         }
     }
     

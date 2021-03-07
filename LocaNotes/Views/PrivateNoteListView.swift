@@ -11,29 +11,41 @@ struct PrivateNoteListView: View {
         
     @ObservedObject var viewModel: NoteViewModel
     
+    @State private var searchText: String = ""
+    
     init (viewModel: NoteViewModel) {
         self.viewModel = viewModel
     }
     
     var body: some View {
         NavigationView {
-            List {
-                if !viewModel.nearbyNotes.isEmpty {
-                    Section(header: Text("Nearby")) {
-                        ForEach(viewModel.nearbyNotes, id: \.noteId) { note in
-                            NoteCell(note: note)
+            VStack {
+                SearchBarView(searchText: $searchText)
+                List {
+                    if !viewModel.nearbyNotes.isEmpty {
+                        Section(header: Text("Nearby")) {
+                            ForEach (viewModel.nearbyNotes.filter({ note in
+                                self.searchText.isEmpty ? true :
+                                    String(note.body).lowercased().contains(self.searchText.lowercased())
+                            }), id: \.noteId) { note in
+                                NoteCell(note: note)
+                            }
+                            .onDelete(perform: viewModel.deleteNearbyNote)
                         }
                     }
-                }
-                Section(header: Text("All")) {
-                    ForEach(viewModel.notes, id: \.noteId) { note in
-                        NoteCell(note: note)
+                    Section(header: Text("All")) {
+                        ForEach (viewModel.notes.filter({ note in
+                            self.searchText.isEmpty ? true :
+                                String(note.body).lowercased().contains(self.searchText.lowercased())
+                        }), id: \.noteId) { note in
+                            NoteCell(note: note)
+                        }
+                        .onDelete(perform: viewModel.deleteNote)
                     }
-                    .onDelete(perform: viewModel.deleteNote)
                 }
+                .navigationTitle("private notes")
+                .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
             }
-            .navigationTitle("private notes")
-            .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
         }
         .onAppear(perform: viewModel.refresh)
     }
