@@ -7,6 +7,9 @@
 
 import Foundation
 
+/**
+ Represents the note table in the database
+ */
 struct Note {
     let noteId: Int32
     let userId: Int32
@@ -17,6 +20,8 @@ struct Note {
 }
 
 extension Note: SQLTable {
+    
+    // represents the sql statement to create the Note table
     static var createStatement: String {
 //        return """
 //            CREATE TABLE Note(

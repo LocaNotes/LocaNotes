@@ -8,6 +8,9 @@
 import Foundation
 import SQLite3
 
+/**
+    Used to represent error messafges from SQLite
+ */
 enum SQLiteError: Error {
     case OpenDatabase(message: String)
     case Prepare(message: String)
@@ -16,14 +19,22 @@ enum SQLiteError: Error {
     case Delete(message: String)
 }
 
+/**
+    Used for accessing the database.
+ */
 class SQLiteDatabase {
+    
+    // need to use this for insertion--don't ask me why
     let SQLITE_TRANSIENT = unsafeBitCast(OpaquePointer(bitPattern: -1), to: sqlite3_destructor_type.self)
     
+    // a C pointer to the open database
     private let dbPointer: OpaquePointer?
+    
     private init (dbPointer: OpaquePointer?) {
         self.dbPointer = dbPointer
     }
     
+    // computed property that holds the error message from the DB
     var errorMessage: String {
         if let errorPointer = sqlite3_errmsg(dbPointer) {
             let errorMessage = String(cString: errorPointer)
@@ -37,13 +48,22 @@ class SQLiteDatabase {
         sqlite3_close(dbPointer)
     }
     
+    /**
+        Opens a connection to the SQLite database
+        - Paremeter path: the path to the database on local storage
+        - Throws: `SQLiteError.openDatabase` if SQLite could not open the database
+        - Returns: a pointer to the database
+     */
     static func open(path: String) throws -> SQLiteDatabase {
         var db: OpaquePointer?
+        
         // 1 attempt to open database at the provided path
         if sqlite3_open(path, &db) == SQLITE_OK  {
+            
             // 2 return a new instance of SQLiteDatabase if successful
             return SQLiteDatabase(dbPointer: db)
         } else {
+            
             // 3 otherwise, defer closing if the status code is anything but SQLITE_OK and throw an error
             defer {
                 if db != nil {
@@ -61,8 +81,18 @@ class SQLiteDatabase {
     }
 }
 
+protocol SQLTable {
+    static var createStatement: String { get }
+}
+
 extension SQLiteDatabase {
     
+    /**
+     Prepares a SQLite statement
+     - Parameter sql: the sql string  to  be prepared
+     - Throws: `SQLiteError.Prepare` if SQLite could not prepare the statement
+     - Returns: a pointer to a preapared statement
+     */
     func prepareStatement(sql: String) throws -> OpaquePointer? {
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(dbPointer, sql, -1, &statement, nil) == SQLITE_OK else {
@@ -73,6 +103,12 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
+    
+    /**
+     Creates a table in the database.
+     - Parameter table: a table for the database
+     - Throws: `SQLiteError.step` if SQLite could not create the table
+     */
     func createTable(table: SQLTable.Type) throws {
         let createTableStatement = try prepareStatement(sql: table.createStatement)
         
@@ -86,10 +122,6 @@ extension SQLiteDatabase {
         
         print("\(table) table created.")
     }
-}
-
-protocol SQLTable {
-    static var createStatement: String { get }
 }
 
 extension SQLiteDatabase {

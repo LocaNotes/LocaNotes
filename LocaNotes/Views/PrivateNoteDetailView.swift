@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PrivateNoteDetailView: View {
     
+    // the note that this view shows
     let note: Note
     
     var body: some View {

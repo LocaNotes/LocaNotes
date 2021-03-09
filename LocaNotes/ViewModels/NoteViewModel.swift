@@ -17,8 +17,10 @@ public class NoteViewModel: ObservableObject {
         
     var locationViewModel = LocationViewModel()
       
+    // all notes
     @Published var notes: [Note] = []
     
+    // only the notes that are nearby the user
     @Published var nearbyNotes: [Note] = []
     
     public let databaseService: DatabaseService
@@ -27,6 +29,9 @@ public class NoteViewModel: ObservableObject {
         self.databaseService = DatabaseService()
     }
     
+    /**
+     Queries all notes from the database and updates `notes` and `nearbyNotes`
+     */
     public func refresh() {
         guard let notes: [Note] = databaseService.queryAllNotes() else {
             print("query returned nil")
@@ -41,6 +46,10 @@ public class NoteViewModel: ObservableObject {
         filterForNearbyNotes()        
     }
     
+    /**
+     Deletes a note from the database, and if successful, deletes the note from `notes` and then `nearbyNotes`
+     - Parameter offsets: an index set containing the index of the note to delete
+     */
     func deleteNote(at offsets: IndexSet) {
         let noteIdToDelete: Int32 = notes[offsets.first!].noteId
         do {
@@ -58,6 +67,10 @@ public class NoteViewModel: ObservableObject {
         }
     }
     
+    /**
+     Deletes a note from the database, and if successful, deletes the note from `nearbyNotes` and then `notes`
+     - Parameter offsets: an index set containing the index of the note to delete
+     */
     func deleteNearbyNote(at offsets: IndexSet) {
         let noteIdToDelete: Int32 = nearbyNotes[offsets.first!].noteId
         do {
@@ -75,6 +88,10 @@ public class NoteViewModel: ObservableObject {
         }
     }
     
+    /**
+     Gets the user's latitude, longtitude, and a timestamp and invokes the database service to insert a note into the database
+     - Parameter body: the body text of the note
+     */
     func insertNote(body: String) {
         let latitude = String(locationViewModel.userLatitude)
         let longitude = String(locationViewModel.userLongitude)
@@ -86,9 +103,13 @@ public class NoteViewModel: ObservableObject {
         }
     }
     
+    /**
+     Filters `notes` for all notes that are nearby the user. Puts the notes that are nearby the user in `nearbyNotes`. A note is considered nearby the user if
+     the note is within the user's set radius.
+     */
     func filterForNearbyNotes() {
         nearbyNotes.removeAll()
-        for (index, note) in notes.enumerated() {
+        for note in notes {
             let userFilterRadiusInMeters = 80467.2 // 50 miles
             
             guard let latitude = Double(String(note.latitude)) else { return }

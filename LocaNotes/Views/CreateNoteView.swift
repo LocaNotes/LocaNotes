@@ -11,8 +11,10 @@ struct CreateNoteView: View {
         
     var noteViewModel: NoteViewModel
     
+    // used in the toggle to show the user's preference between public or private
     @State private var publiclyVisible = false
     
+    // what the user types in the text editor
     @State private var noteContent = ""
     
     init (noteViewModel: NoteViewModel) {

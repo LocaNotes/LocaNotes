@@ -7,6 +7,9 @@
 
 import Foundation
 
+/**
+ Represents the User table in the database
+ */
 struct User {
     let id: Int32
     let firstName: NSString
@@ -17,6 +20,8 @@ struct User {
 }
 
 extension User: SQLTable {
+    
+    // represents the sql statement to create the User table
     static var createStatement: String {
         return """
             CREATE TABLE User(

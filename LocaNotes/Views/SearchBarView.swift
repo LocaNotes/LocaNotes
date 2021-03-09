@@ -9,7 +9,10 @@ import SwiftUI
 
 struct SearchBarView: View {
     
+    // what the user types in the search bar
     @Binding var searchText: String
+    
+    // should be false when the user isn't typing in the search bar and true when they are
     @State private var isEditing: Bool = false
     
     var body: some View {

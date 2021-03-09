@@ -11,6 +11,7 @@ struct PrivateNoteListView: View {
         
     @ObservedObject var viewModel: NoteViewModel
     
+    // what the user types in the search bar
     @State private var searchText: String = ""
     
     init (viewModel: NoteViewModel) {
