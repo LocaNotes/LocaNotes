@@ -16,36 +16,43 @@ struct ContentView: View {
     
     let noteViewModel = NoteViewModel()
     
+    @State var selectedTab = 0
+    
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             PrivateNoteListView(viewModel: noteViewModel)
                 .tabItem {
                     Image(systemName: "homekit")
                     Text("Home")
                 }
+                .tag(0)
             Text("Social")
                 .font(.system(size: 30, weight: .bold))
                 .tabItem {
                     Image(systemName: "globe")
                     Text("Social")
                 }
-            CreateNoteView(noteViewModel: noteViewModel)
+                .tag(1)
+            CreateNoteView(noteViewModel: noteViewModel, selectedTab: self.$selectedTab)
                 .tabItem {
                     Image(systemName: "pencil")
                     Text("New Note")
                 }
+                .tag(3)
             Text("Settings")
                 .font(.system(size: 30, weight: .bold))
                 .tabItem {
                     Image(systemName: "gear")
                     Text("Settings")
                 }
+                .tag(4)
             Text("Account")
                 .font(.system(size: 30, weight: .bold))
                 .tabItem {
                     Image(systemName: "person")
                     Text("Account")
                 }
+                .tag(5)
         }
         
 //        VStack(spacing: 0) {

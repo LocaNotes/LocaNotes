@@ -44,7 +44,7 @@ struct PrivateNoteListView: View {
                         .onDelete(perform: viewModel.deleteNote)
                     }
                 }
-                .navigationTitle("private notes")
+                .navigationTitle("Private Notes")
                 .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
             }
         }
