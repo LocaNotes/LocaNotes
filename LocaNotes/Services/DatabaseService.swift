@@ -83,6 +83,16 @@ public class DatabaseService {
     func insertNote(latitude: String, longitude: String, timestamp: Int32, body: String) throws {
         try db.insertNote(userId: 1, latitude: latitude, longitude: longitude, timestamp: timestamp, body: body)
     }
+    
+    /**
+     Updates the body of the note with the specified id
+     - Parameters:
+        - noteId: the id of the note to be updated
+        - body: the new body
+     */
+    func updateNoteBody(noteId: Int32, body: String) throws {
+        try db.updateNoteBody(noteId: noteId, body: body)
+    }
 }
 
 

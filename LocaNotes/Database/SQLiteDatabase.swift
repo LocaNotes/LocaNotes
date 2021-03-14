@@ -217,3 +217,23 @@ extension SQLiteDatabase {
         }
     }
 }
+
+extension SQLiteDatabase {
+    
+    func updateNoteBody(noteId: Int32, body: String) throws {
+        let updateSql = "UPDATE Note SET Body = ? WHERE NoteId = ?;"
+        let updateStatement = try prepareStatement(sql: updateSql)
+        defer {
+            sqlite3_finalize(updateStatement)
+        }
+        guard
+            sqlite3_bind_text(updateStatement, 1, body, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_int(updateStatement, 2, noteId) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        guard sqlite3_step(updateStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
+}

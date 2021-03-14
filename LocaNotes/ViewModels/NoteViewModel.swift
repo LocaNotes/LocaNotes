@@ -43,7 +43,7 @@ public class NoteViewModel: ObservableObject {
         
         self.notes = notes
         
-        filterForNearbyNotes()        
+        filterForNearbyNotes()
     }
     
     /**
@@ -100,6 +100,20 @@ public class NoteViewModel: ObservableObject {
             try databaseService.insertNote(latitude: latitude, longitude: longitude, timestamp: Int32(timestamp), body: body)
         } catch {
             print("couldn't insert: \(error)")
+        }
+    }
+    
+    /**
+     Invokes the database service to update the body of the note with the specified id
+     - Parameters:
+        - noteId: the id of the note to be updated
+        - body: the new body
+     */
+    func updateNoteBody(noteId: Int32, body: String) {
+        do {
+            try databaseService.updateNoteBody(noteId: noteId, body: body)
+        } catch {
+            print("Couldn't update note: \(error)")
         }
     }
     
