@@ -44,11 +44,12 @@ struct PrivateNoteListView: View {
                         .onDelete(perform: viewModel.deleteNote)
                     }
                 }
+                .onAppear(perform: viewModel.refresh)
                 .navigationTitle("Private Notes")
-                .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
+//                .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
+                .navigationBarItems(leading: EditButton())
             }
         }
-        .onAppear(perform: viewModel.refresh)
     }
 }
 
@@ -71,6 +72,12 @@ struct NoteCell: View {
         }
     }
     
+    /**
+     Returns a substring up to the specified index of the specified string
+     - Parameters:
+        - string: the string to take a substring of
+        - offset: the ending index of the substring
+     */
     private func substring(string: String, offset: Int) -> String.SubSequence {
         let index = string.index(string.startIndex, offsetBy: offset)
         let substring = string[..<index]
