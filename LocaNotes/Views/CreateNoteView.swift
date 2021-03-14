@@ -14,7 +14,7 @@ struct CreateNoteView: View {
     @Binding var selectedTab: Int
     
     // used in the toggle to show the user's preference between public or private
-    @State private var selectedPrivacy = ""
+    @State private var selectedPrivacy = Privacy.privateNote.rawValue
     
     // for the privacy drawer
     @State var showDrawer = false;
@@ -31,39 +31,47 @@ struct CreateNoteView: View {
         ZStack {
             VStack {
                 HStack {
-                    Text("New Note")
-                        .font(.title)
+                    Button(action: {
+                        UIApplication.shared.endEditing(true)
+                    }) {
+                        Text("New Note")
+                            .font(.title)
+                            .foregroundColor(.white)
+                    }
                     Spacer()
                     Button(action: {
                         insertNote()
+                        
+                        // reset
                         selectedTab = 0
                         noteContent = ""
-                        selectedPrivacy = ""
+                        selectedPrivacy = Privacy.privateNote.rawValue
+                        UIApplication.shared.endEditing(true)
                     }) {
                         Image(systemName: "checkmark")
+                            .padding(.trailing, 10)
                     }
                     .disabled(self.noteContent == "" ? true : false)
                     Button(action: {
+                        UIApplication.shared.endEditing(true)
                         self.showDrawer.toggle()
                     }) {
                         Image(systemName: "link")
                     }
                 }
-                .padding()
+                
                 TextEditor(text: $noteContent)
                     .frame(maxHeight: .infinity)
                     .background(Color(UIColor.label.withAlphaComponent(self.showDrawer ? 0.2 : 0)).edgesIgnoringSafeArea(.all))
+                    .disabled(self.showDrawer ? true : false)
             }
+            
             VStack {
-                Spacer()
                 RadioButtonsSheet(selectedPrivacy: self.$selectedPrivacy, show: self.$showDrawer)
                     .offset(y: self.showDrawer ? (UIApplication.shared.windows.last?.safeAreaInsets.bottom)! + 15 : UIScreen.main.bounds.height)
             }
-            .background(Color(UIColor.label.withAlphaComponent(self.showDrawer ? 0.2 : 0)).edgesIgnoringSafeArea(.all))
-            .onTapGesture {
-                self.showDrawer.toggle()
-            }
         }
+        .padding()
         .animation(.default)
     }
     
