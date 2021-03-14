@@ -35,8 +35,8 @@ struct CreateNoteView: View {
                         UIApplication.shared.endEditing(true)
                     }) {
                         Text("New Note")
-                            .font(.title)
-                            .foregroundColor(.white)
+                            .font(.system(size: 30, weight: .bold))
+                            .foregroundColor(.primary)
                     }
                     Spacer()
                     Button(action: {
@@ -106,14 +106,15 @@ struct RadioButtonsSheet: View {
                         Spacer()
                         Image(systemName: self.selectedPrivacy == value ? "largecircle.fill.circle" : "circle")
                     }
-                    .foregroundColor(.black)
+                    
                 }
             }
         }
         .padding(.vertical)
         .padding(.horizontal, 25)
         .padding(.bottom, (UIApplication.shared.windows.last?.safeAreaInsets.bottom)! + 10)
-        .background(Color.white)
+        .background(Color(UIColor.label))
+        .foregroundColor(Color(UIColor.systemBackground))
         .cornerRadius(30)
     }
 }
