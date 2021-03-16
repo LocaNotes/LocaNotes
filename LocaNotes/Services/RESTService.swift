@@ -17,7 +17,8 @@ public class RESTService {
         components.scheme = "http"
         components.host = "localhost"
         components.port = 3000
-        components.path = "/login/\(username)/\(password)"
+        components.path = "/login"
+//        components.path = "/login/\(username)/\(password)"
         
 //        let parameters: [String: Any] = [
 //            "username": username,
@@ -29,6 +30,7 @@ public class RESTService {
         
         let queryItemUsername = URLQueryItem(name: "username", value: username)
         let queryItemPassword = URLQueryItem(name: "password", value: password)
+        
         components.queryItems = [queryItemUsername, queryItemPassword]
         
         guard let url = components.url else { preconditionFailure("Failed to construct URL") }
@@ -70,6 +72,47 @@ public class RESTService {
 //
 //            let responseString = String(data: data, encoding: .utf8)
 //            print("responseString = \(responseString ?? "")")
+        }.resume()
+    }
+    
+    func createUser(firstName: String, lastName: String, email: String, username: String, password: String, completion: NetworkingReturnBlock<MongoUser>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/user"
+        
+        let queryItemFirstName = URLQueryItem(name: "firstName", value: firstName)
+        let queryItemLastName = URLQueryItem(name: "lastName", value: lastName)
+        let queryItemEmail = URLQueryItem(name: "email", value: email)
+        let queryItemUsername = URLQueryItem(name: "username", value: username)
+        let queryItemPassword = URLQueryItem(name: "password", value: password)
+        
+        components.queryItems = [queryItemFirstName, queryItemLastName, queryItemEmail, queryItemUsername, queryItemPassword]
+        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "POST"
+                
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data else {
+                if let err = error {
+                    completion?(nil, error)
+                } else {
+                    completion?(nil, nil)
+                }
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            do {
+                let user = try decoder.decode(MongoUser.self, from: data)
+                completion?(user, nil)
+            } catch let error {
+                completion?(nil, error)
+            }
         }.resume()
     }
 }
