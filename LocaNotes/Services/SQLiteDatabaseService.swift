@@ -11,7 +11,7 @@ import SQLite3
 /**
  A service used by other classes to access the database.
  */
-public class DatabaseService {
+public class SQLiteDatabaseService {
     
     // a reference to the database
     private var db: SQLiteDatabase!
