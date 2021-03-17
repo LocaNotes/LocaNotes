@@ -9,14 +9,27 @@ import SwiftUI
 
 struct ContentView: View {
         
+    @EnvironmentObject var viewRouter: ViewRouter
+        
     var body: some View {
-        LoginView()
+        switch viewRouter.currentPage {
+        case .loginPage:
+            LoginView()
+        case .mainPage:
+            MainView()
+                .transition(.scale)
+        }
     }
+}
+
+enum Page {
+    case loginPage
+    case mainPage
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView().environmentObject(ViewRouter())
     }
 }
 
