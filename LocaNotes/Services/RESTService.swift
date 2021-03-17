@@ -8,25 +8,15 @@
 import Foundation
 
 public class RESTService {
-    let urlString = "http://localhost:3000"
     
-    typealias NetworkingReturnBlock<T> = ((T?, Error?) -> Void)?
+    typealias RestLoginReturnBlock<T> = ((T?, Error?) -> Void)?
     
-    func authenticateUser(username: String, password: String, completion: NetworkingReturnBlock<MongoUser>) {
+    func authenticateUser(username: String, password: String, completion: RestLoginReturnBlock<MongoUser>) {
         var components = URLComponents()
         components.scheme = "http"
         components.host = "localhost"
         components.port = 3000
         components.path = "/login"
-//        components.path = "/login/\(username)/\(password)"
-        
-//        let parameters: [String: Any] = [
-//            "username": username,
-//            "password": password
-//        ]
-//        guard let url = URL(string: urlString) else {
-//            return
-//        }
         
         let queryItemUsername = URLQueryItem(name: "username", value: username)
         let queryItemPassword = URLQueryItem(name: "password", value: password)
@@ -38,44 +28,11 @@ public class RESTService {
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
-        
-        //request.httpBody = parameters.percentEscaped().data(using: .utf8)
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data else {
-                if let err = error {
-                    completion?(nil, error)
-                } else {
-                    completion?(nil, nil)
-                }
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            do {
-                let user = try decoder.decode(MongoUser.self, from: data)
-                completion?(user, nil)
-            } catch let error {
-                completion?(nil, error)
-            }
-//            guard let data = data,
-//                  let response = response as? HTTPURLResponse,
-//                  error == nil else { // check for networking error
-//                print("error", error ?? "Unknown error")
-//                return
-//            }
-//
-//            guard (200...299) ~= response.statusCode else { //check for http errors
-//                print("statusCode should be 2xx, but is \(response.statusCode)")
-//                return
-//            }
-//
-//            let responseString = String(data: data, encoding: .utf8)
-//            print("responseString = \(responseString ?? "")")
-        }.resume()
+                
+        makeURLSessionDataTask(with: request, completion: completion)
     }
     
-    func createUser(firstName: String, lastName: String, email: String, username: String, password: String, completion: NetworkingReturnBlock<MongoUser>) {
+    func createUser(firstName: String, lastName: String, email: String, username: String, password: String, completion: RestLoginReturnBlock<MongoUser>) {
         var components = URLComponents()
         components.scheme = "http"
         components.host = "localhost"
@@ -96,13 +53,24 @@ public class RESTService {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
                 
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data else {
+        makeURLSessionDataTask(with: request, completion: completion)
+    }
+    
+    private func makeURLSessionDataTask(with request: URLRequest, completion: RestLoginReturnBlock<MongoUser>) {
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, let response = response as? HTTPURLResponse else {
                 if let err = error {
                     completion?(nil, error)
                 } else {
                     completion?(nil, nil)
                 }
+                return
+            }
+            
+            let statusCode = response.statusCode
+            guard (200...299) ~= statusCode else { //check for http errors
+                let restError = self.handleErrorStatusCode(statusCode: statusCode, data: data)
+                completion?(nil, restError)
                 return
             }
             
@@ -114,5 +82,52 @@ public class RESTService {
                 completion?(nil, error)
             }
         }.resume()
+    }
+    
+    private func handleErrorStatusCode(statusCode: Int, data: Data) -> RestError {
+        var restError = RestError(title: nil, code: statusCode, description: nil)
+        if let json = String(data: data, encoding: String.Encoding.utf8) {
+            if let decodedJson = json.data(using: .utf8) {
+                do {
+                    if let serializedJson = try JSONSerialization.jsonObject(with: decodedJson, options: []) as? [String: String] {
+                        if let errorMessage = serializedJson["error"] {
+                            
+                            // get error message from server
+                            restError = RestError(title: nil, code: statusCode, description: errorMessage)
+                        } else {
+                            
+                            // response from server doesn't have an "error" key
+                            restError = RestError(title: nil, code: statusCode, description: nil)
+                        }
+                    }
+                } catch {
+                    
+                    // couldn't serialize json
+                    print(error.localizedDescription)
+                    restError = RestError(title: nil, code: statusCode, description: nil)
+                }
+            }
+            return restError
+        }
+        return restError
+    }
+}
+
+protocol RestErrorProtocol: LocalizedError {
+    var title: String? { get }
+    var code: Int { get }
+}
+
+struct RestError: RestErrorProtocol {
+    var title: String?
+    var code: Int
+    
+    var description: String? { return _description }
+    private var _description: String
+    
+    init (title: String?, code: Int, description: String?) {
+        self.title = title ?? "Error"
+        self.code = code
+        self._description = description ?? "Unknown error"
     }
 }
