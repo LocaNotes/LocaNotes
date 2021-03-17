@@ -15,33 +15,28 @@ struct Note {
     let userId: Int32
     let latitude: NSString
     let longitude: NSString
-    let timestamp: Int32 // unix
+    let timeCreated: Int32 // unix
     let body: NSString
+    let isStory: Int32
+    let upvotes: Int32
+    let downvotes: Int32
 }
 
 extension Note: SQLTable {
     
     // represents the sql statement to create the Note table
     static var createStatement: String {
-//        return """
-//            CREATE TABLE Note(
-//                NoteId INTEGER NOT NULL PRIMARY KEY,
-//                UserId INTEGER NOT NULL,
-//                Latitude VARCHAR(20) NOT NULL,
-//                Longitude VARCHAR(20) NOT NULL,
-//                Timestamp INT NOT NULL,
-//                Body VARCHAR(500) NOT NULL,
-//                FOREIGN KEY(UserId) REFERENCES User(UserId)
-//            );
-//        """
         return """
             CREATE TABLE Note(
                 NoteId INTEGER NOT NULL PRIMARY KEY,
                 UserId INTEGER NOT NULL,
                 Latitude TEXT NOT NULL,
                 Longitude TEXT NOT NULL,
-                Timestamp INTEGER NOT NULL,
+                TimeCreated INTEGER NOT NULL,
                 Body TEXT NOT NULL,
+                IsStory INT NOT NULL,
+                Upvotes INT NOT NULL,
+                Downvotes INT NOT NULL,
                 FOREIGN KEY(UserId) REFERENCES User(UserId)
             );
         """
