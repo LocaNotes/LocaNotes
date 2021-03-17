@@ -14,7 +14,13 @@ struct PrivateNoteListView: View {
     
     // what the user types in the search bar
     @State private var searchText: String = ""
-    @State private var loca = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51, longitude: 0), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
+    
+    // user location
+    @State private var centerCoor = CLLocationCoordinate2D()
+    
+    // users nearby notes
+    @State private var nearbyNotes = [MKPointAnnotation]()
+    ////@State private var loca = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51, longitude: 0), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
     
     init (viewModel: NoteViewModel) {
         self.viewModel = viewModel
@@ -22,9 +28,39 @@ struct PrivateNoteListView: View {
     var body: some View {
         NavigationView {
             VStack {
-                Map(coordinateRegion: $loca, showsUserLocation: true, userTrackingMode: .constant(.follow))
+                ZStack{
+                    MapView(centerCoordinate: $centerCoor, annotations: nearbyNotes)
+                        .edgesIgnoringSafeArea(.horizontal)
+                    Circle()
+                        .fill(Color.blue)
+                        .opacity(0.3)
+                        .frame(width: 32, height: 32)
+                    
+                    VStack {
+                        Spacer()
+                        HStack{
+                        Button(action: {
+                            //create a new annotation at this location (//! precursor to viewing notes as annotations)
+                            let newLocation = MKPointAnnotation()
+                            newLocation.coordinate = self.centerCoor
+                            self.nearbyNotes.append(newLocation)
+                        }) {
+                            Image(systemName: "plus")
+                        }
+                        .padding()
+                        .background(Color.black.opacity(0.75))
+                        .foregroundColor(.white)
+                        .font(.title)
+                        .clipShape(Circle())
+                        .padding(.trailing)
+                        }
+                    }
+                }
+    
+              //// Map(coordinateRegion: $loca, showsUserLocation: true, userTrackingMode: .constant(.follow))
                     .frame(width: 400, height: 400, alignment: .center)
                 SearchBarView(searchText: $searchText)
+                
                 List {
                     if !viewModel.nearbyNotes.isEmpty {
                         Section(header: Text("Nearby")) {
