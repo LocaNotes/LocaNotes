@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct PrivateNoteListView: View {
         
@@ -13,14 +14,16 @@ struct PrivateNoteListView: View {
     
     // what the user types in the search bar
     @State private var searchText: String = ""
+    @State private var loca = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51, longitude: 0), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
     
     init (viewModel: NoteViewModel) {
         self.viewModel = viewModel
     }
-    
     var body: some View {
         NavigationView {
             VStack {
+                Map(coordinateRegion: $loca, showsUserLocation: true, userTrackingMode: .constant(.follow))
+                    .frame(width: 400, height: 400, alignment: .center)
                 SearchBarView(searchText: $searchText)
                 List {
                     if !viewModel.nearbyNotes.isEmpty {
@@ -45,8 +48,8 @@ struct PrivateNoteListView: View {
                     }
                 }
                 .onAppear(perform: viewModel.refresh)
-                .navigationTitle("Private Notes")
-//                .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
+                .navigationTitle("Notes")
+                //                .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
                 .navigationBarItems(leading: EditButton())
             }
         }
