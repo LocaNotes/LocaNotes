@@ -14,9 +14,11 @@ struct MainView: View {
     //
     //    let tabBarImageNames = ["person", "gear", "plus.app.fill", "pencil", "lasso"]
         
-        let noteViewModel = NoteViewModel()
+    let noteViewModel = NoteViewModel()
+    
+    @EnvironmentObject var viewRouter: ViewRouter
         
-        @State var selectedTab = 0
+    @State var selectedTab = 0
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -116,6 +118,6 @@ struct MainView: View {
 
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
-        MainView()
+        MainView().environmentObject(ViewRouter())
     }
 }
