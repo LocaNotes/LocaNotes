@@ -101,6 +101,10 @@ public class SQLiteDatabaseService {
     func insertUser(firstName: String, lastName: String, email: String, username: String, password: String, timeCreated: Int32) throws {
         try db.insertUser(firstName: firstName, lastName: lastName, email: email, username: username, password: password, timeCreated: timeCreated)
     }
+    
+    func selectUserByUsernameAndPassword(username: String, password: String) throws -> User? {
+        return try db.selectUserByUsernameAndPassword(username: username, password: password)
+    }
 }
 
 

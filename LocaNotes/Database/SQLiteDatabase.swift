@@ -266,7 +266,7 @@ extension SQLiteDatabase {
     
     func insertUser(firstName: String, lastName: String, email: String, username: String, password: String, timeCreated: Int32) throws {
         
-        let insertSql = "INSERT INTO User (FirstName, LastName, Email, Username, Password) VALUES (?, ?, ?, ?, ?);"
+        let insertSql = "INSERT INTO User (FirstName, LastName, Email, Username, Password, TimeCreated) VALUES (?, ?, ?, ?, ?, ?);"
         
         let insertStatement = try prepareStatement(sql: insertSql)
         defer {
@@ -285,5 +285,69 @@ extension SQLiteDatabase {
         guard sqlite3_step(insertStatement) == SQLITE_DONE else {
             throw SQLiteError.Step(message: errorMessage)
         }
+    }
+}
+
+extension SQLiteDatabase {
+    
+    func selectUserByUsernameAndPassword(username: String, password: String) throws -> User? {
+        let querySql = "SELECT * FROM User WHERE Username LIKE ? AND Password LIKE ?;"
+        guard let queryStatement = try? prepareStatement(sql: querySql) else {
+            return nil
+        }
+        defer {
+            sqlite3_finalize(queryStatement)
+        }
+        
+        guard
+            sqlite3_bind_text(queryStatement, 1, username, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(queryStatement, 2, password, -1, SQLITE_TRANSIENT) == SQLITE_OK 
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        var user: User
+        
+        if sqlite3_step(queryStatement) == SQLITE_ROW {
+            
+            let id = sqlite3_column_int(queryStatement, 0)
+            
+            guard let queryResultCol1 = sqlite3_column_text(queryStatement, 1) else {
+                print("Query result is nil")
+                return nil
+            }
+            let firstName = String(cString: queryResultCol1) as NSString
+            
+            guard let queryResultCol2 = sqlite3_column_text(queryStatement, 2) else {
+                print("Query result is nil")
+                return nil
+            }
+            let lastName = String(cString: queryResultCol2) as NSString
+            
+            guard let queryResultCol3 = sqlite3_column_text(queryStatement, 3) else {
+                print("Query result is nil")
+                return nil
+            }
+            let email = String(cString: queryResultCol3) as NSString
+            
+//            guard let queryResultCol4 = sqlite3_column_text(queryStatement, 4) else {
+//                print("Query result is nil")
+//                return
+//            }
+//            let username = String(cString: queryResultCol4) as NSString
+//
+//            guard let queryResultCol5 = sqlite3_column_text(queryStatement, 5) else {
+//                print("Query result is nil")
+//                return
+//            }
+//            let password = String(cString: queryResultCol5) as NSString
+            
+            let timeCreated = sqlite3_column_int(queryStatement, 6)
+            
+            user = User(firstName: firstName, lastName: lastName, email: email, username: username as NSString, password: password as NSString, timeCreated: timeCreated)
+        } else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+        return user
     }
 }
