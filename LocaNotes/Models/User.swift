@@ -11,7 +11,7 @@ import Foundation
  Represents the User table in the database
  */
 struct User {
-    let id: Int32
+    //let id: Int32
     let firstName: NSString
     let lastName: NSString
     let email: NSString
