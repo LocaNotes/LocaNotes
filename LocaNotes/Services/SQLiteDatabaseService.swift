@@ -25,7 +25,7 @@ public class SQLiteDatabaseService {
             db = try SQLiteDatabase.open(path: "\(path)/locanotes_db.sqlite3")
             print("Opened connection to database: \(path)/locanotes_db.sqlite3")
             
-//            UserDefaults.standard.set(false, forKey: "is_db_created")
+            UserDefaults.standard.set(false, forKey: "is_db_created")
             
             // create a database if one hasn't been created
             if (!UserDefaults.standard.bool(forKey: "is_db_created")) {
@@ -74,14 +74,18 @@ public class SQLiteDatabaseService {
     /**
      Inserts a note with the specified information into the database
      - Parameters:
+        - userId: the id of the user that created the note
         - latitude: the latitude of the note
         - longitude: the longitude of the note
         - timestamp: the time that the user tapped "finish"
         - body: the content of the node
+        - isStory: represents if the note is a story
+        - upvotes: the number of upvotes the note has
+        - downvotes: the number of downvotes the notes has
      - Throws: `SQLiteError.Insert` if the note could not be inserted
      */
-    func insertNote(latitude: String, longitude: String, timestamp: Int32, body: String) throws {
-        try db.insertNote(userId: 1, latitude: latitude, longitude: longitude, timestamp: timestamp, body: body)
+    func insertNote(userId: Int32, latitude: String, longitude: String, timestamp: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
+        try db.insertNote(userId: userId, latitude: latitude, longitude: longitude, timestamp: timestamp, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
     }
     
     /**
@@ -92,6 +96,10 @@ public class SQLiteDatabaseService {
      */
     func updateNoteBody(noteId: Int32, body: String) throws {
         try db.updateNoteBody(noteId: noteId, body: body)
+    }
+    
+    func insertUser(firstName: String, lastName: String, email: String, username: String, password: String, timeCreated: Int32) throws {
+        try db.insertUser(firstName: firstName, lastName: lastName, email: email, username: username, password: password, timeCreated: timeCreated)
     }
 }
 
