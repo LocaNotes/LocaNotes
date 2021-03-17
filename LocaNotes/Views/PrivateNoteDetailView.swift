@@ -65,6 +65,6 @@ struct PrivateNoteDetailView: View {
 
 struct PrivateNoteDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        PrivateNoteDetailView(note: Note(noteId: 1, userId: 1, latitude: "23.9889", longitude: "82.2322", timestamp: 23, body: "test"))
+        PrivateNoteDetailView(note: Note(noteId: 1, userId: 1, latitude: "23.9889", longitude: "82.2322", timeCreated: 23, body: "test", isStory: 0, upvotes: 0, downvotes: 0))
     }
 }
