@@ -219,7 +219,7 @@ extension SQLiteDatabase {
 extension SQLiteDatabase {
     
     func insertNote(userId: Int32, latitude: String, longitude: String, timestamp: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
-        let insertSql = "INSERT INTO Note (UserId, Latitude, Longitude, Timestamp, Body) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+        let insertSql = "INSERT INTO Note (UserId, Latitude, Longitude, Timestamp, Body, IsStory, Upvotes, Downvotes) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
         let insertStatement = try prepareStatement(sql: insertSql)
         defer {
             sqlite3_finalize(insertStatement)
@@ -257,6 +257,32 @@ extension SQLiteDatabase {
             throw SQLiteError.Bind(message: errorMessage)
         }
         guard sqlite3_step(updateStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
+}
+
+extension SQLiteDatabase {
+    
+    func insertUser(firstName: String, lastName: String, email: String, username: String, password: String, timeCreated: Int32) throws {
+        
+        let insertSql = "INSERT INTO User (FirstName, LastName, Email, Username, Password) VALUES (?, ?, ?, ?, ?);"
+        
+        let insertStatement = try prepareStatement(sql: insertSql)
+        defer {
+            sqlite3_finalize(insertStatement)
+        }
+        guard
+            sqlite3_bind_text(insertStatement, 1, firstName, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 2, lastName, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 3, email, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 4, username, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 5, password, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 6, timeCreated) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        guard sqlite3_step(insertStatement) == SQLITE_DONE else {
             throw SQLiteError.Step(message: errorMessage)
         }
     }
