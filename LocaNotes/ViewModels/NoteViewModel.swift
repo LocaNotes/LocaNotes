@@ -8,12 +8,6 @@
 import Foundation
 
 public class NoteViewModel: ObservableObject {
-//    @Published var noteId: Int32 = 0
-//    @Published var userId: Int32 = 0
-//    @Published var longitude: NSString = ""
-//    @Published var latitude: NSString = ""
-//    @Published var timestamp: Int32 = 0
-//    @Published var body: NSString = ""
         
     var locationViewModel = LocationViewModel()
       
@@ -23,10 +17,10 @@ public class NoteViewModel: ObservableObject {
     // only the notes that are nearby the user
     @Published var nearbyNotes: [Note] = []
     
-    public let databaseService: DatabaseService
+    public let databaseService: SQLiteDatabaseService
     
     public init() {
-        self.databaseService = DatabaseService()
+        self.databaseService = SQLiteDatabaseService()
     }
     
     /**
@@ -38,7 +32,7 @@ public class NoteViewModel: ObservableObject {
             return
         }
         for note in notes {
-            print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.timestamp) | \(note.body)")
+            print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.timeCreated) | \(note.body)")
         }
         
         self.notes = notes
@@ -93,11 +87,20 @@ public class NoteViewModel: ObservableObject {
      - Parameter body: the body text of the note
      */
     func insertNote(body: String) {
+        let userId = Int32(1)
         let latitude = String(locationViewModel.userLatitude)
         let longitude = String(locationViewModel.userLongitude)
         let timestamp = NSDate().timeIntervalSince1970
+        let isStory = Int32(0)
+        let upvotes = Int32(0)
+        let downvotes = Int32(0)
+        
+        insertNote(userId: userId, latitude: latitude, longitude: longitude, timeCreated: Int32(timestamp), body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+    }
+    
+    func insertNote(userId: Int32, latitude: String, longitude: String, timeCreated: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) {
         do {
-            try databaseService.insertNote(latitude: latitude, longitude: longitude, timestamp: Int32(timestamp), body: body)
+            try databaseService.insertNote(userId: userId, latitude: latitude, longitude: longitude, timestamp: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
         } catch {
             print("couldn't insert: \(error)")
         }
