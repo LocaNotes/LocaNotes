@@ -10,14 +10,16 @@ import Foundation
 /**
  Represents a user from the MongoDB database
  */
-struct MongoUser: Codable {
-    let _id: String
-    let firstName: String
-    let lastName: String
-    let email: String
-    let username: String
-    let password: String
-    let createdAt: String
-    let updatedAt: String
-    let __v: Int
+struct MongoUserElement: Codable {
+    let id, firstName, lastName, email: String
+    let username, password, createdAt, updatedAt: String
+    let v: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case firstName, lastName, email, username, password, createdAt, updatedAt
+        case v = "__v"
+    }
 }
+
+typealias MongoUser = [MongoUserElement]

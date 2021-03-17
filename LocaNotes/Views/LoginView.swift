@@ -206,7 +206,7 @@ struct SignUp: View {
     
     @State var didReceiveRestError = false
     @State var restResponse = ""
-    
+        
     struct FirstName: View {
         
         @Binding var firstName: String
@@ -374,18 +374,22 @@ struct SignUp: View {
         }
     }
     
-    private func createUserCallback(user: MongoUser?, error: Error?) {
+    private func createUserCallback(mongoUser: MongoUserElement?, error: Error?) {
         if error != nil {
             restResponse = "\(error!)"
             didReceiveRestError.toggle()
-        } else {
-            
+        } else if mongoUser != nil {
+            let userViewModel = UserViewModel()
+            userViewModel.createUserByMongoUser(mongoUser: mongoUser!)
             print("created user")
             DispatchQueue.main.async {
                 withAnimation {
                     viewRouter.currentPage = .mainPage
                 }
             }
+        } else {
+            restResponse = "Unknown Error"
+            didReceiveRestError.toggle()
         }
     }
     
@@ -416,7 +420,7 @@ struct SignUp: View {
     private func createUser() {
         if validateInputs() {
             let restService = RESTService()
-            restService.createUser(firstName: firstName, lastName: lastName, email: mail, username: username, password: pass, completion: createUserCallback(user:error:))
+            restService.createUser(firstName: firstName, lastName: lastName, email: mail, username: username, password: pass, completion: createUserCallback(mongoUser:error:))
         }
     }
 }

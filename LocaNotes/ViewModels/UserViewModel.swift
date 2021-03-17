@@ -30,7 +30,7 @@ public class UserViewModel: ObservableObject {
         user = User(firstName: firstName, lastName: lastName, email: email, username: username, password: password, timeCreated: timeCreated)
     }
     
-    func createUserByMongoUser(mongoUser: MongoUser) {
+    func createUserByMongoUser(mongoUser: MongoUserElement) {
         //let userId = Int32(-1)
         let firstName = NSString(string: mongoUser.firstName)
         let lastName = NSString(string: mongoUser.lastName)

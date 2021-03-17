@@ -29,10 +29,25 @@ public class RESTService {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
                 
-        makeURLSessionDataTask(with: request, completion: completion)
+        //makeURLSessionDataTask(with: request, completion: completion)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+            }
+            
+            let decoder = JSONDecoder()
+            do {
+                let user = try decoder.decode(MongoUser.self, from: data!)
+                completion?(user, nil)
+            } catch let error {
+                completion?(nil, error)
+            }
+        }.resume()
     }
     
-    func createUser(firstName: String, lastName: String, email: String, username: String, password: String, completion: RestLoginReturnBlock<MongoUser>) {
+    func createUser(firstName: String, lastName: String, email: String, username: String, password: String, completion: RestLoginReturnBlock<MongoUserElement>) {
         var components = URLComponents()
         components.scheme = "http"
         components.host = "localhost"
@@ -53,35 +68,40 @@ public class RESTService {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
                 
-        makeURLSessionDataTask(with: request, completion: completion)
-    }
-    
-    private func makeURLSessionDataTask(with request: URLRequest, completion: RestLoginReturnBlock<MongoUser>) {
+        //makeURLSessionDataTask(with: request, completion: completion)
+        
         URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, let response = response as? HTTPURLResponse else {
-                if let err = error {
-                    completion?(nil, error)
-                } else {
-                    completion?(nil, nil)
-                }
-                return
-            }
-            
-            let statusCode = response.statusCode
-            guard (200...299) ~= statusCode else { //check for http errors
-                let restError = self.handleErrorStatusCode(statusCode: statusCode, data: data)
-                completion?(nil, restError)
-                return
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
             }
             
             let decoder = JSONDecoder()
             do {
-                let user = try decoder.decode(MongoUser.self, from: data)
+                let user = try decoder.decode(MongoUserElement.self, from: data!)
                 completion?(user, nil)
             } catch let error {
                 completion?(nil, error)
             }
         }.resume()
+    }
+    
+    private func checkForErrors(data: Data?, response: URLResponse?, error: Error?) -> Error? {
+        guard let data = data, let response = response as? HTTPURLResponse else {
+            if let err = error {
+                return error
+            } else {
+                return nil
+            }
+        }
+        
+        let statusCode = response.statusCode
+        guard (200...299) ~= statusCode else { //check for http errors
+            let restError = self.handleErrorStatusCode(statusCode: statusCode, data: data)
+            return restError
+        }
+        
+        return nil
     }
     
     private func handleErrorStatusCode(statusCode: Int, data: Data) -> RestError {
