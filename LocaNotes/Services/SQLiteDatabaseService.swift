@@ -25,7 +25,7 @@ public class SQLiteDatabaseService {
             db = try SQLiteDatabase.open(path: "\(path)/locanotes_db.sqlite3")
             print("Opened connection to database: \(path)/locanotes_db.sqlite3")
             
-            UserDefaults.standard.set(false, forKey: "is_db_created")
+//            UserDefaults.standard.set(false, forKey: "is_db_created")
             
             // create a database if one hasn't been created
             if (!UserDefaults.standard.bool(forKey: "is_db_created")) {
