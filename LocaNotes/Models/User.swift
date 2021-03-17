@@ -17,6 +17,7 @@ struct User {
     let email: NSString
     let username: NSString
     let password: NSString
+    let timeCreated: Int32
 }
 
 extension User: SQLTable {
@@ -30,7 +31,8 @@ extension User: SQLTable {
                 LastName VARCHAR(20) NOT NULL,
                 Email VARCHAR(40) NOT NULL,
                 Username VARCHAR(40) NOT NULL,
-                Password VARCHAR(40) NOT NULL
+                Password VARCHAR(40) NOT NULL,
+                TimeCreated INTEGER NOT NULL
             );
         """
     }
