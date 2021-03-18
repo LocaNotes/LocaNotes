@@ -8,8 +8,19 @@
 import SwiftUI
 
 struct AccountView: View {
+    
+    @EnvironmentObject var viewRouter: ViewRouter
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            Text("Account")
+                .font(.system(size: 30, weight: .bold))
+            Button(action: {
+                viewRouter.currentPage = .loginPage
+            }) {
+                Text("Log out")
+            }
+        }
     }
 }
 
