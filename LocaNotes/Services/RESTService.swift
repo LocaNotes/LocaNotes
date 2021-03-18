@@ -28,13 +28,12 @@ public class RESTService {
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
-                
-        //makeURLSessionDataTask(with: request, completion: completion)
-        
+                        
         URLSession.shared.dataTask(with: request) { data, response, error in
             let returnedError = self.checkForErrors(data: data, response: response, error: error)
             if returnedError != nil {
                 completion?(nil, returnedError)
+                return
             }
             
             let decoder = JSONDecoder()
@@ -67,13 +66,12 @@ public class RESTService {
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
-                
-        //makeURLSessionDataTask(with: request, completion: completion)
-        
+                        
         URLSession.shared.dataTask(with: request) { data, response, error in
             let returnedError = self.checkForErrors(data: data, response: response, error: error)
             if returnedError != nil {
                 completion?(nil, returnedError)
+                return
             }
             
             let decoder = JSONDecoder()
