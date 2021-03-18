@@ -98,7 +98,7 @@ public class SQLiteDatabaseService {
         try db.updateNoteBody(noteId: noteId, body: body)
     }
     
-    func insertUser(firstName: String, lastName: String, email: String, username: String, password: String, timeCreated: Int32) throws {
+    func insertUser(firstName: String, lastName: String, email: String, username: String, password: String, timeCreated: Int32, isLoggedIn: Int32) throws {
         try db.insertUser(firstName: firstName, lastName: lastName, email: email, username: username, password: password, timeCreated: timeCreated)
     }
     

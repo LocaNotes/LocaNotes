@@ -344,7 +344,7 @@ extension SQLiteDatabase {
             
             let timeCreated = sqlite3_column_int(queryStatement, 6)
             
-            user = User(firstName: firstName, lastName: lastName, email: email, username: username as NSString, password: password as NSString, timeCreated: timeCreated)
+            user = User(userId: id, firstName: firstName, lastName: lastName, email: email, username: username as NSString, password: password as NSString, timeCreated: timeCreated)
         } else {
             throw SQLiteError.Step(message: errorMessage)
         }
