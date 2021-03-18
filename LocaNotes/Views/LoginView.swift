@@ -159,18 +159,33 @@ struct Login: View {
         }
     }
     
-    private func authenticateCallback(mongoUser: MongoUser?, error: Error?) {
-        if error != nil {
-            restResponse = "\(error!)"
+    private func authenticateCallback(response: MongoUser?, error: Error?) {
+        guard let user = response else {
+            guard let err = error else {
+                restResponse = "Unknown Error"
+                didReceiveRestError.toggle()
+                return
+            }
+            restResponse = "\(err)"
             didReceiveRestError.toggle()
-        } else if mongoUser != nil {
+            return
+        }
+        
+        let userViewModel = UserViewModel()
+        if !userViewModel.mongoUserDoesExistInSqliteDatabase(mongoUserElement: user[0]) {
+            userViewModel.createUserByMongoUser(mongoUser: user[0])
+        }
+        let keychainService = KeychainService()
+        do {
+            try keychainService.storeGenericPasswordFor(account: user[0].username, service: "storePassword", password: user[0].password)
+            UserDefaults.standard.set(user[0].username, forKey: "username")
             DispatchQueue.main.async {
                 withAnimation {
                     viewRouter.currentPage = .mainPage
                 }
             }
-        } else {
-            restResponse = "Unknown Error"
+        } catch {
+            restResponse = "\(error)"
             didReceiveRestError.toggle()
         }
     }
@@ -178,7 +193,7 @@ struct Login: View {
     private func authenticateUser() {
         
         let restService = RESTService()
-        restService.authenticateUser(username: self.mail, password: self.pass, completion: authenticateCallback(mongoUser:error:))
+        restService.authenticateUser(username: self.mail, password: self.pass, completion: authenticateCallback(response:error:))
         
     }
 }
@@ -374,21 +389,32 @@ struct SignUp: View {
         }
     }
     
-    private func createUserCallback(mongoUser: MongoUserElement?, error: Error?) {
-        if error != nil {
-            restResponse = "\(error!)"
+    private func createUserCallback(response: MongoUserElement?, error: Error?) {
+        
+        guard let user = response else {
+            guard let err = error else {
+                restResponse = "Unknown Error"
+                didReceiveRestError.toggle()
+                return
+            }
+            restResponse = "\(err)"
             didReceiveRestError.toggle()
-        } else if mongoUser != nil {
-            let userViewModel = UserViewModel()
-            userViewModel.createUserByMongoUser(mongoUser: mongoUser!)
-            print("created user")
+            return
+        }
+        
+        let userViewModel = UserViewModel()
+        userViewModel.createUserByMongoUser(mongoUser: user)
+        let keychainService = KeychainService()
+        do {
+            try keychainService.storeGenericPasswordFor(account: user.username, service: "storePassword", password: user.password)
+            UserDefaults.standard.set(user.username, forKey: "username")
             DispatchQueue.main.async {
                 withAnimation {
                     viewRouter.currentPage = .mainPage
                 }
             }
-        } else {
-            restResponse = "Unknown Error"
+        } catch {
+            restResponse = "\(error)"
             didReceiveRestError.toggle()
         }
     }
@@ -420,7 +446,7 @@ struct SignUp: View {
     private func createUser() {
         if validateInputs() {
             let restService = RESTService()
-            restService.createUser(firstName: firstName, lastName: lastName, email: mail, username: username, password: pass, completion: createUserCallback(mongoUser:error:))
+            restService.createUser(firstName: firstName, lastName: lastName, email: mail, username: username, password: pass, completion: createUserCallback(response:error:))
         }
     }
 }
