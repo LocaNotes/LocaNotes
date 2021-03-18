@@ -48,8 +48,7 @@ struct MainView: View {
                     Text("Settings")
                 }
                 .tag(4)
-            Text("Account")
-                .font(.system(size: 30, weight: .bold))
+            AccountView()
                 .tabItem {
                     Image(systemName: "person")
                     Text("Account")
