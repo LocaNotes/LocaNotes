@@ -7,31 +7,11 @@
 
 import Foundation
 
-public class UserViewModel: ObservableObject {
-            
-    init(username: String, password: String) {
-        do {
-            user = try sqliteDatabaseService.selectUserByUsernameAndPassword(username: username, password: password) ?? User(firstName: "", lastName: "", email: "", username: "", password: "", timeCreated: -1)
-        } catch {
-            print("failed")
-        }
-    }
-    
-    init() {
-        print("tony")
-    }
-    
-    // this user
-    @Published var user: User = User(firstName: "", lastName: "", email: "", username: "", password: "", timeCreated: -1)
+public class UserViewModel {
     
     let sqliteDatabaseService = SQLiteDatabaseService()
     
-    func setUser(userId: Int32, firstName: NSString, lastName: NSString, email: NSString, username: NSString, password: NSString, timeCreated: Int32) {
-        user = User(firstName: firstName, lastName: lastName, email: email, username: username, password: password, timeCreated: timeCreated)
-    }
-    
     func createUserByMongoUser(mongoUser: MongoUserElement) {
-        //let userId = Int32(-1)
         let firstName = NSString(string: mongoUser.firstName)
         let lastName = NSString(string: mongoUser.lastName)
         let email = NSString(string: mongoUser.email)
@@ -47,13 +27,30 @@ public class UserViewModel: ObservableObject {
         let date = formatter.date(from: timestamp)
         let unix = date?.timeIntervalSince1970
         let timeCreated = Int32(unix!)
-
-        user = User(firstName: firstName, lastName: lastName, email: email, username: username, password: password, timeCreated: timeCreated)
         
         do {
-            try sqliteDatabaseService.insertUser(firstName: firstName as String, lastName: lastName as String, email: email as String, username: username as String, password: password as String, timeCreated: timeCreated)
+            try sqliteDatabaseService.insertUser(firstName: firstName as String, lastName: lastName as String, email: email as String, username: username as String, password: password as String, timeCreated: timeCreated, isLoggedIn: 0)
         } catch {
             print("error inserting user: \(error)")
         }
+    }
+    
+    func selectUserByUsernameAndPassword(username: String, password: String) -> User? {
+        var user: User?
+        do {
+            user = try sqliteDatabaseService.selectUserByUsernameAndPassword(username: username, password: password)
+        } catch {
+            print("error fetching new user: \(error)")
+        }
+        return user
+    }
+    
+    func mongoUserDoesExistInSqliteDatabase(mongoUserElement: MongoUserElement) -> Bool {
+        do {
+            let _ = try sqliteDatabaseService.selectUserByUsernameAndPassword(username: mongoUserElement.username, password: mongoUserElement.password)
+        } catch {
+            return false
+        }
+        return true
     }
 }
