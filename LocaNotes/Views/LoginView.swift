@@ -160,30 +160,43 @@ struct Login: View {
     }
     
     private func authenticateCallback(response: MongoUser?, error: Error?) {
-        guard let user = response else {
-            guard let err = error else {
+        if response == nil {
+            if error == nil {
                 restResponse = "Unknown Error"
                 didReceiveRestError.toggle()
                 return
             }
-            restResponse = "\(err)"
+            restResponse = "\(error)"
             didReceiveRestError.toggle()
             return
         }
         
         let userViewModel = UserViewModel()
-        if !userViewModel.mongoUserDoesExistInSqliteDatabase(mongoUserElement: user[0]) {
-            userViewModel.createUserByMongoUser(mongoUser: user[0])
+        guard let user = userViewModel.mongoUserDoesExistInSqliteDatabase(mongoUserElement: response![0]) else {
+            restResponse = "Login failed"
+            didReceiveRestError.toggle()
+            return
         }
+//        if !userViewModel.mongoUserDoesExistInSqliteDatabase(mongoUserElement: user[0]) {
+//            userViewModel.createUserByMongoUser(mongoUser: user[0])
+//        }
         let keychainService = KeychainService()
         do {
-            try keychainService.storeGenericPasswordFor(account: user[0].username, service: "storePassword", password: user[0].password)
-            UserDefaults.standard.set(user[0].username, forKey: "username")
+            try keychainService.storeGenericPasswordFor(account: user.username as String, service: "storePassword", password: user.password as String)
+            UserDefaults.standard.set(user.username, forKey: "username")
             DispatchQueue.main.async {
                 withAnimation {
                     viewRouter.currentPage = .mainPage
                 }
             }
+//            do {
+//                if let u = UserDefaults.standard.string(forKey: "username") {
+//                    let s = try keychainService.getGenericPasswordFor(account: u, service: "storePassword")
+//                    print("\(u) and \(s)")
+//                }
+//            } catch {
+//                print("fail")
+//            }
         } catch {
             restResponse = "\(error)"
             didReceiveRestError.toggle()
