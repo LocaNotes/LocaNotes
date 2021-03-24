@@ -14,7 +14,7 @@ struct CreateNoteView: View {
     @Binding var selectedTab: Int
     
     // used in the toggle to show the user's preference between public or private
-    @State private var selectedPrivacy = Privacy.privateNote.rawValue
+    @State private var selectedPrivacy = PrivacyLabel.privateNote.rawValue
     
     // for the privacy drawer
     @State var showDrawer = false;
@@ -45,7 +45,7 @@ struct CreateNoteView: View {
                         // reset
                         selectedTab = 0
                         noteContent = ""
-                        selectedPrivacy = Privacy.privateNote.rawValue
+                        selectedPrivacy = PrivacyLabel.privateNote.rawValue
                         UIApplication.shared.endEditing(true)
                     }) {
                         Image(systemName: "checkmark")
@@ -81,7 +81,7 @@ struct CreateNoteView: View {
     }
 }
 
-enum Privacy: String {
+enum PrivacyLabel: String {
     case publicNote = "Public"
     case privateNote = "Private"
 }
@@ -90,7 +90,7 @@ struct RadioButtonsSheet: View {
     @Binding var selectedPrivacy: String
     @Binding var show: Bool
     
-    let data = [Privacy.publicNote.rawValue, Privacy.privateNote.rawValue]
+    let data = [PrivacyLabel.publicNote.rawValue, PrivacyLabel.privateNote.rawValue]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
