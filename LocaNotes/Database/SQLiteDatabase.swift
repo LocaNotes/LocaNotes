@@ -219,7 +219,7 @@ extension SQLiteDatabase {
 extension SQLiteDatabase {
     
     func insertNote(userId: Int32, latitude: String, longitude: String, timestamp: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
-        let insertSql = "INSERT INTO Note (UserId, Latitude, Longitude, Timestamp, Body, IsStory, Upvotes, Downvotes) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+        let insertSql = "INSERT INTO Note (UserId, Latitude, Longitude, TimeCreated, Body, IsStory, Upvotes, Downvotes) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
         let insertStatement = try prepareStatement(sql: insertSql)
         defer {
             sqlite3_finalize(insertStatement)
