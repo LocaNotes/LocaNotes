@@ -38,6 +38,9 @@ public class SQLiteDatabaseService {
                     // create NoteTag table
                     try db.createTable(table: NoteTag.self)
                     
+                    // create Privacy table
+                    try db.createTable(table: Privacy.self)
+                    
                     // create Note table
                     try db.createTable(table: Note.self)
                     

@@ -143,42 +143,50 @@ extension SQLiteDatabase {
             // get user id
             let userId = sqlite3_column_int(queryStatement, 1)
             
+            // get note tag id
+            let noteTagId = sqlite3_column_int(queryStatement, 2)
+            
+            // get privacy id
+            let privacyId = sqlite3_column_int(queryStatement, 3)
+            
             // get latitude
-            guard let queryResultCol2 =  sqlite3_column_text(queryStatement, 2) else {
+            guard let queryResultCol2 =  sqlite3_column_text(queryStatement, 4) else {
                 print("Query result is nil")
                 return nil
             }
             let latitude = String(cString: queryResultCol2) as NSString
             
             // get longitude
-            guard let queryResultCol3 =  sqlite3_column_text(queryStatement, 3) else {
+            guard let queryResultCol3 =  sqlite3_column_text(queryStatement, 5) else {
                 print("Query result is nil")
                 return nil
             }
             let longitude = String(cString: queryResultCol3) as NSString
             
             // get timestamp
-            let timeCreated = sqlite3_column_int(queryStatement, 4)
+            let timeCreated = sqlite3_column_int(queryStatement, 6)
             
             // get body
-            guard let queryResultCol5 =  sqlite3_column_text(queryStatement, 5) else {
+            guard let queryResultCol5 =  sqlite3_column_text(queryStatement, 7) else {
                 print("Query result is nil")
                 return nil
             }
             let body = String(cString: queryResultCol5) as NSString
             
             // get isStory
-            let isStory = sqlite3_column_int(queryStatement, 6)
+            let isStory = sqlite3_column_int(queryStatement,8)
             
             // get upvotes
-            let upvotes = sqlite3_column_int(queryStatement, 7)
+            let upvotes = sqlite3_column_int(queryStatement, 9)
             
             // get downvotes
-            let downvotes = sqlite3_column_int(queryStatement, 8)
+            let downvotes = sqlite3_column_int(queryStatement, 10)
             
             let note = Note(
                 noteId: noteId,
                 userId: userId,
+                noteTagId: noteTagId,
+                privacyId: privacyId,
                 latitude: latitude,
                 longitude: longitude,
                 timeCreated: timeCreated,
@@ -375,42 +383,50 @@ extension SQLiteDatabase {
             // get user id
             let userId = sqlite3_column_int(queryStatement, 1)
             
+            // get note tag id
+            let noteTagId = sqlite3_column_int(queryStatement, 2)
+            
+            // get privacy id
+            let privacyId = sqlite3_column_int(queryStatement, 3)
+            
             // get latitude
-            guard let queryResultCol2 =  sqlite3_column_text(queryStatement, 2) else {
+            guard let queryResultCol2 =  sqlite3_column_text(queryStatement, 4) else {
                 print("Query result is nil")
                 throw SQLiteError.Step(message: errorMessage)
             }
             let latitude = String(cString: queryResultCol2) as NSString
             
             // get longitude
-            guard let queryResultCol3 =  sqlite3_column_text(queryStatement, 3) else {
+            guard let queryResultCol3 =  sqlite3_column_text(queryStatement, 5) else {
                 print("Query result is nil")
                 throw SQLiteError.Step(message: errorMessage)
             }
             let longitude = String(cString: queryResultCol3) as NSString
             
             // get timestamp
-            let timeCreated = sqlite3_column_int(queryStatement, 4)
+            let timeCreated = sqlite3_column_int(queryStatement, 6)
             
             // get body
-            guard let queryResultCol5 =  sqlite3_column_text(queryStatement, 5) else {
+            guard let queryResultCol5 =  sqlite3_column_text(queryStatement, 7) else {
                 print("Query result is nil")
                 throw SQLiteError.Step(message: errorMessage)
             }
             let body = String(cString: queryResultCol5) as NSString
             
             // get isStory
-            let isStory = sqlite3_column_int(queryStatement, 6)
+            let isStory = sqlite3_column_int(queryStatement, 8)
             
             // get upvotes
             let upvotes = sqlite3_column_int(queryStatement, 7)
             
             // get downvotes
-            let downvotes = sqlite3_column_int(queryStatement, 8)
+            let downvotes = sqlite3_column_int(queryStatement, 10)
             
             let note = Note(
                 noteId: noteId,
                 userId: userId,
+                noteTagId: noteTagId,
+                privacyId: privacyId,
                 latitude: latitude,
                 longitude: longitude,
                 timeCreated: timeCreated,
