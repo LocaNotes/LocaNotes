@@ -172,18 +172,30 @@ struct Login: View {
         }
         
         let userViewModel = UserViewModel()
-        guard let user = userViewModel.mongoUserDoesExistInSqliteDatabase(mongoUserElement: response![0]) else {
-            restResponse = "Login failed"
-            didReceiveRestError.toggle()
-            return
+        var user: User?
+        user = userViewModel.mongoUserDoesExistInSqliteDatabase(mongoUserElement: response![0])
+        if user == nil {
+            user = userViewModel.createUserByMongoUser(mongoUser: response![0])
+            if user == nil {
+                restResponse = "Try again"
+                didReceiveRestError.toggle()
+                return
+            }
         }
+    
+        
+        
 //        if !userViewModel.mongoUserDoesExistInSqliteDatabase(mongoUserElement: user[0]) {
 //            userViewModel.createUserByMongoUser(mongoUser: user[0])
 //        }
         let keychainService = KeychainService()
         do {
-            try keychainService.storeGenericPasswordFor(account: user.username as String, service: "storePassword", password: user.password as String)
-            UserDefaults.standard.set(user.username, forKey: "username")
+            guard let username = user?.username, let password = user?.password, let userId = user?.userId else {
+                return
+            }
+            try keychainService.storeGenericPasswordFor(account: username as String, service: "storePassword", password: password as String)
+            UserDefaults.standard.set(username, forKey: "username")
+            UserDefaults.standard.set(userId, forKey: "userId")
             DispatchQueue.main.async {
                 withAnimation {
                     viewRouter.currentPage = .mainPage
@@ -404,23 +416,28 @@ struct SignUp: View {
     
     private func createUserCallback(response: MongoUserElement?, error: Error?) {
         
-        guard let user = response else {
-            guard let err = error else {
+        if response == nil {
+            if error == nil {
                 restResponse = "Unknown Error"
                 didReceiveRestError.toggle()
                 return
             }
-            restResponse = "\(err)"
+            restResponse = "\(error)"
             didReceiveRestError.toggle()
             return
         }
         
         let userViewModel = UserViewModel()
-        userViewModel.createUserByMongoUser(mongoUser: user)
+        guard let user = userViewModel.createUserByMongoUser(mongoUser: response!) else {
+            restResponse = "Try logging in"
+            didReceiveRestError.toggle()
+            return
+        }
         let keychainService = KeychainService()
         do {
-            try keychainService.storeGenericPasswordFor(account: user.username, service: "storePassword", password: user.password)
+            try keychainService.storeGenericPasswordFor(account: user.username as String, service: "storePassword", password: user.password as String)
             UserDefaults.standard.set(user.username, forKey: "username")
+            UserDefaults.standard.set(user.userId, forKey: "userId")
             DispatchQueue.main.async {
                 withAnimation {
                     viewRouter.currentPage = .mainPage

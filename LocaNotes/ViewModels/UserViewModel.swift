@@ -11,7 +11,7 @@ public class UserViewModel {
     
     let sqliteDatabaseService = SQLiteDatabaseService()
     
-    func createUserByMongoUser(mongoUser: MongoUserElement) {
+    func createUserByMongoUser(mongoUser: MongoUserElement) -> User? {
         let firstName = NSString(string: mongoUser.firstName)
         let lastName = NSString(string: mongoUser.lastName)
         let email = NSString(string: mongoUser.email)
@@ -33,6 +33,8 @@ public class UserViewModel {
         } catch {
             print("error inserting user: \(error)")
         }
+        
+        return self.selectUserByUsernameAndPassword(username: username as String, password: password as String) ?? nil
     }
     
     func selectUserByUsernameAndPassword(username: String, password: String) -> User? {
