@@ -44,6 +44,9 @@ public class SQLiteDatabaseService {
                     // create Note table
                     try db.createTable(table: Note.self)
                     
+                    // create Comment table
+                    try db.createTable(table: Comment.self)
+                    
                     // set a key saying that the database is made (prevent a new DB getting created every time)
                     UserDefaults.standard.set(true, forKey: "is_db_created")
                 } catch {

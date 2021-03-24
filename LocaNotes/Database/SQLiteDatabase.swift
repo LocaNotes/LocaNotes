@@ -441,3 +441,27 @@ extension SQLiteDatabase {
         return notes
     }
 }
+
+extension SQLiteDatabase {
+    func insertComment(noteId: Int32, userId: Int32, body: String, timeCommented: Int32) throws {
+        let insertSql = "INSERT INTO Comment (NoteId, UserId, Body, TimeCommented) VALUES (?, ?, ?, ?);"
+        
+        let insertStatement = try prepareStatement(sql: insertSql)
+        defer {
+            sqlite3_finalize(insertStatement)
+        }
+        
+        guard
+            sqlite3_bind_int(insertStatement, 1, noteId) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 2, userId) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 3, body, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 4, timeCommented) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        guard sqlite3_step(insertStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
+}
