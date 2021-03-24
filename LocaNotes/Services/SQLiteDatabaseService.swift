@@ -35,6 +35,9 @@ public class SQLiteDatabaseService {
                     // create User table
                     try db.createTable(table: User.self)
                     
+                    // create NoteTag table
+                    try db.createTable(table: NoteTag.self)
+                    
                     // create Note table
                     try db.createTable(table: Note.self)
                     
