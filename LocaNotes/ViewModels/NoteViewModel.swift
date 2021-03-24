@@ -27,10 +27,21 @@ public class NoteViewModel: ObservableObject {
      Queries all notes from the database and updates `notes` and `nearbyNotes`
      */
     public func refresh() {
-        guard let notes: [Note] = databaseService.queryAllNotes() else {
+//        guard let notes: [Note] = databaseService.queryAllNotes() else {
+//            print("query returned nil")
+//            return
+//        }
+        
+        
+        
+        let userId = UserDefaults.standard.integer(forKey: "userId")
+//            let password = try keychainService.getGenericPasswordFor(account: username, service: "storePassword")
+        
+        guard let notes: [Note] = self.queryNotesBy(userId: userId) else {
             print("query returned nil")
             return
         }
+        
         for note in notes {
             print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.timeCreated) | \(note.body)")
         }
@@ -38,6 +49,14 @@ public class NoteViewModel: ObservableObject {
         self.notes = notes
         
         filterForNearbyNotes()
+        
+    }
+    
+    private func queryNotesBy(userId: Int) -> [Note]? {
+        guard let notes = try? databaseService.queryNotesBy(userId: userId) else {
+            return nil
+        }
+        return notes
     }
     
     /**
@@ -87,7 +106,7 @@ public class NoteViewModel: ObservableObject {
      - Parameter body: the body text of the note
      */
     func insertNote(body: String) {
-        let userId = Int32(1)
+        let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
         let latitude = String(locationViewModel.userLatitude)
         let longitude = String(locationViewModel.userLongitude)
         let timestamp = NSDate().timeIntervalSince1970

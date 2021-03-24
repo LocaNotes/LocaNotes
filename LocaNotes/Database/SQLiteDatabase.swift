@@ -351,3 +351,77 @@ extension SQLiteDatabase {
         return user
     }
 }
+
+extension SQLiteDatabase {
+    
+    func queryNotesBy(userId: Int32) throws -> [Note] {
+        let querySql = "SELECT * FROM Note WHERE UserId = ?;"
+        guard let queryStatement = try? prepareStatement(sql: querySql) else {
+            throw SQLiteError.Prepare(message: errorMessage)
+        }
+        defer {
+            sqlite3_finalize(queryStatement)
+        }
+        
+        guard sqlite3_bind_int(queryStatement, 1, userId) == SQLITE_OK else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        var notes: [Note] = []
+        while (sqlite3_step(queryStatement) == SQLITE_ROW) {
+            // get note id
+            let noteId = sqlite3_column_int(queryStatement, 0)
+            
+            // get user id
+            let userId = sqlite3_column_int(queryStatement, 1)
+            
+            // get latitude
+            guard let queryResultCol2 =  sqlite3_column_text(queryStatement, 2) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let latitude = String(cString: queryResultCol2) as NSString
+            
+            // get longitude
+            guard let queryResultCol3 =  sqlite3_column_text(queryStatement, 3) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let longitude = String(cString: queryResultCol3) as NSString
+            
+            // get timestamp
+            let timeCreated = sqlite3_column_int(queryStatement, 4)
+            
+            // get body
+            guard let queryResultCol5 =  sqlite3_column_text(queryStatement, 5) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let body = String(cString: queryResultCol5) as NSString
+            
+            // get isStory
+            let isStory = sqlite3_column_int(queryStatement, 6)
+            
+            // get upvotes
+            let upvotes = sqlite3_column_int(queryStatement, 7)
+            
+            // get downvotes
+            let downvotes = sqlite3_column_int(queryStatement, 8)
+            
+            let note = Note(
+                noteId: noteId,
+                userId: userId,
+                latitude: latitude,
+                longitude: longitude,
+                timeCreated: timeCreated,
+                body: body,
+                isStory: isStory,
+                upvotes: upvotes,
+                downvotes: downvotes
+            )
+            
+            notes.append(note)
+        }
+        return notes
+    }
+}

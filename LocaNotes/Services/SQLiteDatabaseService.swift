@@ -105,6 +105,10 @@ public class SQLiteDatabaseService {
     func selectUserByUsernameAndPassword(username: String, password: String) throws -> User? {
         return try db.selectUserByUsernameAndPassword(username: username, password: password)
     }
+    
+    func queryNotesBy(userId: Int) throws -> [Note]? {
+        try db.queryNotesBy(userId: Int32(userId))
+    }
 }
 
 
