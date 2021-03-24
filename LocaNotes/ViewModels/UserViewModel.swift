@@ -45,12 +45,10 @@ public class UserViewModel {
         return user
     }
     
-    func mongoUserDoesExistInSqliteDatabase(mongoUserElement: MongoUserElement) -> Bool {
-        do {
-            let _ = try sqliteDatabaseService.selectUserByUsernameAndPassword(username: mongoUserElement.username, password: mongoUserElement.password)
-        } catch {
-            return false
+    func mongoUserDoesExistInSqliteDatabase(mongoUserElement: MongoUserElement) -> User? {
+        guard let user = selectUserByUsernameAndPassword(username: mongoUserElement.username, password: mongoUserElement.password) else {
+            return nil
         }
-        return true
+        return user
     }
 }
