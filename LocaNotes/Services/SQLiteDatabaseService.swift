@@ -37,9 +37,15 @@ public class SQLiteDatabaseService {
                     
                     // create NoteTag table
                     try db.createTable(table: NoteTag.self)
+                    try db.insertNoteTag(label: "emergency")
+                    try db.insertNoteTag(label: "dining")
+                    try db.insertNoteTag(label: "meme")
+                    try db.insertNoteTag(label: "other")
                     
                     // create Privacy table
                     try db.createTable(table: Privacy.self)
+                    try db.insertPrivacy(label: "public")
+                    try db.insertPrivacy(label: "private")
                     
                     // create Note table
                     try db.createTable(table: Note.self)
@@ -84,6 +90,8 @@ public class SQLiteDatabaseService {
      Inserts a note with the specified information into the database
      - Parameters:
         - userId: the id of the user that created the note
+        - noteTagId: the tag of the note
+        - privacyId: the privacy setting of the note
         - latitude: the latitude of the note
         - longitude: the longitude of the note
         - timestamp: the time that the user tapped "finish"
@@ -93,8 +101,8 @@ public class SQLiteDatabaseService {
         - downvotes: the number of downvotes the notes has
      - Throws: `SQLiteError.Insert` if the note could not be inserted
      */
-    func insertNote(userId: Int32, latitude: String, longitude: String, timestamp: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
-        try db.insertNote(userId: userId, latitude: latitude, longitude: longitude, timestamp: timestamp, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, timeCreated: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
+        try db.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, timestamp: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
     }
     
     /**

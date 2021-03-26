@@ -79,6 +79,38 @@ class SQLiteDatabase {
             }
         }
     }
+    
+    func insertNoteTag(label: String) throws {
+        let insertSql = "INSERT INTO NoteTag (Label) VALUES (?);"
+        let insertStatement = try prepareStatement(sql: insertSql)
+        defer {
+            sqlite3_finalize(insertStatement)
+        }
+        guard
+            sqlite3_bind_text(insertStatement, 1, label, -1, SQLITE_TRANSIENT) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        guard sqlite3_step(insertStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
+    
+    func insertPrivacy(label: String) throws {
+        let insertSql = "INSERT INTO Privacy (Label) VALUES (?);"
+        let insertStatement = try prepareStatement(sql: insertSql)
+        defer {
+            sqlite3_finalize(insertStatement)
+        }
+        guard
+            sqlite3_bind_text(insertStatement, 1, label, -1, SQLITE_TRANSIENT) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        guard sqlite3_step(insertStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
 }
 
 protocol SQLTable {
@@ -226,21 +258,23 @@ extension SQLiteDatabase {
 
 extension SQLiteDatabase {
     
-    func insertNote(userId: Int32, latitude: String, longitude: String, timestamp: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
-        let insertSql = "INSERT INTO Note (UserId, Latitude, Longitude, TimeCreated, Body, IsStory, Upvotes, Downvotes) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, timestamp: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
+        let insertSql = "INSERT INTO Note (UserId, NoteTagId, PrivacyId, Latitude, Longitude, TimeCreated, Body, IsStory, Upvotes, Downvotes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
         let insertStatement = try prepareStatement(sql: insertSql)
         defer {
             sqlite3_finalize(insertStatement)
         }
         guard
             sqlite3_bind_int(insertStatement, 1, userId) == SQLITE_OK &&
-            sqlite3_bind_text(insertStatement, 2, latitude, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
-            sqlite3_bind_text(insertStatement, 3, longitude, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
-            sqlite3_bind_int(insertStatement, 4, timestamp) == SQLITE_OK &&
-            sqlite3_bind_text(insertStatement, 5, body, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
-            sqlite3_bind_int(insertStatement, 6, isStory) == SQLITE_OK &&
-            sqlite3_bind_int(insertStatement, 7, upvotes) == SQLITE_OK &&
-            sqlite3_bind_int(insertStatement, 8, downvotes) == SQLITE_OK
+            sqlite3_bind_int(insertStatement, 2, noteTagId) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 3, privacyId) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 4, latitude, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 5, longitude, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 6, timestamp) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 7, body, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 8, isStory) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 9, upvotes) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 10, downvotes) == SQLITE_OK
         else {
             throw SQLiteError.Bind(message: errorMessage)
         }

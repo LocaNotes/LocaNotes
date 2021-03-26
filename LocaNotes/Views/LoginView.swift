@@ -94,7 +94,7 @@ struct Login: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
-    @State var mail = ""
+    @State var username = ""
     @State var pass = ""
     
     @State var didReceiveRestError = false
@@ -106,7 +106,7 @@ struct Login: View {
                 HStack(spacing: 15) {
                     Image(systemName: "envelope")
                         .foregroundColor(.black)
-                    TextField("Enter email address", text: self.$mail)
+                    TextField("Enter username", text: self.$username)
                         .autocapitalization(.none)
                 }
                 .padding(.vertical, 20)
@@ -218,7 +218,7 @@ struct Login: View {
     private func authenticateUser() {
         
         let restService = RESTService()
-        restService.authenticateUser(username: self.mail, password: self.pass, completion: authenticateCallback(response:error:))
+        restService.authenticateUser(username: self.username, password: self.pass, completion: authenticateCallback(response:error:))
         
     }
 }

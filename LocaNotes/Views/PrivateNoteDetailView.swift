@@ -63,8 +63,8 @@ struct PrivateNoteDetailView: View {
     }
 }
 
-struct PrivateNoteDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        PrivateNoteDetailView(note: Note(noteId: 1, userId: 1, latitude: "23.9889", longitude: "82.2322", timeCreated: 23, body: "test", isStory: 0, upvotes: 0, downvotes: 0))
-    }
-}
+//struct PrivateNoteDetailView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        PrivateNoteDetailView(note: Note(noteId: 1, userId: 1, noteTagId: 1, privacyId: 1, latitude: "23.9889", longitude: "82.2322", timeCreated: 23, body: "test", isStory: 0, upvotes: 0, downvotes: 0))
+//    }
+//}

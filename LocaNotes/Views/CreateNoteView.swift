@@ -13,19 +13,19 @@ struct CreateNoteView: View {
     
     @Binding var selectedTab: Int
     
+    @State private var selectedTag = noteTagLabel.other.rawValue
+    
     // used in the toggle to show the user's preference between public or private
     @State private var selectedPrivacy = PrivacyLabel.privateNote.rawValue
     
     // for the privacy drawer
-    @State var showDrawer = false;
+    @State var showPrivacyDrawer = false
+    
+    // for the note tags drawer
+    @State var showNoteTagDrawer = false
     
     // what the user types in the text editor
     @State private var noteContent = ""
-    
-//    init (noteViewModel: NoteViewModel, selectedTab: Int) {
-//        self.noteViewModel = noteViewModel
-//        self.selectedTab = selectedTab
-//    }
     
     var body: some View {
         ZStack {
@@ -54,21 +54,32 @@ struct CreateNoteView: View {
                     .disabled(self.noteContent == "" ? true : false)
                     Button(action: {
                         UIApplication.shared.endEditing(true)
-                        self.showDrawer.toggle()
+                        self.showPrivacyDrawer.toggle()
                     }) {
                         Image(systemName: "link")
+                    }
+                    Button(action: {
+                        UIApplication.shared.endEditing(true)
+                        self.showNoteTagDrawer.toggle()
+                    }) {
+                        Image(systemName: "tray.circle")
                     }
                 }
                 
                 TextEditor(text: $noteContent)
                     .frame(maxHeight: .infinity)
-                    .background(Color(UIColor.label.withAlphaComponent(self.showDrawer ? 0.2 : 0)).edgesIgnoringSafeArea(.all))
-                    .disabled(self.showDrawer ? true : false)
+                    .background(Color(UIColor.label.withAlphaComponent(self.showPrivacyDrawer ? 0.2 : 0)).edgesIgnoringSafeArea(.all))
+                    .disabled(self.showPrivacyDrawer ? true : false)
             }
             
             VStack {
-                RadioButtonsSheet(selectedPrivacy: self.$selectedPrivacy, show: self.$showDrawer)
-                    .offset(y: self.showDrawer ? (UIApplication.shared.windows.last?.safeAreaInsets.bottom)! + 15 : UIScreen.main.bounds.height)
+                RadioButtonsSheet(selectedPrivacy: self.$selectedPrivacy, show: self.$showPrivacyDrawer)
+                    .offset(y: self.showPrivacyDrawer ? (UIApplication.shared.windows.last?.safeAreaInsets.bottom)! + 15 : UIScreen.main.bounds.height)
+            }
+            
+            VStack {
+                NoteTagRadioButtonsSheet(selectedTag: self.$selectedTag, show: self.$showNoteTagDrawer)
+                    .offset(y: self.showNoteTagDrawer ? (UIApplication.shared.windows.last?.safeAreaInsets.bottom)! + 15 : UIScreen.main.bounds.height)
             }
         }
         .padding()
@@ -77,8 +88,36 @@ struct CreateNoteView: View {
     
     // is it worth using the NotificationCenter instead of invoking the call?
     private func insertNote() {
-        noteViewModel.insertNote(body: noteContent)
+        var noteTagId: Int32
+        switch selectedTag {
+        case noteTagLabel.emergency.rawValue:
+            noteTagId = 1
+        case noteTagLabel.dining.rawValue:
+            noteTagId = 2
+        case noteTagLabel.meme.rawValue:
+            noteTagId = 3
+        default:
+            noteTagId = 4
+        }
+        
+        var privacyId: Int32
+        switch selectedPrivacy {
+        case PrivacyLabel.privateNote.rawValue:
+            privacyId = 1
+        default:
+            privacyId = 2
+        }
+        
+        print(noteContent)
+        noteViewModel.insertNote(body: noteContent, noteTagId: noteTagId, privacyId: privacyId)
     }
+}
+
+enum noteTagLabel: String {
+    case emergency = "Emergency"
+    case dining = "Dining"
+    case meme = "Meme"
+    case other = "Other"
 }
 
 enum PrivacyLabel: String {
@@ -105,6 +144,39 @@ struct RadioButtonsSheet: View {
                         Text(value)
                         Spacer()
                         Image(systemName: self.selectedPrivacy == value ? "largecircle.fill.circle" : "circle")
+                    }
+                    
+                }
+            }
+        }
+        .padding(.vertical)
+        .padding(.horizontal, 25)
+        .padding(.bottom, (UIApplication.shared.windows.last?.safeAreaInsets.bottom)! + 10)
+        .background(Color(UIColor.label))
+        .foregroundColor(Color(UIColor.systemBackground))
+        .cornerRadius(30)
+    }
+}
+
+struct NoteTagRadioButtonsSheet: View {
+    @Binding var selectedTag: String
+    @Binding var show: Bool
+    
+    let data = [noteTagLabel.emergency.rawValue, noteTagLabel.dining.rawValue, noteTagLabel.meme.rawValue, noteTagLabel.other.rawValue]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Tags")
+                .font(.title)
+            ForEach(data, id: \.self) {value in
+                Button(action: {
+                    self.selectedTag = value
+                    self.show.toggle()
+                }) {
+                    HStack {
+                        Text(value)
+                        Spacer()
+                        Image(systemName: self.selectedTag == value ? "largecircle.fill.circle" : "circle")
                     }
                     
                 }

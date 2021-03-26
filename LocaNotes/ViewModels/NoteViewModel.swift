@@ -105,21 +105,21 @@ public class NoteViewModel: ObservableObject {
      Gets the user's latitude, longtitude, and a timestamp and invokes the database service to insert a note into the database
      - Parameter body: the body text of the note
      */
-    func insertNote(body: String) {
+    func insertNote(body: String, noteTagId: Int32, privacyId: Int32) {
         let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
         let latitude = String(locationViewModel.userLatitude)
         let longitude = String(locationViewModel.userLongitude)
-        let timestamp = NSDate().timeIntervalSince1970
+        let timeCreated = Int32(NSDate().timeIntervalSince1970)
         let isStory = Int32(0)
         let upvotes = Int32(0)
         let downvotes = Int32(0)
         
-        insertNote(userId: userId, latitude: latitude, longitude: longitude, timeCreated: Int32(timestamp), body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+        insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, timeCreated: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
     }
     
-    func insertNote(userId: Int32, latitude: String, longitude: String, timeCreated: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) {
+    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, timeCreated: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) {
         do {
-            try databaseService.insertNote(userId: userId, latitude: latitude, longitude: longitude, timestamp: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+            try databaseService.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, timeCreated: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
         } catch {
             print("couldn't insert: \(error)")
         }
