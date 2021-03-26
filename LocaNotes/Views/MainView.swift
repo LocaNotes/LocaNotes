@@ -15,6 +15,7 @@ struct MainView: View {
     //    let tabBarImageNames = ["person", "gear", "plus.app.fill", "pencil", "lasso"]
         
     let noteViewModel = NoteViewModel()
+    let userViewModel = UserViewModel()
     
     @EnvironmentObject var viewRouter: ViewRouter
         
@@ -41,7 +42,7 @@ struct MainView: View {
                     Text("New Note")
                 }
                 .tag(3)
-            Text("Settings")
+            SettingsView(viewModel: userViewModel)
                 .font(.system(size: 30, weight: .bold))
                 .tabItem {
                     Image(systemName: "gear")
