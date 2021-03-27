@@ -17,10 +17,10 @@ public class NoteViewModel: ObservableObject {
     // only the notes that are nearby the user
     @Published var nearbyNotes: [Note] = []
     
-    public let databaseService: SQLiteDatabaseService
+    private let notesRepository: NotesRepository
     
     public init() {
-        self.databaseService = SQLiteDatabaseService()
+        self.notesRepository = NotesRepository()
     }
     
     /**
@@ -53,7 +53,7 @@ public class NoteViewModel: ObservableObject {
     }
     
     private func queryNotesBy(userId: Int) -> [Note]? {
-        guard let notes = try? databaseService.queryNotesBy(userId: userId) else {
+        guard let notes = try? notesRepository.queryNotesBy(userId: userId) else {
             return nil
         }
         return notes
@@ -66,7 +66,7 @@ public class NoteViewModel: ObservableObject {
     func deleteNote(at offsets: IndexSet) {
         let noteIdToDelete: Int32 = notes[offsets.first!].noteId
         do {
-            try databaseService.deleteNoteById(id: notes[offsets.first!].noteId)
+            try notesRepository.deleteNoteById(id: notes[offsets.first!].noteId)
             notes.remove(atOffsets: offsets)
         } catch {
             print("couldn't delete: \(error)")
@@ -87,7 +87,7 @@ public class NoteViewModel: ObservableObject {
     func deleteNearbyNote(at offsets: IndexSet) {
         let noteIdToDelete: Int32 = nearbyNotes[offsets.first!].noteId
         do {
-            try databaseService.deleteNoteById(id: noteIdToDelete)
+            try notesRepository.deleteNoteById(id: noteIdToDelete)
             nearbyNotes.remove(atOffsets: offsets)
         } catch {
             print("Couldn't delete nearby note: \(error)")
@@ -119,7 +119,7 @@ public class NoteViewModel: ObservableObject {
     
     func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, timeCreated: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) {
         do {
-            try databaseService.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, timeCreated: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+            try notesRepository.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, timeCreated: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
         } catch {
             print("couldn't insert: \(error)")
         }
@@ -133,7 +133,7 @@ public class NoteViewModel: ObservableObject {
      */
     func updateNoteBody(noteId: Int32, body: String) {
         do {
-            try databaseService.updateNoteBody(noteId: noteId, body: body)
+            try notesRepository.updateNoteBody(noteId: noteId, body: body)
         } catch {
             print("Couldn't update note: \(error)")
         }

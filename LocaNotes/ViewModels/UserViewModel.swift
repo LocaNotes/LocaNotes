@@ -9,7 +9,11 @@ import Foundation
 
 public class UserViewModel {
     
-    let sqliteDatabaseService = SQLiteDatabaseService()
+    let userRepository: UserRepository
+    
+    init() {
+        self.userRepository = UserRepository()
+    }
     
     func createUserByMongoUser(mongoUser: MongoUserElement) -> User? {
         let firstName = NSString(string: mongoUser.firstName)
@@ -29,7 +33,7 @@ public class UserViewModel {
         let timeCreated = Int32(unix!)
         
         do {
-            try sqliteDatabaseService.insertUser(firstName: firstName as String, lastName: lastName as String, email: email as String, username: username as String, password: password as String, timeCreated: timeCreated, isLoggedIn: 0)
+            try userRepository.insertUser(firstName: firstName as String, lastName: lastName as String, email: email as String, username: username as String, password: password as String, timeCreated: timeCreated)
         } catch {
             print("error inserting user: \(error)")
         }
@@ -40,7 +44,7 @@ public class UserViewModel {
     func selectUserByUsernameAndPassword(username: String, password: String) -> User? {
         var user: User?
         do {
-            user = try sqliteDatabaseService.selectUserByUsernameAndPassword(username: username, password: password)
+            user = try userRepository.selectUserByUsernameAndPassword(username: username, password: password)
         } catch {
             print("error fetching new user: \(error)")
         }
