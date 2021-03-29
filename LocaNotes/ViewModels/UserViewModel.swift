@@ -10,7 +10,7 @@ import Foundation
 public class UserViewModel {
     
     let userRepository: UserRepository
-    
+        
     init() {
         self.userRepository = UserRepository()
     }
@@ -57,5 +57,9 @@ public class UserViewModel {
             return nil
         }
         return user
+    }
+    
+    func forgotPasswordSendEmail(email: String, completion: RESTService.RestLoginReturnBlock<MongoUserElement>) {
+        userRepository.forgotPasswordSendEmail(email: email, completion: completion)
     }
 }

@@ -10,7 +10,7 @@ import Foundation
 class UserRepository {
     let sqliteDatabaseService: SQLiteDatabaseService
     let restService: RESTService
-    
+        
     init() {
         self.sqliteDatabaseService = SQLiteDatabaseService()
         self.restService = RESTService()
@@ -39,5 +39,13 @@ class UserRepository {
     
     func getUserBy(userId: Int32) throws -> User? {
         return try sqliteDatabaseService.getUserBy(userId: userId)
+    }
+    
+    func forgotPasswordSendEmail(email: String, completion: RESTService.RestLoginReturnBlock<MongoUserElement>) {
+        restService.forgotPasswordSendEmail(email: email, completion: completion)
+    }
+    
+    func forgotPasswordSendTemporaryPassword(email: String, temporaryPassword: String, completion: RESTService.RestLoginReturnBlock<MongoUserElement>) {
+        restService.forgotPasswordSendTemporaryPassword(email: email, temporaryPassword: temporaryPassword, completion: completion)
     }
 }

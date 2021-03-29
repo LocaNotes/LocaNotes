@@ -264,6 +264,76 @@ public class RESTService {
             completion?(nil, error)
         }
     }
+    
+    func forgotPasswordSendEmail(email: String, completion: RestLoginReturnBlock<MongoUserElement>) {
+        
+        do {
+            var components = URLComponents()
+            components.scheme = "http"
+            components.host = "localhost"
+            components.port = 3000
+            components.path = "/user/forgotpassword"
+            
+            let queryItemUsername = URLQueryItem(name: "email", value: email)
+            
+            components.queryItems = [queryItemUsername]
+            
+            guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+            
+            var request = URLRequest(url: url)
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpMethod = "POST"
+                                        
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                let returnedError = self.checkForErrors(data: data, response: response, error: error)
+                if returnedError != nil {
+                    completion?(nil, returnedError)
+                    return
+                }
+                
+                let decoder = JSONDecoder()
+                let user = try? decoder.decode(MongoUserElement.self, from: data!)
+                completion?(user, nil)
+            }.resume()
+        } catch {
+            completion?(nil, error)
+        }
+    }
+    
+    func forgotPasswordSendTemporaryPassword(email: String, temporaryPassword: String, completion: RestLoginReturnBlock<MongoUserElement>) {
+        do {
+            var components = URLComponents()
+            components.scheme = "http"
+            components.host = "localhost"
+            components.port = 3000
+            components.path = "/user/verifytemporarypassword"
+            
+            let queryItemEmail = URLQueryItem(name: "email", value: email)
+            let queryItemTemporaryPassword = URLQueryItem(name: "temporaryPassword", value: temporaryPassword)
+            
+            components.queryItems = [queryItemEmail, queryItemTemporaryPassword]
+            
+            guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+            
+            var request = URLRequest(url: url)
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpMethod = "POST"
+                            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                let returnedError = self.checkForErrors(data: data, response: response, error: error)
+                if returnedError != nil {
+                    completion?(nil, returnedError)
+                    return
+                }
+                
+                let decoder = JSONDecoder()
+                let user = try? decoder.decode(MongoUserElement.self, from: data!)
+                completion?(user, nil)
+            }.resume()
+        } catch {
+            completion?(nil, error)
+        }
+    }
 }
 
 protocol RestErrorProtocol: LocalizedError {

@@ -30,6 +30,10 @@ struct LoginView: View {
 struct Home: View {
     @State var index = 0
     
+    @State var showForgotPasswordScreen = false
+    
+    @StateObject var viewRouter = ForgotPasswordViewRouter()
+    
     var body: some View {
         VStack {
 //            Image("hart_icon")
@@ -78,11 +82,14 @@ struct Home: View {
             
             if self.index == 0 {
                 Button(action: {
-                    
+                    showForgotPasswordScreen.toggle()
                 }) {
                     Text("Forgot Password?")
                         .foregroundColor(.white)
                 }
+                .sheet(isPresented: $showForgotPasswordScreen, content: {
+                    ForgotPasswordView().environmentObject(viewRouter)
+                })
                 .padding(.top, 20)
             }
         }
