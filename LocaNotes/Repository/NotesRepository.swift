@@ -44,8 +44,8 @@ class NotesRepository {
         - downvotes: the number of downvotes the notes has
      - Throws: `SQLiteError.Insert` if the note could not be inserted
      */
-    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, timeCreated: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
-        try sqliteDatabaseService.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, timeCreated: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
+        try sqliteDatabaseService.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
     }
     
     /**
@@ -58,7 +58,7 @@ class NotesRepository {
         try sqliteDatabaseService.updateNoteBody(noteId: noteId, body: body)
     }
     
-    func queryNotesBy(userId: Int) throws -> [Note]? {
+    func queryNotesBy(userId: Int32) throws -> [Note]? {
         try sqliteDatabaseService.queryNotesBy(userId: userId)
     }
 }

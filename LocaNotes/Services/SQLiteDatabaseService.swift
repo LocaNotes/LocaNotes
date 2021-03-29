@@ -25,7 +25,7 @@ public class SQLiteDatabaseService {
             db = try SQLiteDatabase.open(path: "\(path)/locanotes_db.sqlite3")
             print("Opened connection to database: \(path)/locanotes_db.sqlite3")
             
-//            UserDefaults.standard.set(false, forKey: "is_db_created")
+            UserDefaults.standard.set(false, forKey: "is_db_created")
             
             // create a database if one hasn't been created
             if (!UserDefaults.standard.bool(forKey: "is_db_created")) {
@@ -101,8 +101,8 @@ public class SQLiteDatabaseService {
         - downvotes: the number of downvotes the notes has
      - Throws: `SQLiteError.Insert` if the note could not be inserted
      */
-    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, timeCreated: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
-        try db.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, timestamp: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
+        try db.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
     }
     
     /**
@@ -115,16 +115,33 @@ public class SQLiteDatabaseService {
         try db.updateNoteBody(noteId: noteId, body: body)
     }
     
-    func insertUser(firstName: String, lastName: String, email: String, username: String, password: String, timeCreated: Int32, isLoggedIn: Int32) throws {
-        try db.insertUser(firstName: firstName, lastName: lastName, email: email, username: username, password: password, timeCreated: timeCreated)
+    func insertUser(serverId: String, firstName: String, lastName: String, email: String, username: String, password: String, createdAt: Int32) throws {
+        try db.insertUser(serverId: serverId, firstName: firstName, lastName: lastName, email: email, username: username, password: password, createdAt: createdAt)
     }
     
     func selectUserByUsernameAndPassword(username: String, password: String) throws -> User? {
         return try db.selectUserByUsernameAndPassword(username: username, password: password)
     }
     
-    func queryNotesBy(userId: Int) throws -> [Note]? {
-        try db.queryNotesBy(userId: Int32(userId))
+    func queryNotesBy(userId: Int32) throws -> [Note]? {
+        try db.queryNotesBy(userId: userId)
+    }
+    
+    func getUserBy(userId: Int32) throws -> User? {
+        return try db.getUserBy(userId: userId)
+    }
+    
+    func updateUsernameFor(userId: Int32, username: String) throws {
+        try db.updateUsernameFor(userId: userId, username: username)
+    }
+    
+    func updateEmailFor(userId: Int32, email: String) throws {
+        print("line 139")
+        try db.updateEmailFor(userId: userId, email: email)
+    }
+    
+    func updatePasswordFor(userId: Int32, password: String) throws {
+        try db.updatePasswordFor(userId: userId, password: password)
     }
 }
 

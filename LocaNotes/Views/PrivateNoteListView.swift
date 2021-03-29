@@ -67,7 +67,7 @@ struct NoteCell: View {
         NavigationLink(destination: PrivateNoteDetailView(note: note)) {
             HStack {
                 Text(String(note.userId))
-                Text(substring(string: String(note.body), offset: note.body.length / 2))
+                Text(substring(string: String(note.body), offset: NSString(string: note.body).length / 2))
             }
         }
     }

@@ -34,7 +34,7 @@ public class NoteViewModel: ObservableObject {
         
         
         
-        let userId = UserDefaults.standard.integer(forKey: "userId")
+        let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
 //            let password = try keychainService.getGenericPasswordFor(account: username, service: "storePassword")
         
         guard let notes: [Note] = self.queryNotesBy(userId: userId) else {
@@ -43,7 +43,7 @@ public class NoteViewModel: ObservableObject {
         }
         
         for note in notes {
-            print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.timeCreated) | \(note.body)")
+            print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.createdAt) | \(note.body)")
         }
         
         self.notes = notes
@@ -52,7 +52,7 @@ public class NoteViewModel: ObservableObject {
         
     }
     
-    private func queryNotesBy(userId: Int) -> [Note]? {
+    private func queryNotesBy(userId: Int32) -> [Note]? {
         guard let notes = try? notesRepository.queryNotesBy(userId: userId) else {
             return nil
         }
@@ -109,17 +109,17 @@ public class NoteViewModel: ObservableObject {
         let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
         let latitude = String(locationViewModel.userLatitude)
         let longitude = String(locationViewModel.userLongitude)
-        let timeCreated = Int32(NSDate().timeIntervalSince1970)
+        let createdAt = Int32(NSDate().timeIntervalSince1970)
         let isStory = Int32(0)
         let upvotes = Int32(0)
         let downvotes = Int32(0)
         
-        insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, timeCreated: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+        insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
     }
     
-    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, timeCreated: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) {
+    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) {
         do {
-            try notesRepository.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, timeCreated: timeCreated, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+            try notesRepository.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
         } catch {
             print("couldn't insert: \(error)")
         }

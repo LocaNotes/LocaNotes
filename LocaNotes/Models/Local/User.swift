@@ -12,12 +12,10 @@ import Foundation
  */
 struct User {
     let userId: Int32
-    let firstName: NSString
-    let lastName: NSString
-    let email: NSString
-    let username: NSString
-    let password: NSString
-    let timeCreated: Int32
+    let serverId: String
+    let firstName, lastName, email: String
+    let username, password: String
+    let createdAt: Int32
 }
 
 extension User: SQLTable {
@@ -27,12 +25,13 @@ extension User: SQLTable {
         return """
             CREATE TABLE User(
                 UserId INTEGER NOT NULL PRIMARY KEY,
+                ServerId INTEGER NOT NULL,
                 FirstName VARCHAR(20) NOT NULL,
                 LastName VARCHAR(20) NOT NULL,
                 Email VARCHAR(40) NOT NULL,
                 Username VARCHAR(40) NOT NULL,
                 Password VARCHAR(40) NOT NULL,
-                TimeCreated INTEGER NOT NULL
+                CreatedAt INTEGER NOT NULL
             );
         """
     }

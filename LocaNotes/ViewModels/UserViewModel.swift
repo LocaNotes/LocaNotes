@@ -16,11 +16,12 @@ public class UserViewModel {
     }
     
     func createUserByMongoUser(mongoUser: MongoUserElement) -> User? {
-        let firstName = NSString(string: mongoUser.firstName)
-        let lastName = NSString(string: mongoUser.lastName)
-        let email = NSString(string: mongoUser.email)
-        let username = NSString(string: mongoUser.username)
-        let password = NSString(string: mongoUser.password)
+        let serverId = mongoUser.id
+        let firstName = mongoUser.firstName
+        let lastName = mongoUser.lastName
+        let email = mongoUser.email
+        let username = mongoUser.username
+        let password = mongoUser.password
         
         let createdAt = mongoUser.createdAt
         let index = createdAt.index(createdAt.startIndex, offsetBy: 19)
@@ -30,10 +31,10 @@ public class UserViewModel {
         let formatter = ISO8601DateFormatter()
         let date = formatter.date(from: timestamp)
         let unix = date?.timeIntervalSince1970
-        let timeCreated = Int32(unix!)
+        let createdAtUnix = Int32(unix!)
         
         do {
-            try userRepository.insertUser(firstName: firstName as String, lastName: lastName as String, email: email as String, username: username as String, password: password as String, timeCreated: timeCreated)
+            try userRepository.insertUser(serverId: serverId, firstName: firstName, lastName: lastName, email: email, username: username, password: password, createdAt: createdAtUnix)
         } catch {
             print("error inserting user: \(error)")
         }

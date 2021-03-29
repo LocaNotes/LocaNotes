@@ -11,15 +11,15 @@ import Foundation
  Represents the note table in the database
  */
 struct Note {
-    let noteId: Int
+    let noteId: Int32
     let serverId: String
-    let userId, privacyId, noteTagId: Int
+    let userId, privacyId, noteTagId: Int32
     let title: String
-    let latitude, longitude: Double
-    let createdAt: Int
+    let latitude, longitude: String
+    let createdAt: Int32
     let body: String
-    let isStory: Int
-    let downvotes, upvotes: Int
+    let isStory: Int32
+    let downvotes, upvotes: Int32
 }
 
 extension Note: SQLTable {

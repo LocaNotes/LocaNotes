@@ -11,6 +11,12 @@ public class RESTService {
     
     typealias RestLoginReturnBlock<T> = ((T?, Error?) -> Void)?
     
+    private let sqliteDatebaseService: SQLiteDatabaseService
+    
+    init() {
+        self.sqliteDatebaseService = SQLiteDatabaseService()
+    }
+    
     func authenticateUser(username: String, password: String, completion: RestLoginReturnBlock<MongoUser>) {
         var components = URLComponents()
         components.scheme = "http"
@@ -86,7 +92,7 @@ public class RESTService {
     
     private func checkForErrors(data: Data?, response: URLResponse?, error: Error?) -> Error? {
         guard let data = data, let response = response as? HTTPURLResponse else {
-            if let err = error {
+            if error != nil {
                 return error
             } else {
                 return nil
@@ -128,6 +134,135 @@ public class RESTService {
             return restError
         }
         return restError
+    }
+    
+    func resetEmail(email: String, completion: RestLoginReturnBlock<MongoUserElement>) {
+        let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
+        do {
+            let userRepository = UserRepository()
+            guard let user = try userRepository.getUserBy(userId: userId) else {
+                completion?(nil, nil)
+                return
+            }
+            
+            var components = URLComponents()
+            components.scheme = "http"
+            components.host = "localhost"
+            components.port = 3000
+            components.path = "/user/resetemail/\(user.serverId)"
+            
+            print("server id: \(user.serverId)")
+            print("email:\(email)")
+            let queryItemEmail = URLQueryItem(name: "email", value: email)
+            
+            components.queryItems = [queryItemEmail]
+            
+            guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+            
+            print(url)
+            
+            var request = URLRequest(url: url)
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpMethod = "PATCH"
+                            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                let returnedError = self.checkForErrors(data: data, response: response, error: error)
+                if returnedError != nil {
+                    completion?(nil, returnedError)
+                    return
+                }
+                let user = try? JSONDecoder().decode(MongoUserElement.self, from: data!)
+                completion?(user, nil)
+            }.resume()
+        } catch {
+            completion?(nil, error)
+            return
+        }
+    }
+    
+    func resetPassword(password: String, completion: RestLoginReturnBlock<MongoUserElement>) {
+        let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
+        
+        do {
+            let userRepository = UserRepository()
+            guard let user = try userRepository.getUserBy(userId: userId) else {
+                completion?(nil, nil)
+                return
+            }
+            
+            var components = URLComponents()
+            components.scheme = "http"
+            components.host = "localhost"
+            components.port = 3000
+            components.path = "/user/resetpassword/\(user.serverId)"
+            
+            let queryItemPassword = URLQueryItem(name: "password", value: password)
+            
+            components.queryItems = [queryItemPassword]
+            
+            guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+            
+            var request = URLRequest(url: url)
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpMethod = "PATCH"
+                            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                let returnedError = self.checkForErrors(data: data, response: response, error: error)
+                if returnedError != nil {
+                    completion?(nil, returnedError)
+                    return
+                }
+                
+                let decoder = JSONDecoder()
+                let user = try? decoder.decode(MongoUserElement.self, from: data!)
+                completion?(user, nil)
+            }.resume()
+        }  catch {
+            completion?(nil, error)
+            return
+        }
+    }
+    
+    func resetUsername(username: String, completion: RestLoginReturnBlock<MongoUserElement>) {
+        let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
+        
+        do {
+            let userRepository = UserRepository()
+            guard let user = try userRepository.getUserBy(userId: userId) else {
+                completion?(nil, nil)
+                return
+            }
+            
+            var components = URLComponents()
+            components.scheme = "http"
+            components.host = "localhost"
+            components.port = 3000
+            components.path = "/user/resetusername/\(user.serverId)"
+            
+            let queryItemUsername = URLQueryItem(name: "username", value: username)
+            
+            components.queryItems = [queryItemUsername]
+            
+            guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+            
+            var request = URLRequest(url: url)
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpMethod = "PATCH"
+                            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                let returnedError = self.checkForErrors(data: data, response: response, error: error)
+                if returnedError != nil {
+                    completion?(nil, returnedError)
+                    return
+                }
+                
+                let decoder = JSONDecoder()
+                let user = try? decoder.decode(MongoUserElement.self, from: data!)
+                completion?(user, nil)
+            }.resume()
+        } catch {
+            completion?(nil, error)
+        }
     }
 }
 
