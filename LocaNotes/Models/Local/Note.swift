@@ -11,17 +11,15 @@ import Foundation
  Represents the note table in the database
  */
 struct Note {
-    let noteId: Int32
-    let userId: Int32
-    let noteTagId: Int32
-    let privacyId: Int32
-    let latitude: NSString
-    let longitude: NSString
-    let timeCreated: Int32 // unix
-    let body: NSString
-    let isStory: Int32
-    let upvotes: Int32
-    let downvotes: Int32
+    let noteId: Int
+    let serverId: String
+    let userId, privacyId, noteTagId: Int
+    let title: String
+    let latitude, longitude: Double
+    let createdAt: Int
+    let body: String
+    let isStory: Int
+    let downvotes, upvotes: Int
 }
 
 extension Note: SQLTable {
@@ -31,12 +29,14 @@ extension Note: SQLTable {
         return """
             CREATE TABLE Note(
                 NoteId INTEGER NOT NULL PRIMARY KEY,
-                UserId INTEGER NOT NULL,
-                NoteTagId INTEGER NOT NULL,
-                PrivacyId INTEGER NOT NULL,
+                ServerId TEXT NOT NULL,
+                UserId INT NOT NULL,
+                NoteTagId INT NOT NULL,
+                PrivacyId INT NOT NULL,
                 Latitude TEXT NOT NULL,
                 Longitude TEXT NOT NULL,
-                TimeCreated INTEGER NOT NULL,
+                CreatedAt INT NOT NULL,
+                Title TEXT NOT NULL,
                 Body TEXT NOT NULL,
                 IsStory INT NOT NULL,
                 Upvotes INT NOT NULL,
