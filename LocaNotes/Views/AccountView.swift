@@ -16,7 +16,9 @@ struct AccountView: View {
             Text("Account")
                 .font(.system(size: 30, weight: .bold))
             Button(action: {
-                viewRouter.currentPage = .loginPage
+                withAnimation {
+                    viewRouter.currentPage = .loginPage
+                }
             }) {
                 Text("Log out")
             }
