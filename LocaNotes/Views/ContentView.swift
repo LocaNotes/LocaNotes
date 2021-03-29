@@ -15,16 +15,12 @@ struct ContentView: View {
         switch viewRouter.currentPage {
         case .loginPage:
             LoginView()
+                .transition(.scale)
         case .mainPage:
             MainView()
                 .transition(.scale)
         }
     }
-}
-
-enum Page {
-    case loginPage
-    case mainPage
 }
 
 struct ContentView_Previews: PreviewProvider {
