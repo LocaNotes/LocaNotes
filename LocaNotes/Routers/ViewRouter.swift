@@ -11,3 +11,8 @@ class ViewRouter: ObservableObject {
     
     @Published var currentPage: Page = .loginPage
 }
+
+enum Page {
+    case loginPage
+    case mainPage
+}
