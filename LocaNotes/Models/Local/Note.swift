@@ -12,7 +12,7 @@ import Foundation
  */
 struct Note {
     let noteId: Int32
-    let serverId: String
+    let serverId, userServerId: String
     let userId, privacyId, noteTagId: Int32
     let title: String
     let latitude, longitude: String
@@ -30,6 +30,7 @@ extension Note: SQLTable {
             CREATE TABLE Note(
                 NoteId INTEGER NOT NULL PRIMARY KEY,
                 ServerId TEXT NOT NULL,
+                UserServerId TEXT NOT NULL,
                 UserId INT NOT NULL,
                 NoteTagId INT NOT NULL,
                 PrivacyId INT NOT NULL,
