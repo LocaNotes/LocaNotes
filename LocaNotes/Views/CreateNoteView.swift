@@ -41,12 +41,6 @@ struct CreateNoteView: View {
                     Spacer()
                     Button(action: {
                         insertNote()
-                        
-                        // reset
-                        selectedTab = 0
-                        noteContent = ""
-                        selectedPrivacy = PrivacyLabel.privateNote.rawValue
-                        UIApplication.shared.endEditing(true)
                     }) {
                         Image(systemName: "checkmark")
                             .padding(.trailing, 10)
@@ -103,13 +97,22 @@ struct CreateNoteView: View {
         var privacyId: Int32
         switch selectedPrivacy {
         case PrivacyLabel.privateNote.rawValue:
-            privacyId = 1
-        default:
             privacyId = 2
+        default:
+            privacyId = 1
         }
         
-        print(noteContent)
-        noteViewModel.insertNote(body: noteContent, noteTagId: noteTagId, privacyId: privacyId)
+        noteViewModel.insertNewNote(body: noteContent, noteTagId: noteTagId, privacyId: privacyId, UICompletion: completion)
+    }
+    
+    private func completion() {
+        // reset
+        DispatchQueue.main.async {
+            selectedTab = 0
+            noteContent = ""
+            selectedPrivacy = PrivacyLabel.privateNote.rawValue
+            UIApplication.shared.endEditing(true)
+        }
     }
 }
 

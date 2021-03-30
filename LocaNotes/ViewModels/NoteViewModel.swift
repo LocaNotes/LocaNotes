@@ -59,6 +59,13 @@ public class NoteViewModel: ObservableObject {
         return notes
     }
     
+    private func queryNoteBy(noteId: Int32) -> Note? {
+        guard let note = try? notesRepository.queryNoteBy(noteId: noteId) else {
+            return nil
+        }
+        return note
+    }
+    
     /**
      Deletes a note from the database, and if successful, deletes the note from `notes` and then `nearbyNotes`
      - Parameter offsets: an index set containing the index of the note to delete
@@ -66,7 +73,8 @@ public class NoteViewModel: ObservableObject {
     func deleteNote(at offsets: IndexSet) {
         let noteIdToDelete: Int32 = notes[offsets.first!].noteId
         do {
-            try notesRepository.deleteNoteById(id: notes[offsets.first!].noteId)
+            let note = notes[offsets.first!]
+            try notesRepository.deleteNoteById(id: note.noteId, serverId: note.serverId)
             notes.remove(atOffsets: offsets)
         } catch {
             print("couldn't delete: \(error)")
@@ -87,7 +95,8 @@ public class NoteViewModel: ObservableObject {
     func deleteNearbyNote(at offsets: IndexSet) {
         let noteIdToDelete: Int32 = nearbyNotes[offsets.first!].noteId
         do {
-            try notesRepository.deleteNoteById(id: noteIdToDelete)
+            let note = notes[offsets.first!]
+            try notesRepository.deleteNoteById(id: note.noteId, serverId: note.serverId)
             nearbyNotes.remove(atOffsets: offsets)
         } catch {
             print("Couldn't delete nearby note: \(error)")
@@ -102,11 +111,24 @@ public class NoteViewModel: ObservableObject {
     }
     
     /**
+     Returns a substring up to the specified index of the specified string
+     - Parameters:
+        - string: the string to take a substring of
+        - offset: the ending index of the substring
+     */
+    private func substring(string: String, offset: Int) -> String.SubSequence {
+        let index = string.index(string.startIndex, offsetBy: offset)
+        let substring = string[..<index]
+        return substring
+    }
+    
+    /**
      Gets the user's latitude, longtitude, and a timestamp and invokes the database service to insert a note into the database
      - Parameter body: the body text of the note
      */
-    func insertNote(body: String, noteTagId: Int32, privacyId: Int32) {
+    func insertNewNote(body: String, noteTagId: Int32, privacyId: Int32, UICompletion: (() -> Void)?) {
         let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
+        let title = String(substring(string: body, offset: NSString(string: body).length / 2))
         let latitude = String(locationViewModel.userLatitude)
         let longitude = String(locationViewModel.userLongitude)
         let createdAt = Int32(NSDate().timeIntervalSince1970)
@@ -114,16 +136,26 @@ public class NoteViewModel: ObservableObject {
         let upvotes = Int32(0)
         let downvotes = Int32(0)
         
-        insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+        switch privacyId {
+        case 1:
+            insertNewPublicNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes, UICompletion: UICompletion)
+        default:
+            insertNewPrivateNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes, UICompletion: UICompletion)
+        }
     }
     
-    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) {
+    func insertNewPublicNote(userId: Int32, noteTagId: Int32, privacyId: Int32, title: String, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32, UICompletion: (() -> Void)?) {
         do {
-            try notesRepository.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+            try notesRepository.insertNewPublicNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, body: body, isStory: isStory, UICompletion: UICompletion)
         } catch {
             print("couldn't insert: \(error)")
         }
     }
+    
+    func insertNewPrivateNote(userId: Int32, noteTagId: Int32, privacyId: Int32, title: String, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32, UICompletion: (() -> Void)?) {
+        notesRepository.insertNewPrivateNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes, UICompletion: UICompletion)
+    }
+    
     
     /**
      Invokes the database service to update the body of the note with the specified id

@@ -25,7 +25,7 @@ public class SQLiteDatabaseService {
             db = try SQLiteDatabase.open(path: "\(path)/locanotes_db.sqlite3")
             print("Opened connection to database: \(path)/locanotes_db.sqlite3")
             
-            UserDefaults.standard.set(false, forKey: "is_db_created")
+//            UserDefaults.standard.set(false, forKey: "is_db_created")
             
             // create a database if one hasn't been created
             if (!UserDefaults.standard.bool(forKey: "is_db_created")) {
@@ -73,8 +73,8 @@ public class SQLiteDatabaseService {
      Queries all notes from the database
      - Returns: a list of notes or nothing
      */
-    func queryAllNotes() -> [Note]? {
-        return db.queryAllNotes()
+    func queryAllNotes() throws -> [Note]? {
+        return try db.queryAllNotes()
     }
     
     /**
@@ -90,8 +90,11 @@ public class SQLiteDatabaseService {
      Inserts a note with the specified information into the database
      - Parameters:
         - userId: the id of the user that created the note
+        - serverId: the id of the note in the server's database
+        - userServerId: the server's id of the user that created the note
         - noteTagId: the tag of the note
         - privacyId: the privacy setting of the note
+        - title: the title of the note
         - latitude: the latitude of the note
         - longitude: the longitude of the note
         - timestamp: the time that the user tapped "finish"
@@ -101,8 +104,8 @@ public class SQLiteDatabaseService {
         - downvotes: the number of downvotes the notes has
      - Throws: `SQLiteError.Insert` if the note could not be inserted
      */
-    func insertNote(userId: Int32, noteTagId: Int32, privacyId: Int32, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
-        try db.insertNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+    func insertNote(userId: Int32, serverId: String, userServerId: String, noteTagId: Int32, privacyId: Int32, title: String, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) throws {
+        try db.insertNote(serverId: serverId, userServerId: userServerId, userId: userId, noteTagId: noteTagId, privacyId: privacyId, latitude: latitude, longitude: longitude, createdAt: createdAt, title: title, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
     }
     
     /**
@@ -125,6 +128,10 @@ public class SQLiteDatabaseService {
     
     func queryNotesBy(userId: Int32) throws -> [Note]? {
         try db.queryNotesBy(userId: userId)
+    }
+    
+    func queryNoteBy(noteId: Int32) throws -> Note? {
+        try db.queryNoteBy(noteId: noteId)
     }
     
     func getUserBy(userId: Int32) throws -> User? {

@@ -11,6 +11,8 @@ public class RESTService {
     
     typealias RestLoginReturnBlock<T> = ((T?, Error?) -> Void)?
     
+    typealias RestResponseReturnBlock<T> = ((T?, Error?) -> Void)?
+    
     private let sqliteDatebaseService: SQLiteDatabaseService
     
     init() {
@@ -333,6 +335,185 @@ public class RESTService {
         } catch {
             completion?(nil, error)
         }
+    }
+    
+    func insertNote(userId: Int32, privacyId: Int32, noteTagId: Int32, title: String, latitude: String, longitude: String, body: String, isStory: Bool, completion: RestResponseReturnBlock<MongoNoteElement>, UICompletion: (() -> Void)?) {
+                
+        do {
+            let userRepository = UserRepository()
+            guard let user = try userRepository.getUserBy(userId: userId) else {
+                completion?(nil, nil)
+                return
+            }
+            
+            var components = URLComponents()
+            components.scheme = "http"
+            components.host = "localhost"
+            components.port = 3000
+            components.path = "/notes"
+            
+            var privacyIdServer: String
+            switch (privacyId) {
+            case 1: // public
+                privacyIdServer = "6061432c9a65a46b36955c44"
+            case 2: // private
+                privacyIdServer = "606143349a65a46b36955c45"
+            default:
+                privacyIdServer = "606143349a65a46b36955c45"
+            }
+            
+            var noteTagIdServer: String
+            switch (noteTagId) {
+            case 1: // emergency
+                noteTagIdServer = "606143549a65a46b36955c46"
+            case 2: // dining
+                noteTagIdServer = "606143599a65a46b36955c47"
+            case 3: // meme
+                noteTagIdServer = "6061435c9a65a46b36955c48"
+            case 4: // other
+                noteTagIdServer = "606143609a65a46b36955c49"
+            default:
+                noteTagIdServer = "606143609a65a46b36955c49"
+            }
+            
+            
+            let queryItemUserId = URLQueryItem(name: "userId", value: String(user.serverId))
+            let queryItemPrivacyId = URLQueryItem(name: "privacyId", value: privacyIdServer)
+            let queryItemNoteTagId = URLQueryItem(name: "noteTagId", value: noteTagIdServer)
+            let queryItemTitle = URLQueryItem(name: "title", value: title)
+            let queryItemLatitude = URLQueryItem(name: "latitude", value: latitude)
+            let queryItemLongitude = URLQueryItem(name: "longitude", value: longitude)
+            let queryItemBody = URLQueryItem(name: "body", value: body)
+            let queryItemIsStory = URLQueryItem(name: "isStory", value: String(isStory))
+            let queryItemDownvotes = URLQueryItem(name: "downvotes", value: "0")
+            let queryItemUpvotes = URLQueryItem(name: "upvotes", value: "0")
+            
+            components.queryItems = [queryItemUserId, queryItemPrivacyId, queryItemNoteTagId, queryItemTitle, queryItemLatitude, queryItemLongitude, queryItemBody, queryItemIsStory, queryItemDownvotes, queryItemUpvotes]
+            
+            guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+            
+            var request = URLRequest(url: url)
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpMethod = "POST"
+                            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                let returnedError = self.checkForErrors(data: data, response: response, error: error)
+                if returnedError != nil {
+                    completion?(nil, returnedError)
+                    return
+                }
+                
+                let decoder = JSONDecoder()
+                let note = try? decoder.decode(MongoNoteElement.self, from: data!)
+                print("here")
+                completion?(note, nil)
+                UICompletion?()
+            }.resume()
+        } catch {
+            completion?(nil, error)
+        }
+    }
+    
+    func deleteNoteBy(id: String, completion: RestResponseReturnBlock<MongoNoteElement>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/notes/\(id)"
+                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "DELETE"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let note = try? decoder.decode(MongoNoteElement.self, from: data!)
+            completion?(note, nil)
+        }.resume()
+    }
+    
+    func updateNoteBody(note: Note, completion: RestResponseReturnBlock<MongoNoteElement>) {
+        
+        let serverId = note.serverId
+        let serverUserId = note.userServerId
+        let privacyId = note.privacyId
+        let noteTagId = note.noteId
+        let title = note.title
+        let latitude = note.latitude
+        let longitude = note.longitude
+        let body = note.body
+        let isStory = note.isStory
+        let downvotes = note.downvotes
+        let upvotes = note.upvotes
+        
+        var privacyIdServer: String
+        switch (privacyId) {
+        case 1: // public
+            privacyIdServer = "6061432c9a65a46b36955c44"
+        case 2: // private
+            privacyIdServer = "606143349a65a46b36955c45"
+        default:
+            privacyIdServer = "606143349a65a46b36955c45"
+        }
+        
+        var noteTagIdServer: String
+        switch (noteTagId) {
+        case 1: // emergency
+            noteTagIdServer = "606143549a65a46b36955c46"
+        case 2: // dining
+            noteTagIdServer = "606143599a65a46b36955c47"
+        case 3: // meme
+            noteTagIdServer = "6061435c9a65a46b36955c48"
+        case 4: // other
+            noteTagIdServer = "606143609a65a46b36955c49"
+        default:
+            noteTagIdServer = "606143609a65a46b36955c49"
+        }
+        
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/notes/\(serverId)"
+        
+        let queryItemUserId = URLQueryItem(name: "userId", value: serverUserId)
+        let queryItemPrivacyId = URLQueryItem(name: "privacyId", value: privacyIdServer)
+        let queryItemNoteTagId = URLQueryItem(name: "noteTagId", value: noteTagIdServer)
+        let queryItemTitle = URLQueryItem(name: "title", value: title)
+        let queryItemLatitude = URLQueryItem(name: "latitude", value: latitude)
+        let queryItemLongitude = URLQueryItem(name: "longitude", value: longitude)
+        let queryItemBody = URLQueryItem(name: "body", value: body)
+        let queryItemIsStory = URLQueryItem(name: "isStory", value: String(isStory))
+        let queryItemDownvotes = URLQueryItem(name: "downvotes", value: String(downvotes))
+        let queryItemUpvotes = URLQueryItem(name: "upvotes", value: String(upvotes))
+        
+        components.queryItems = [queryItemUserId, queryItemPrivacyId, queryItemNoteTagId, queryItemTitle, queryItemLatitude, queryItemLongitude, queryItemBody, queryItemIsStory, queryItemDownvotes, queryItemUpvotes]
+                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "PATCH"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let note = try? decoder.decode(MongoNoteElement.self, from: data!)
+            completion?(note, nil)
+        }.resume()
     }
 }
 
