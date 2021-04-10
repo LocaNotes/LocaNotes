@@ -100,8 +100,15 @@ struct PrivateNoteListView: View {
         annotation.subtitle = String(note.body)
         annotation.coordinate = CLLocationCoordinate2D(latitude: Double(note.latitude)!, longitude: Double(note.longitude)!)
         annotation.id = note.noteId
-        annotation.userid = note.userId
-        annotation.timestamp = note.timestamp
+        annotation.userId = note.userId
+        annotation.userServerId = note.userServerId
+        annotation.createdAt = note.createdAt
+        annotation.serverId = note.serverId
+        annotation.noteTagId = note.noteTagId
+        annotation.privacyId = note.privacyId
+        annotation.isStory = note.isStory
+        annotation.downvotes = note.downvotes
+        annotation.upvotes = note.upvotes
         return annotation
     }
     
@@ -112,7 +119,20 @@ struct PrivateNoteListView: View {
      - Returns:annotation representing the note
      */
     private func annoToNote(_ annotation: Annotation) -> Note{
-        let note = Note(noteId: annotation.id, userId: annotation.userid, latitude: String(annotation.coordinate.latitude), longitude: String(annotation.coordinate.longitude), timestamp: annotation.timestamp, body: String(annotation.subtitle!))
+        let note = Note(noteId: annotation.id,
+                        serverId: annotation.serverId,
+                        userServerId: annotation.userServerId,
+                        userId: annotation.userId,
+                        privacyId: annotation.privacyId,
+                        noteTagId: annotation.noteTagId,
+                        title: annotation.title!,
+                        latitude: String(annotation.coordinate.latitude),
+                        longitude: String(annotation.coordinate.longitude),
+                        createdAt: annotation.createdAt,
+                        body: annotation.subtitle!,
+                        isStory: annotation.isStory,
+                        downvotes: annotation.downvotes,
+                        upvotes: annotation.upvotes)
         return note
     }
     
