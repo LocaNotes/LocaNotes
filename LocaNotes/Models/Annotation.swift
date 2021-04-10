@@ -17,9 +17,15 @@ class Annotation: MKPointAnnotation {
     
     init(_ parent: MKPointAnnotation){
         self.parent = parent
+        parent.subtitle = " "
+        parent.title = " "
         self.id = 0
         self.userid = 0
         self.timestamp = 0
+    }
+    
+    override convenience init(){
+        self.init(MKPointAnnotation())
     }
     
     func toMKPointAnnotation() -> MKPointAnnotation{

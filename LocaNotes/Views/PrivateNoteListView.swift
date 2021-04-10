@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import MapKit
+import CoreLocation
 
 struct PrivateNoteListView: View {
         
@@ -19,20 +19,16 @@ struct PrivateNoteListView: View {
     @State private var centerCoor = CLLocationCoordinate2D()
     
     // users nearby notes
-    @State private var nearbyNotes = [Annotation]()
-    ////@State private var loca = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51, longitude: 0), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
+    @State private var nearbyAnnoNotes = [Annotation]()
     
+    // selected annotation on map
     @State private var selectedNote: Annotation?
-
     
+    // whether the user is trying to show details of an annotation
     @State private var showingDetails = false
 
     init (viewModel: NoteViewModel) {
         self.viewModel = viewModel
-        
-        print(self.viewModel.notes.count)
-        //TODO: GET THIS TO WORK
-        //NotificationCenter.default.addObserver(self, selector: Selector(("updateAnnos")), name: NSNotification.Name(rawValue: "updateAnnos"), object: nil)
     }
     
     var body: some View {
@@ -40,46 +36,19 @@ struct PrivateNoteListView: View {
             VStack {
                 //----------------Map Notes-------------------------//
                 ZStack{
-                    MapView(centerCoordinate: $centerCoor,selectedAnno: $selectedNote, showingDetails: $showingDetails, annotations: nearbyNotes)
+                    MapView(centerCoordinate: $centerCoor,selectedAnno: $selectedNote, showingDetails: $showingDetails, annotations: nearbyAnnoNotes)
                         .edgesIgnoringSafeArea(.all)
-                        
-                    ////Map(coordinateRegion: $loca, showsUserLocation: true, userTrackingMode: .constant(.follow))
-                    Circle()
-                        .fill(Color.blue)
-                        .opacity(0.3)
-                        .frame(width: 32, height: 32)
-                    VStack {
-                        Spacer()
-                        HStack{
-                        Button(action: {
-                            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "updateAnnos"), object: nil, userInfo: nil)
-                            //create a new annotation at this location (//! precursor to viewing notes as annotations)
-                            updateAnnos()
-                            /*let newLocation = MKPointAnnotation()
-                            newLocation.title = "example"
-                            newLocation.coordinate = self.centerCoor
-                            self.nearbyNotes.append(newLocation)*/
-                        }) {
-                            Image(systemName: "plus")
-                        }
-                        .padding()
-                        .background(Color.black.opacity(0.75))
-                        .foregroundColor(.white)
-                        .font(.title)
-                        .clipShape(Circle())
-                        .padding(.trailing)
-                        }
-                    }
                 }
                 .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height/2 - 100, alignment: .center)
+               .alert(isPresented: $showingDetails, content: { Alert(title: Text(selectedNote?.title ?? "Unknown"), message: Text(selectedNote?.subtitle ?? "Missing note information."), primaryButton: .default(Text("Open"), action: {
+                //NoteCell(note: annoToNote(selectedNote!))
+                    showingDetails = true
+                    searchForMapNote()
+                    showingDetails = false
+               }),secondaryButton: .cancel())})
                 .onAppear(perform: updateAnnos)
+                .onDisappear(perform: updateAnnos)
                 
-                //.alert(isPresented: $showingDetails, content: { Alert(title: Text(selectedNote?.title ?? "Unknown"), message: Text(selectedNote?.subtitle ?? "Missing note information."), primaryButton: .default(Text("OK")),secondaryButton:                     .default(Text("expand"), action: {
-                            //NoteCell(note: annoToNote(selectedNote!))
-                     //   })
-                        //edit this note
-                        //NavigationLink("Open", destination: PrivateNoteDetailView(note: viewModel.nearbyNotes[0]))
-                 //   )})
                 
                 //----------------List Notes-------------------------//
                 SearchBarView(searchText: $searchText)
@@ -108,7 +77,9 @@ struct PrivateNoteListView: View {
                     }
                     
                 }
-                .navigationBarItems(trailing: EditButton())
+                .navigationBarItems(leading: Button("Refresh", action: {
+                    updateAnnos() //! doesn't always refresh properly :(
+                }), trailing: EditButton())
                 .onAppear(perform: viewModel.refresh)
                 .navigationTitle("Notes")
                 //                .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
@@ -124,7 +95,7 @@ struct PrivateNoteListView: View {
      - Returns:annotation representing the note
      */
     private func noteToAnno(_ note: Note) -> Annotation{
-        let annotation = Annotation(MKPointAnnotation())
+        let annotation = Annotation()
         annotation.title = String(substring(string: note.body, offset: (note.body.count > 15 ? 15 : note.body.count)))
         annotation.subtitle = String(note.body)
         annotation.coordinate = CLLocationCoordinate2D(latitude: Double(note.latitude)!, longitude: Double(note.longitude)!)
@@ -145,11 +116,21 @@ struct PrivateNoteListView: View {
         return note
     }
     
-    private func updateAnnos(/*notification: NSNotification*/){
-        nearbyNotes = [Annotation]()
-        for note in (self.viewModel.nearbyNotes) {
-            self.nearbyNotes.append(noteToAnno(note))
+    /* Updates annotations on map */
+    private func updateAnnos(){
+        nearbyAnnoNotes.removeAll()
+        for note in (viewModel.nearbyNotes) {
+            nearbyAnnoNotes.append(noteToAnno(note))
             print(note.body)
+        }
+    }
+    
+    /* Sets search text to the note being viewed on the map */
+    private func searchForMapNote(){
+       // print(showingDetails)
+        // print(selectedNote != nil)
+        if (showingDetails && selectedNote != nil){
+            searchText = selectedNote!.subtitle!
         }
     }
 }
