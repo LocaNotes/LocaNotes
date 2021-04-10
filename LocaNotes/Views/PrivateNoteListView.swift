@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct PrivateNoteListView: View {
         
@@ -14,6 +15,18 @@ struct PrivateNoteListView: View {
     // what the user types in the search bar
     @State private var searchText: String = ""
     
+    // user location
+    @State private var centerCoor = CLLocationCoordinate2D()
+    
+    // users nearby notes
+    @State private var nearbyAnnoNotes = [Annotation]()
+    
+    // selected annotation on map
+    @State private var selectedNote: Annotation?
+    
+    // whether the user is trying to show details of an annotation
+    @State private var showingDetails = false
+
     init (viewModel: NoteViewModel) {
         self.viewModel = viewModel
     }
@@ -21,7 +34,26 @@ struct PrivateNoteListView: View {
     var body: some View {
         NavigationView {
             VStack {
+                //----------------Map Notes-------------------------//
+                ZStack{
+                    MapView(centerCoordinate: $centerCoor,selectedAnno: $selectedNote, showingDetails: $showingDetails, annotations: nearbyAnnoNotes)
+                        .edgesIgnoringSafeArea(.all)
+                }
+                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height/2 - 100, alignment: .center)
+               .alert(isPresented: $showingDetails, content: { Alert(title: Text(selectedNote?.title ?? "Unknown"), message: Text(selectedNote?.subtitle ?? "Missing note information."), primaryButton: .default(Text("Open"), action: {
+                //NoteCell(note: annoToNote(selectedNote!))
+                    showingDetails = true
+                    searchForMapNote()
+                    showingDetails = false
+               }),secondaryButton: .cancel())})
+                .onAppear(perform: updateAnnos)
+                .onDisappear(perform: updateAnnos)
+                
+                
+                //----------------List Notes-------------------------//
                 SearchBarView(searchText: $searchText)
+                    .frame(width: UIScreen.main.bounds.width+20, height: 40, alignment: .bottom)
+                    
                 List {
                     if !viewModel.nearbyNotes.isEmpty {
                         Section(header: Text("Nearby")) {
@@ -43,12 +75,62 @@ struct PrivateNoteListView: View {
                         }
                         .onDelete(perform: viewModel.deleteNote)
                     }
+                    
                 }
+                .navigationBarItems(leading: Button("Refresh", action: {
+                    updateAnnos() //! doesn't always refresh properly :(
+                }), trailing: EditButton())
                 .onAppear(perform: viewModel.refresh)
-                .navigationTitle("Private Notes")
-//                .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
-                .navigationBarItems(leading: EditButton())
+                .navigationTitle("Notes")
+                //                .navigationBarItems(leading: EditButton(), trailing: Text("Test"))
+                
             }
+        }
+    }
+    
+    /**
+     converts a note to an annotation
+     - Parameters:
+        - note: the note to be converted into an annotation
+     - Returns:annotation representing the note
+     */
+    private func noteToAnno(_ note: Note) -> Annotation{
+        let annotation = Annotation()
+        annotation.title = String(substring(string: note.body, offset: (note.body.count > 15 ? 15 : note.body.count)))
+        annotation.subtitle = String(note.body)
+        annotation.coordinate = CLLocationCoordinate2D(latitude: Double(note.latitude)!, longitude: Double(note.longitude)!)
+        annotation.id = note.noteId
+        annotation.userid = note.userId
+        annotation.timestamp = note.timestamp
+        return annotation
+    }
+    
+    /**
+     converts an annotation to a note
+     - Parameters:
+        - annotation: the annotation to be converted into a note
+     - Returns:annotation representing the note
+     */
+    private func annoToNote(_ annotation: Annotation) -> Note{
+        let note = Note(noteId: annotation.id, userId: annotation.userid, latitude: String(annotation.coordinate.latitude), longitude: String(annotation.coordinate.longitude), timestamp: annotation.timestamp, body: String(annotation.subtitle!))
+        return note
+    }
+    
+    /* Updates annotations on map */
+    private func updateAnnos(){
+        nearbyAnnoNotes.removeAll()
+        for note in (viewModel.nearbyNotes) {
+            nearbyAnnoNotes.append(noteToAnno(note))
+            print(note.body)
+        }
+    }
+    
+    /* Sets search text to the note being viewed on the map */
+    private func searchForMapNote(){
+       // print(showingDetails)
+        // print(selectedNote != nil)
+        if (showingDetails && selectedNote != nil){
+            searchText = selectedNote!.subtitle!
         }
     }
 }
@@ -71,16 +153,16 @@ struct NoteCell: View {
             }
         }
     }
-    
-    /**
-     Returns a substring up to the specified index of the specified string
-     - Parameters:
-        - string: the string to take a substring of
-        - offset: the ending index of the substring
-     */
-    private func substring(string: String, offset: Int) -> String.SubSequence {
-        let index = string.index(string.startIndex, offsetBy: offset)
-        let substring = string[..<index]
-        return substring
-    }
+}
+
+/**
+ Returns a substring up to the specified index of the specified string
+ - Parameters:
+    - string: the string to take a substring of
+    - offset: the ending index of the substring
+ */
+private func substring(string: String, offset: Int) -> String.SubSequence {
+    let index = string.index(string.startIndex, offsetBy: offset)
+    let substring = string[..<index]
+    return substring
 }
