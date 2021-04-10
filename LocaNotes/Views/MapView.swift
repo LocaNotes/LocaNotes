@@ -19,7 +19,7 @@ struct MapView: UIViewRepresentable{
         let mapView = MKMapView()
         
         mapView.delegate = context.coordinator
-        mapView.pointOfInterestFilter?.includes(.atm)
+        mapView.pointOfInterestFilter = .some(MKPointOfInterestFilter(including: []))
         mapView.showsUserLocation = true
         mapView.userTrackingMode = .follow
         mapView.setRegion(MKCoordinateRegion(center: centerCoordinate, latitudinalMeters: 0, longitudinalMeters: 0), animated: true)
@@ -79,7 +79,7 @@ struct MapView: UIViewRepresentable{
 
 extension Annotation{
     static var example: Annotation{
-        let annotation = Annotation(MKPointAnnotation())
+        let annotation = Annotation()
         annotation.title = "title"
         annotation.subtitle = "sub"
         annotation.coordinate = CLLocationCoordinate2D(latitude: 39, longitude: 0.13)
