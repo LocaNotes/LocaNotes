@@ -195,6 +195,7 @@ struct Login: View {
 //        if !userViewModel.mongoUserDoesExistInSqliteDatabase(mongoUserElement: user[0]) {
 //            userViewModel.createUserByMongoUser(mongoUser: user[0])
 //        }
+        
         let keychainService = KeychainService()
         do {
             guard let username = user?.username, let password = user?.password, let userId = user?.userId else {
@@ -216,6 +217,12 @@ struct Login: View {
 //            } catch {
 //                print("fail")
 //            }
+            
+            let noteViewModel = NoteViewModel()
+            guard let serverId = user?.serverId else {
+                return
+            }
+            noteViewModel.queryServerNotesBy(userId: serverId, completion: queryNotesFromServerCallback(response:error:))
         } catch {
             restResponse = "\(error)"
             didReceiveRestError.toggle()
@@ -226,7 +233,80 @@ struct Login: View {
         
         let restService = RESTService()
         restService.authenticateUser(username: self.username, password: self.pass, completion: authenticateCallback(response:error:))
+    }
+    
+    private func queryNotesFromServerCallback(response: [MongoNoteElement]?, error: Error?) {
+        if response == nil {
+            if error == nil {
+                restResponse = "Able to log in but received Unknown Error"
+                didReceiveRestError.toggle()
+                return
+            }
+            restResponse = "\(error?.localizedDescription)"
+            didReceiveRestError.toggle()
+            return
+        }
         
+        let noteViewModel = NoteViewModel()
+        noteViewModel.insertNotesFromServer(notes: response!)
+        
+        let userViewModel = UserViewModel()
+        userViewModel.queryAllServerUsers(completion: queryAllServerUsersCallback(response:error:))
+    }
+    
+    private func queryAllServerUsersCallback(response: [MongoUserElement]?, error: Error?) {
+        if response == nil {
+            if error == nil {
+                restResponse = "Unknown Error"
+                didReceiveRestError.toggle()
+                return
+            }
+            restResponse = "\(error)"
+            didReceiveRestError.toggle()
+            return
+        }
+        
+        let userViewModel = UserViewModel()
+        userViewModel.insertUsersFromServer(users: response!)
+        
+        let noteViewModel = NoteViewModel()
+        noteViewModel.queryAllServerPublicNotes(completion: queryAllServerPublicNotesCallback(response:error:))
+    }
+    
+    private func queryAllServerPublicNotesCallback(response: [MongoNoteElement]?, error: Error?) {
+        if response == nil {
+            if error == nil {
+                restResponse = "Able to log in but received Unknown Error"
+                didReceiveRestError.toggle()
+                return
+            }
+            restResponse = "\(error)"
+            didReceiveRestError.toggle()
+            return
+        }
+        
+        let noteViewModel = NoteViewModel()
+        noteViewModel.insertNotesFromServer(notes: response!)
+        let serverId = response![0].userID
+        
+        let commentViewModel = CommentViewModel()
+        commentViewModel.queryCommentsFromServerBy(userId: serverId, completion: queryCommentsFromServerCallback(response:error:))
+    }
+    
+    private func queryCommentsFromServerCallback(response: [MongoCommentElement]?, error: Error?) {
+        if response == nil {
+            if error == nil {
+                restResponse = "Able to log in but received Unknown Error"
+                didReceiveRestError.toggle()
+                return
+            }
+            restResponse = "\(error)"
+            didReceiveRestError.toggle()
+            return
+        }
+        
+        let commentsViewModel = CommentViewModel()
+        commentsViewModel.insertCommentsFromServer(comments: response!)
     }
 }
 
