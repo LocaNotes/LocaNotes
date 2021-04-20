@@ -9,7 +9,8 @@ import Foundation
 
 struct NoteTag {
     let noteTagId: Int32
-    let label: NSString
+    let serverId: String
+    let label: String
 }
 
 extension NoteTag: SQLTable {
@@ -18,6 +19,7 @@ extension NoteTag: SQLTable {
         return """
             CREATE TABLE NoteTag(
                 NoteTagId INTEGER NOT NULL PRIMARY KEY,
+                ServerId TEXT NOT NULL,
                 Label TEXT NOT NULL
             );
         """

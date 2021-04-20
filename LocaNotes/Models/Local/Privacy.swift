@@ -9,7 +9,8 @@ import Foundation
 
 struct Privacy {
     let privacyId: Int32
-    let label: NSString
+    let serverId: String
+    let label: String
 }
 
 extension Privacy: SQLTable {
@@ -18,6 +19,7 @@ extension Privacy: SQLTable {
         return """
             CREATE TABLE Privacy(
                 PrivacyId INTEGER NOT NULL PRIMARY KEY,
+                ServerId TEXT NOT NULL, 
                 Label TEXT NOT NULL
             );
         """
