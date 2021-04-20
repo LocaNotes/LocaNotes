@@ -16,7 +16,9 @@ public class SQLiteDatabaseService {
     // a reference to the database
     private var db: SQLiteDatabase!
     
-    init() {
+    static let shared = SQLiteDatabaseService()
+    
+    private init() {
         
         do {
             let path: String = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first ?? ""
@@ -37,15 +39,38 @@ public class SQLiteDatabaseService {
                     
                     // create NoteTag table
                     try db.createTable(table: NoteTag.self)
-                    try db.insertNoteTag(label: "emergency")
-                    try db.insertNoteTag(label: "dining")
-                    try db.insertNoteTag(label: "meme")
-                    try db.insertNoteTag(label: "other")
+                    let restService = RESTService()
+                    restService.queryNoteTag { [self] (response, error) in
+                        if response != nil {
+                            for noteTag in response! {
+                                let serverId = noteTag.id
+                                let label = noteTag.label
+                                do {
+                                    try db.insertNoteTag(serverId: serverId, label: label)
+                                } catch {
+                                    print(error.localizedDescription)
+                                }
+                            }
+                        }
+                    }
                     
                     // create Privacy table
                     try db.createTable(table: Privacy.self)
-                    try db.insertPrivacy(label: "public")
-                    try db.insertPrivacy(label: "private")
+//                    let privacyViewModel = PrivacyViewModel()
+                    restService.queryPrivacy { [self] (response, error) in
+                        if response != nil {
+                            for privacy in response! {
+                                let serverId = privacy.id
+                                let label = privacy.label
+                                do {
+                                    try db.insertPrivacy(serverId: serverId, label: label)
+                                } catch {
+                                    print(error.localizedDescription)
+                                }
+                            }
+                        }
+                    }
+                    
                     
                     // create Note table
                     try db.createTable(table: Note.self)
@@ -134,8 +159,16 @@ public class SQLiteDatabaseService {
         try db.queryNoteBy(noteId: noteId)
     }
     
+    func queryNoteBy(serverId: String) throws -> Note? {
+        return try db.getNoteByServerId(noteServerId: serverId)
+    }
+    
     func getUserBy(userId: Int32) throws -> User? {
         return try db.getUserBy(userId: userId)
+    }
+    
+    func queryUserBy(serverId: String) throws -> User? {
+        return try db.queryUserBy(serverId: serverId)
     }
     
     func updateUsernameFor(userId: Int32, username: String) throws {
@@ -149,6 +182,30 @@ public class SQLiteDatabaseService {
     
     func updatePasswordFor(userId: Int32, password: String) throws {
         try db.updatePasswordFor(userId: userId, password: password)
+    }
+    
+    func insertComment(serverId: String, noteId: Int32, noteServerId: String, userId: Int32, userServerId: String, body: String, timeCommented: Int32) throws {
+        try db.insertComment(serverId: serverId, noteId: noteId, noteServerId: noteServerId, userId: userId, userServerId: userServerId, body: body, timeCommented: timeCommented)
+    }
+    
+    func queryLocalCommentBy(serverId: String) throws -> Comment? {
+        return try db.queryLocalCommentBy(serverId: serverId)
+    }
+    
+    func queryPrivacyBy(serverId: String) throws -> Privacy? {
+        return try db.queryPrivacyBy(serverId: serverId)
+    }
+    
+    func queryNoteTagBy(serverId: String) throws -> NoteTag? {
+        return try db.queryNoteTagBy(serverId: serverId)
+    }
+    
+    func queryAllPublicNotes() throws -> [Note]? {
+        return try db.queryAllPublicNotes()
+    }
+    
+    func queryAllPrivacies() throws -> [Privacy]? {
+        return try db.queryAllPrivacies()
     }
 }
 
