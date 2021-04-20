@@ -12,7 +12,8 @@ class NotesRepository {
     let restService: RESTService
     
     init() {
-        self.sqliteDatabaseService = SQLiteDatabaseService()
+//        self.sqliteDatabaseService = SQLiteDatabaseService()
+        self.sqliteDatabaseService = SQLiteDatabaseService.shared
         self.restService = RESTService()
     }
     
@@ -73,6 +74,14 @@ class NotesRepository {
         }
     }
     
+    func insertNoteLocally(serverId: String, userId: Int32, userServerId: String, noteTagId: Int32, privacyId: Int32, title: String, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32) {
+        do {
+            try sqliteDatabaseService.insertNote(userId: userId, serverId: serverId, userServerId: userServerId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes)
+            } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
     private func insertNoteCallback(response: MongoNoteElement?, error: Error?) {
         if response == nil {
             if error == nil {
@@ -128,6 +137,10 @@ class NotesRepository {
     
     func queryNoteBy(noteId: Int32) throws -> Note? {
         try sqliteDatabaseService.queryNoteBy(noteId: noteId)
+    }
+    
+    func queryNoteBy(serverId: String) throws -> Note? {
+        return try sqliteDatabaseService.queryNoteBy(serverId: serverId)
     }
     
     func createNoteFor(mongoNoteElement: MongoNoteElement) -> Note {
@@ -186,5 +199,17 @@ class NotesRepository {
         let createdAtUnix = Int32(unix!)
         
         return Note(noteId: -1, serverId: serverId, userServerId: userServerId, userId: userId, privacyId: privacyId, noteTagId: noteTagId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAtUnix, body: body, isStory: isStoryLocal, downvotes: downvotes, upvotes: upvotes)
+    }
+    
+    func queryServerNotesBy(userId: String, completion: RESTService.RestResponseReturnBlock<[MongoNoteElement]>) {
+        restService.queryServerNotesBy(userId: userId, completion: completion)
+    }
+    
+    func queryAllServerPublicNotes(completion: RESTService.RestResponseReturnBlock<[MongoNoteElement]>) {
+        restService.queryAllServerPublicNotes(completion: completion)
+    }
+    
+    func queryAllPublicNotesFromStorage() throws -> [Note]? {
+        return try? sqliteDatabaseService.queryAllPublicNotes()
     }
 }
