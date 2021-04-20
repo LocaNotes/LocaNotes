@@ -12,7 +12,8 @@ class UserRepository {
     let restService: RESTService
         
     init() {
-        self.sqliteDatabaseService = SQLiteDatabaseService()
+//        self.sqliteDatabaseService = SQLiteDatabaseService()
+        self.sqliteDatabaseService = SQLiteDatabaseService.shared
         self.restService = RESTService()
     }
     
@@ -47,5 +48,13 @@ class UserRepository {
     
     func forgotPasswordSendTemporaryPassword(email: String, temporaryPassword: String, completion: RESTService.RestLoginReturnBlock<MongoUserElement>) {
         restService.forgotPasswordSendTemporaryPassword(email: email, temporaryPassword: temporaryPassword, completion: completion)
+    }
+    
+    func queryUserBy(serverId: String) throws -> User? {
+        return try sqliteDatabaseService.queryUserBy(serverId: serverId)
+    }
+    
+    func queryAllServerUsers(completion: RESTService.RestResponseReturnBlock<[MongoUserElement]>) {
+        restService.queryAllServerUsers(completion: completion)
     }
 }
