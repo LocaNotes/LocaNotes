@@ -14,13 +14,29 @@ public class NoteViewModel: ObservableObject {
     // all notes
     @Published var notes: [Note] = []
     
-    // only the notes that are nearby the user
-    @Published var nearbyNotes: [Note] = []
+    var privateNotes: [Note] = []
     
+    // only the notes that are nearby the user
+    var nearbyPrivateNotes: [Note] = []
+    
+    // all public notes except for ones written by the user
+    @Published var publicNotes: [Note] = []
+    
+    var nearbyPublicNotes: [Note] = []
+        
     private let notesRepository: NotesRepository
     
     public init() {
         self.notesRepository = NotesRepository()
+    }
+    
+    func queryAllFromStorage() -> [Note]? {
+        do {
+            return try notesRepository.queryAllNotes()
+        } catch {
+            print("\(error.localizedDescription)")
+            return nil
+        }
     }
     
     /**
@@ -32,15 +48,18 @@ public class NoteViewModel: ObservableObject {
 //            return
 //        }
         
-        
+        guard let notes = self.queryAllFromStorage() else {
+            print("queryAllFromStorage returned nil")
+            return
+        }
         
         let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
 //            let password = try keychainService.getGenericPasswordFor(account: username, service: "storePassword")
         
-        guard let notes: [Note] = self.queryNotesBy(userId: userId) else {
-            print("query returned nil")
-            return
-        }
+//        guard let allNotesWrittenByCurrentUser: [Note] = self.queryNotesBy(userId: userId) else {
+//            print("queryNotesBy returned nil")
+//            return
+//        }
         
         for note in notes {
             print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.createdAt) | \(note.body)")
@@ -48,8 +67,11 @@ public class NoteViewModel: ObservableObject {
         
         self.notes = notes
         
-        filterForNearbyNotes()
+        filterForAllPrivateNotes()
+        filterForNearbyPrivateNotes()
         
+        queryAllPublicNotesFromStorage()
+        filterForNearbyPublicNotes()
     }
     
     private func queryNotesBy(userId: Int32) -> [Note]? {
@@ -64,6 +86,18 @@ public class NoteViewModel: ObservableObject {
             return nil
         }
         return note
+    }
+    
+    func queryServerNotesBy(userId: String, completion: RESTService.RestResponseReturnBlock<[MongoNoteElement]>) {
+        notesRepository.queryServerNotesBy(userId: userId, completion: completion)
+    }
+    
+    func queryNoteBy(serverId: String) throws -> Note? {
+        return try notesRepository.queryNoteBy(serverId: serverId)
+    }
+    
+    func queryAllServerPublicNotes(completion: RESTService.RestResponseReturnBlock<[MongoNoteElement]>) {
+        notesRepository.queryAllServerPublicNotes(completion: completion)
     }
     
     /**
@@ -81,9 +115,9 @@ public class NoteViewModel: ObservableObject {
         }
         
         // now delete the note from nearby notes
-        for (i, note) in nearbyNotes.enumerated() {
+        for (i, note) in nearbyPrivateNotes.enumerated() {
             if note.noteId == noteIdToDelete {
-                nearbyNotes.remove(at: i)
+                nearbyPrivateNotes.remove(at: i)
             }
         }
     }
@@ -93,11 +127,11 @@ public class NoteViewModel: ObservableObject {
      - Parameter offsets: an index set containing the index of the note to delete
      */
     func deleteNearbyNote(at offsets: IndexSet) {
-        let noteIdToDelete: Int32 = nearbyNotes[offsets.first!].noteId
+        let noteIdToDelete: Int32 = nearbyPrivateNotes[offsets.first!].noteId
         do {
             let note = notes[offsets.first!]
             try notesRepository.deleteNoteById(id: note.noteId, serverId: note.serverId)
-            nearbyNotes.remove(atOffsets: offsets)
+            nearbyPrivateNotes.remove(atOffsets: offsets)
         } catch {
             print("Couldn't delete nearby note: \(error)")
         }
@@ -156,6 +190,74 @@ public class NoteViewModel: ObservableObject {
         notesRepository.insertNewPrivateNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes, UICompletion: UICompletion)
     }
     
+    func insertNotesFromServer(notes: [MongoNoteElement]) {
+        for note in notes {
+            let serverId = note.id
+            let userServerId = note.userID
+            let privacyServerId = note.privacyID
+            let noteTagServerId = note.noteTagID
+            let title = note.title
+            let latitude = String(note.latitude)
+            let longitude = String(note.longitude)
+            let body = note.body
+            let isStory = Int32(note.isStory == true ? 1 : 0)
+            let downvotes = Int32(note.downvotes)
+            let upvotes = Int32(note.upvotes)
+            let createdAt = note.createdAt
+            
+            let index = createdAt.index(createdAt.startIndex, offsetBy: 19)
+            let substring = createdAt[..<index]
+            let timestamp = String(substring) + "Z"
+            
+            let formatter = ISO8601DateFormatter()
+            let date = formatter.date(from: timestamp)
+            let unix = date?.timeIntervalSince1970
+            let postedAt = Int32(unix!)
+            
+            do {
+                // first check if note is already in db
+                if try queryNoteBy(serverId: serverId) == nil {
+                    
+                    // get privacyId from db by privacyServerId
+                    let privacyViewModel = PrivacyViewModel()
+                    guard let privacy = privacyViewModel.queryPrivacyBy(serverId: privacyServerId) else {
+                        return
+                    }
+                    
+                    // get noteTagId from db by noteTagServerId
+                    let noteTagViewModel = NoteTagViewModel()
+                    guard let noteTag = noteTagViewModel.queryBy(serverId: noteTagServerId) else {
+                        return
+                    }
+                    
+                    // get userId from DB by userServerId
+                    let userViewModel = UserViewModel()
+                    guard let user = try userViewModel.queryUserBy(serverId: userServerId) else {
+                        return
+                    }
+                        
+                    try notesRepository.insertNoteLocally(
+                        serverId: serverId,
+                        userId: user.userId,
+                        userServerId: userServerId,
+                        noteTagId: noteTag.noteTagId,
+                        privacyId: privacy.privacyId,
+                        title: title,
+                        latitude: latitude,
+                        longitude: longitude,
+                        createdAt: postedAt,
+                        body: body,
+                        isStory: isStory,
+                        upvotes: upvotes,
+                        downvotes: downvotes
+                    )
+                }
+            } catch {
+                print(error)
+                print("\(error.localizedDescription)")
+            }
+        }
+    }
     
     /**
      Invokes the database service to update the body of the note with the specified id
@@ -175,9 +277,9 @@ public class NoteViewModel: ObservableObject {
      Filters `notes` for all notes that are nearby the user. Puts the notes that are nearby the user in `nearbyNotes`. A note is considered nearby the user if
      the note is within the user's set radius.
      */
-    func filterForNearbyNotes() {
-        nearbyNotes.removeAll()
-        for note in notes {
+    func filterForNearbyPrivateNotes() {
+        nearbyPrivateNotes.removeAll()
+        for note in privateNotes {
             let userFilterRadiusInMeters = 80467.2 // 50 miles
             
             guard let latitude = Double(String(note.latitude)) else { return }
@@ -186,8 +288,46 @@ public class NoteViewModel: ObservableObject {
             let distance = locationViewModel.getDistanceBetweenNoteAndUser(latitude: latitude, longitude: longitude)
                         
             if (distance < userFilterRadiusInMeters) {
-                nearbyNotes.append(note)
+                nearbyPrivateNotes.append(note)
             }
         }
+    }
+    
+    func queryAllPublicNotesFromStorage() {
+        do {
+            guard let publicNotes = try notesRepository.queryAllPublicNotesFromStorage() else {
+                return
+            }
+            self.publicNotes = publicNotes
+        } catch {
+            print("\(error.localizedDescription)")
+        }
+    }
+    
+    func filterForNearbyPublicNotes() {
+        let userFilterRadiusInMeters = 80467.2 // 50 miles
+        self.nearbyPublicNotes = self.publicNotes.filter { note in
+            guard let latitude = Double(String(note.latitude)) else { return false }
+            guard let longitude = Double(String(note.longitude)) else { return false }
+            let distance = locationViewModel.getDistanceBetweenNoteAndUser(latitude: latitude, longitude: longitude)
+            return distance < userFilterRadiusInMeters
+        }
+    }
+    
+    func filterForAllPrivateNotes() {
+        let privacyViewModel = PrivacyViewModel()
+        guard let privacies = privacyViewModel.queryAllFromStorage() else {
+            print("error filtering for private notes")
+            self.privateNotes = []
+            return
+        }
+        var privacyId: Int32 = Int32(-1)
+        for privacy in privacies {
+            if privacy.label.lowercased() == "private" {
+                privacyId = privacy.privacyId
+            }
+        }
+        let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
+        self.privateNotes = notes.filter { $0.userId == userId && $0.privacyId == privacyId }
     }
 }
