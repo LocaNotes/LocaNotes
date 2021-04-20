@@ -23,14 +23,13 @@ struct MainView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            PrivateNoteListView(viewModel: noteViewModel)
+            NoteView(viewModel: noteViewModel, privacyLabel: PrivacyLabel.privateNote)
                 .tabItem {
                     Image(systemName: "homekit")
                     Text("Home")
                 }
                 .tag(0)
-            Text("Social")
-                .font(.system(size: 30, weight: .bold))
+            NoteView(viewModel: noteViewModel, privacyLabel: PrivacyLabel.publicNote)
                 .tabItem {
                     Image(systemName: "globe")
                     Text("Social")
