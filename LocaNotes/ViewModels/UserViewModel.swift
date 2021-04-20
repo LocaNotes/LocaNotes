@@ -62,4 +62,25 @@ public class UserViewModel {
     func forgotPasswordSendEmail(email: String, completion: RESTService.RestLoginReturnBlock<MongoUserElement>) {
         userRepository.forgotPasswordSendEmail(email: email, completion: completion)
     }
+    
+    func queryUserBy(serverId: String) throws -> User? {
+        return try userRepository.queryUserBy(serverId: serverId)
+    }
+    
+    func insert(serverId: String, firstName: String, lastName: String, email: String, username: String, password: String, createdAt: Int32) throws {
+        try userRepository.insertUser(serverId: serverId, firstName: firstName, lastName: lastName, email: email, username: username, password: password, createdAt: createdAt)
+    }
+    
+    func queryAllServerUsers(completion: RESTService.RestResponseReturnBlock<[MongoUserElement]>) {
+        userRepository.queryAllServerUsers(completion: completion)
+    }
+    
+    func insertUsersFromServer(users: [MongoUserElement]) {
+        for user in users {
+            let tempUser = mongoUserDoesExistInSqliteDatabase(mongoUserElement: user)
+            if tempUser == nil {
+                createUserByMongoUser(mongoUser: user)
+            }
+        }
+    }
 }
