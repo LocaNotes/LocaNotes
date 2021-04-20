@@ -8,13 +8,30 @@
 import SwiftUI
 
 struct NoteView: View {
+    @ObservedObject var viewModel: NoteViewModel
+    
+    var privacyLabel: PrivacyLabel
+    
+    // what the user types in the search bar
+    @State private var searchText: String = ""
+    
+    init (viewModel: NoteViewModel, privacyLabel: PrivacyLabel) {
+        self.viewModel = viewModel
+        self.privacyLabel = privacyLabel
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationView {
+            VStack {
+                NoteMapView(viewModel: viewModel, searchText: $searchText, privacyLabel: privacyLabel)
+                NoteListView(viewModel: viewModel, searchText: $searchText, privacyLabel: privacyLabel)
+            }
+        }
     }
 }
 
-struct NoteView_Previews: PreviewProvider {
-    static var previews: some View {
-        NoteView()
-    }
-}
+//struct NoteView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        NoteView()
+//    }
+//}
