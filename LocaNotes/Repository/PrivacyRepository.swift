@@ -6,3 +6,26 @@
 //
 
 import Foundation
+
+public class PrivacyRepository {
+    let sqliteDatabaseService: SQLiteDatabaseService
+    let restService: RESTService
+    
+    init() {
+//        self.sqliteDatabaseService = SQLiteDatabaseService()
+        self.sqliteDatabaseService = SQLiteDatabaseService.shared
+        self.restService = RESTService()
+    }
+    
+    func queryAllFromStorage() throws -> [Privacy]? {
+        return try sqliteDatabaseService.queryAllPrivacies()
+    }
+    
+    func queryPrivacyBy(serverId: String) throws -> Privacy? {
+        return try sqliteDatabaseService.queryPrivacyBy(serverId: serverId)
+    }
+    
+    func queryFromServer(completion: RESTService.RestResponseReturnBlock<[MongoPrivacyElement]>) {
+        restService.queryPrivacy(completion: completion)
+    }
+}
