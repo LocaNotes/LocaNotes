@@ -6,3 +6,24 @@
 //
 
 import Foundation
+
+public class NoteTagViewModel {
+    private let noteTagRepository: NoteTagRepository
+
+    public init() {
+        self.noteTagRepository = NoteTagRepository()
+    }
+    
+    func queryBy(serverId: String) -> NoteTag? {
+        do {
+            return try noteTagRepository.queryBy(serverId: serverId)
+        } catch {
+            print(error.localizedDescription)
+            return nil
+        }
+    }
+    
+    func queryFromServer(completion: RESTService.RestResponseReturnBlock<[MongoNoteTagElement]>) {
+        noteTagRepository.queryFromServer(completion: completion)
+    }
+}
