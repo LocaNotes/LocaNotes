@@ -19,7 +19,7 @@ public class SQLiteDatabaseService {
     static let shared = SQLiteDatabaseService()
     
     private init() {
-        
+                
         do {
             let path: String = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first ?? ""
 
@@ -27,7 +27,7 @@ public class SQLiteDatabaseService {
             db = try SQLiteDatabase.open(path: "\(path)/locanotes_db.sqlite3")
             print("Opened connection to database: \(path)/locanotes_db.sqlite3")
             
-//            UserDefaults.standard.set(false, forKey: "is_db_created")
+            UserDefaults.standard.set(false, forKey: "is_db_created")
             
             // create a database if one hasn't been created
             if (!UserDefaults.standard.bool(forKey: "is_db_created")) {
@@ -71,7 +71,6 @@ public class SQLiteDatabaseService {
                         }
                     }
                     
-                    
                     // create Note table
                     try db.createTable(table: Note.self)
                     
@@ -91,6 +90,26 @@ public class SQLiteDatabaseService {
                                 let v = downvote.v
                                 do {
                                     try db.insertDownvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+                                } catch {
+                                    print(error.localizedDescription)
+                                }
+                            }
+                        }
+                    }
+                    
+                    // create Upvote table
+                    try db.createTable(table: Upvote.self)
+                    restService.queryAllUpvotes { [self] (response, error) in
+                        if response != nil {
+                            for upvote in response! {
+                                let serverId = upvote.id
+                                let userServerId = upvote.userID
+                                let noteServerId = upvote.noteID
+                                let createdAt = upvote.createdAt
+                                let updatedAt = upvote.updatedAt
+                                let v = upvote.v
+                                do {
+                                    try db.insertUpvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
                                 } catch {
                                     print(error.localizedDescription)
                                 }
@@ -246,6 +265,26 @@ public class SQLiteDatabaseService {
     
     func getNumberOfDownvotesBy(noteId: String) throws -> Int {
         return try db.getNumberOfDownvotesBy(noteId: noteId)
+    }
+    
+    func queryAllUpvotes() throws -> [Upvote]? {
+        return try db.queryAllUpvotes()
+    }
+
+    func insertUpvote(serverId: String, userServerId: String, noteServerId: String, createdAt: String, updatedAt: String, v: Int32) throws {
+        return try db.insertUpvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+    }
+
+    func queryUpvoteBy(userId: String, noteId: String) throws -> Upvote? {
+        return try db.queryUpvoteBy(userId: userId, noteId: noteId)
+    }
+
+    func deleteUpvoteBy(serverId: String) throws {
+        return try db.deleteUpvoteBy(serverId: serverId)
+    }
+
+    func getNumberOfUpvotesBy(noteId: String) throws -> Int {
+        return try db.getNumberOfUpvotesBy(noteId: noteId)
     }
 }
 
