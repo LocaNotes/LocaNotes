@@ -85,21 +85,21 @@ struct CreateNoteView: View {
         var noteTagId: Int32
         switch selectedTag {
         case noteTagLabel.emergency.rawValue:
-            noteTagId = 1
-        case noteTagLabel.dining.rawValue:
-            noteTagId = 2
-        case noteTagLabel.meme.rawValue:
-            noteTagId = 3
-        default:
             noteTagId = 4
+        case noteTagLabel.dining.rawValue:
+            noteTagId = 3
+        case noteTagLabel.meme.rawValue:
+            noteTagId = 2
+        default:
+            noteTagId = 1
         }
         
         var privacyId: Int32
         switch selectedPrivacy {
         case PrivacyLabel.privateNote.rawValue:
-            privacyId = 2
-        default:
             privacyId = 1
+        default:
+            privacyId = 2
         }
         
         noteViewModel.insertNewNote(body: noteContent, noteTagId: noteTagId, privacyId: privacyId, UICompletion: completion)
