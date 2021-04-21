@@ -15,6 +15,8 @@ public class RESTService {
     
     typealias InsertDownvoteReturnBlock<T> = ((MongoDownvote?, Error?, RestResponseReturnBlock<T>) -> Void)?
     
+    typealias InsertUpvoteReturnBlock<T> = ((MongoUpvote?, Error?, RestResponseReturnBlock<T>) -> Void)?
+    
 //    private let sqliteDatebaseService: SQLiteDatabaseService
 //    
 //    init() {
@@ -767,6 +769,89 @@ public class RESTService {
             let decoder = JSONDecoder()
             let downvotes = try? decoder.decode(MongoDownvote.self, from: data!)
             restCompletion?(downvotes, nil, deleteCompletion)
+        }.resume()
+    }
+    
+    func queryAllUpvotes(completion: RestResponseReturnBlock<[MongoUpvote]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/upvote"
+                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let upvotes = try? decoder.decode([MongoUpvote].self, from: data!)
+            completion?(upvotes, nil)
+        }.resume()
+    }
+
+    func insertUpvote(userId: String, noteId: String, restCompletion: InsertUpvoteReturnBlock<MongoUpvote>, insertCompletion: RestResponseReturnBlock<MongoUpvote>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/upvote"
+        
+        let queryItemUserId = URLQueryItem(name: "userId", value: userId)
+        let queryItemNoteId = URLQueryItem(name: "noteId", value: noteId)
+        
+        components.queryItems = [queryItemUserId, queryItemNoteId]
+                                                
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "POST"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                restCompletion?(nil, returnedError, insertCompletion)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let upvotes = try? decoder.decode(MongoUpvote.self, from: data!)
+            restCompletion?(upvotes, nil, insertCompletion)
+        }.resume()
+    }
+
+    func deleteUpvote(upvoteId: String, restCompletion: ((MongoUpvote?, Error?, RestResponseReturnBlock<MongoUpvote>) -> Void)?, deleteCompletion: RestResponseReturnBlock<MongoUpvote>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/upvote/\(upvoteId)"
+                                                                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "DELETE"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                restCompletion?(nil, returnedError, deleteCompletion)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let upvotes = try? decoder.decode(MongoUpvote.self, from: data!)
+            restCompletion?(upvotes, nil, deleteCompletion)
         }.resume()
     }
 }

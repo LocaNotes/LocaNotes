@@ -1511,80 +1511,217 @@ extension SQLiteDatabase {
     }
 }
 
-//extension SQLiteDatabase {
-//    func queryDownvoteBy(noteId: String) throws -> [Downvote]? {
-//        let querySql  = "SELECT * FROM Downvote WHERE NoteServerId LIKE ?;"
-//        guard let queryStatement = try? prepareStatement(sql: querySql) else {
-//            throw SQLiteError.Prepare(message: errorMessage)
-//        }
-//        defer {
-//            sqlite3_finalize(queryStatement)
-//        }
-//
-//        guard
-//            sqlite3_bind_text(queryStatement, 1, noteId, -1, SQLITE_TRANSIENT) == SQLITE_OK
-//        else {
-//            throw SQLiteError.Bind(message: errorMessage)
-//        }
-//
-//        var downvotes: [Downvote]
-//        while sqlite3_step(queryStatement) == SQLITE_ROW {
-//
-//            // get downvote id
-//            let downvoteId = sqlite3_column_int(queryStatement, 0)
-//
-//            // get server id
-//            guard let queryResultCol1 = sqlite3_column_text(queryStatement, 1) else {
-//                print("Query result is nil")
-//                throw SQLiteError.Step(message: errorMessage)
-//            }
-//            let serverId = String(cString: queryResultCol1)
-//
-//            // get user server id
-//            guard let queryResultCol2 = sqlite3_column_text(queryStatement, 2) else {
-//                print("Query result is nil")
-//                throw SQLiteError.Step(message: errorMessage)
-//            }
-//            let userServerId = String(cString: queryResultCol2)
-//
-//            // get note server id
-//            guard let queryResultCol3 = sqlite3_column_text(queryStatement, 3) else {
-//                print("Query result is nil")
-//                throw SQLiteError.Step(message: errorMessage)
-//            }
-//            let noteServerId = String(cString: queryResultCol3)
-//
-//            // get created at
-//            guard let queryResultCol4 = sqlite3_column_text(queryStatement, 4) else {
-//                print("Query result is nil")
-//                throw SQLiteError.Step(message: errorMessage)
-//            }
-//            let createdAt = String(cString: queryResultCol4)
-//
-//            // get updated at
-//            guard let queryResultCol5 = sqlite3_column_text(queryStatement, 5) else {
-//                print("Query result is nil")
-//                throw SQLiteError.Step(message: errorMessage)
-//            }
-//            let updatedAt = String(cString: queryResultCol5)
-//
-//            // get created at
-//            let v = sqlite3_column_int(queryStatement, 6)
-//
-//            let downvote = Downvote(
-//                downvoteId: downvoteId,
-//                id: serverId,
-//                userID: userServerId,
-//                noteID: noteServerId,
-//                createdAt: createdAt,
-//                updatedAt: updatedAt,
-//                v: v
-//            )
-//
-//            downvotes.append(<#T##newElement: Downvote##Downvote#>)
-//        } else {
-//            return nil
-//        }
-//        return downvote
-//    }
-//}
+extension SQLiteDatabase {
+    func queryAllUpvotes() throws -> [Upvote] {
+        let querySql  = "SELECT * FROM Upvote;"
+        guard let queryStatement = try? prepareStatement(sql: querySql) else {
+            throw SQLiteError.Prepare(message: errorMessage)
+        }
+        defer {
+            sqlite3_finalize(queryStatement)
+        }
+        
+        var upvotes: [Upvote] = []
+        while (sqlite3_step(queryStatement) == SQLITE_ROW) {
+            
+            // get upvote id
+            let upvoteId = sqlite3_column_int(queryStatement, 0)
+
+            // get server id
+            guard let queryResultCol1 = sqlite3_column_text(queryStatement, 1) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let serverId = String(cString: queryResultCol1)
+
+            // get user server id
+            guard let queryResultCol2 = sqlite3_column_text(queryStatement, 2) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let userServerId = String(cString: queryResultCol2)
+            
+            // get note server id
+            guard let queryResultCol3 = sqlite3_column_text(queryStatement, 3) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let noteServerId = String(cString: queryResultCol3)
+
+            // get created at
+            guard let queryResultCol4 = sqlite3_column_text(queryStatement, 4) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let createdAt = String(cString: queryResultCol4)
+            
+            // get updated at
+            guard let queryResultCol5 = sqlite3_column_text(queryStatement, 5) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let updatedAt = String(cString: queryResultCol5)
+            
+            // get created at
+            let v = sqlite3_column_int(queryStatement, 6)
+            
+            let upvote = Upvote(
+                upvoteId: upvoteId,
+                id: serverId,
+                userID: userServerId,
+                noteID: noteServerId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                v: v
+            )
+            
+            upvotes.append(upvote)
+        }
+        return upvotes
+    }
+}
+
+extension SQLiteDatabase {
+    func insertUpvote(serverId: String, userServerId: String, noteServerId: String, createdAt: String, updatedAt: String, v: Int32) throws {
+        let insertSql = "INSERT INTO Upvote (ServerId, UserServerId, NoteServerId, CreatedAt, UpdatedAt, V) VALUES (?, ?, ?, ?, ?, ?);"
+        
+        let insertStatement = try prepareStatement(sql: insertSql)
+        defer {
+            sqlite3_finalize(insertStatement)
+        }
+        
+        guard
+            sqlite3_bind_text(insertStatement, 1, serverId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 2, userServerId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 3, noteServerId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 4, createdAt, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 5, updatedAt, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 6, v) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        guard sqlite3_step(insertStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
+}
+
+extension SQLiteDatabase {
+    func queryUpvoteBy(userId: String, noteId: String) throws -> Upvote? {
+        let querySql  = "SELECT * FROM Upvote WHERE UserServerId LIKE ? AND NoteServerId LIKE ?;"
+        guard let queryStatement = try? prepareStatement(sql: querySql) else {
+            throw SQLiteError.Prepare(message: errorMessage)
+        }
+        defer {
+            sqlite3_finalize(queryStatement)
+        }
+        
+        guard
+            sqlite3_bind_text(queryStatement, 1, userId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(queryStatement, 2, noteId, -1, SQLITE_TRANSIENT) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        var upvote: Upvote
+        if sqlite3_step(queryStatement) == SQLITE_ROW {
+            
+            // get upvote id
+            let upvoteId = sqlite3_column_int(queryStatement, 0)
+
+            // get server id
+            guard let queryResultCol1 = sqlite3_column_text(queryStatement, 1) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let serverId = String(cString: queryResultCol1)
+
+            // get user server id
+            guard let queryResultCol2 = sqlite3_column_text(queryStatement, 2) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let userServerId = String(cString: queryResultCol2)
+            
+            // get note server id
+            guard let queryResultCol3 = sqlite3_column_text(queryStatement, 3) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let noteServerId = String(cString: queryResultCol3)
+
+            // get created at
+            guard let queryResultCol4 = sqlite3_column_text(queryStatement, 4) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let createdAt = String(cString: queryResultCol4)
+            
+            // get updated at
+            guard let queryResultCol5 = sqlite3_column_text(queryStatement, 5) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let updatedAt = String(cString: queryResultCol5)
+            
+            // get created at
+            let v = sqlite3_column_int(queryStatement, 6)
+            
+            upvote = Upvote(
+                upvoteId: upvoteId,
+                id: serverId,
+                userID: userServerId,
+                noteID: noteServerId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                v: v
+            )
+        } else {
+            return nil
+        }
+        return upvote
+    }
+}
+
+extension SQLiteDatabase {
+    func deleteUpvoteBy(serverId: String) throws {
+        let deleteStatementString = "DELETE FROM Upvote WHERE ServerId = ?;"
+                
+        guard let deleteStatement = try? prepareStatement(sql: deleteStatementString) else {
+            throw SQLiteError.Prepare(message: errorMessage)
+        }
+        defer {
+            sqlite3_finalize(deleteStatement)
+        }
+        
+        // bind the id to the statement (1-based index)
+        sqlite3_bind_text(deleteStatement, 1, serverId, -1, SQLITE_TRANSIENT)
+        
+        if sqlite3_step(deleteStatement) != SQLITE_DONE {
+            throw SQLiteError.Delete(message: errorMessage)
+        }
+    }
+}
+
+extension SQLiteDatabase {
+    func getNumberOfUpvotesBy(noteId: String) throws -> Int {
+        let queryStatementString = "SELECT COUNT(*) FROM Upvote WHERE NoteServerId LIKE ?;"
+        
+        guard let queryStatement = try? prepareStatement(sql: queryStatementString) else {
+            throw SQLiteError.Prepare(message: errorMessage)
+        }
+        defer {
+            sqlite3_finalize(queryStatement)
+        }
+        
+        sqlite3_bind_text(queryStatement, 1, noteId, -1, SQLITE_TRANSIENT)
+        
+        var num = 0
+        let result = sqlite3_step(queryStatement)
+        if  result == SQLITE_ROW {
+            num = Int(sqlite3_column_int(queryStatement, 0))
+        }
+        return num
+    }
+}

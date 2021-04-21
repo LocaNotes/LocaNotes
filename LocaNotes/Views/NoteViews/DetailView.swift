@@ -21,8 +21,10 @@ struct DetailView: View {
     @State var isUpvoted: Bool
     
     @State var numberOfDownvotes: String
+    @State var numberOfUpvotes: String
     
     let downvoteViewModel: DownvoteViewModel
+    let upvoteViewModel: UpvoteViewModel
     
     @Environment(\.presentationMode) var mode: Binding<PresentationMode>
     
@@ -31,14 +33,25 @@ struct DetailView: View {
         self.privacyLabel = privacyLabel
         self.viewModel = NoteViewModel()
         self.downvoteViewModel = DownvoteViewModel()
+        self.upvoteViewModel = UpvoteViewModel()
+        
         let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        
+        // determine whether the downvote button should be marked as upvoted
         if let _ = downvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) {
             _isDownvoted = .init(wrappedValue: true)
         } else {
             _isDownvoted = .init(wrappedValue: false)
         }
-        _isUpvoted = .init(wrappedValue: false)
         
+        // determine whether the upvote button should be marked as upvoted
+        if let _ = upvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) {
+            _isUpvoted = .init(wrappedValue: true)
+        } else {
+            _isUpvoted = .init(wrappedValue: false)
+        }
+        
+        // get the number of downvotes
         do {
             let num = try String(downvoteViewModel.getNumberOfDownvotesFromStorageBy(noteId: note.serverId))
             _numberOfDownvotes = .init(wrappedValue: num)
@@ -47,6 +60,14 @@ struct DetailView: View {
             _numberOfDownvotes = .init(wrappedValue: "0")
         }
         
+        // get the number of upvotes
+        do {
+            let num = try String(upvoteViewModel.getNumberOfUpvotesFromStorageBy(noteId: note.serverId))
+            _numberOfUpvotes = .init(wrappedValue: num)
+        } catch {
+            print("could not get number of upvotes")
+            _numberOfUpvotes = .init(wrappedValue: "0")
+        }
     }
     
     var body: some View {
@@ -110,7 +131,7 @@ struct DetailView: View {
                                 Image(systemName: "arrow.up")
                                     .foregroundColor(isUpvoted ? .red : .black)
                             }
-                            Text(getNumberOfUpvotes())
+                            Text(numberOfUpvotes)
                         }
                         
                         HStack {
@@ -120,7 +141,6 @@ struct DetailView: View {
                                 Image(systemName: "arrow.down")
                                     .foregroundColor(isDownvoted ? .blue : .black)
                             }
-                            //Text(getNumberOfDownvotes())
                             Text(numberOfDownvotes)
                         }
                         
@@ -170,27 +190,13 @@ struct DetailView: View {
         isUpvoted.toggle()
         if isUpvoted == isDownvoted && isUpvoted == true {
             isDownvoted.toggle()
+            deleteDownvote()
         }
         
-        let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
         if isUpvoted {
-            upvoteViewModel.insert(userId: userId, noteId: note.serverId, completion: { (response, error) in
-                if response == nil {
-                    print("could not upvote")
-                }
-                numberOfUpvotes = getNumberOfUpvotes()
-            })
+            insertUpvote()
         } else {
-            guard let upvote = upvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) else {
-                print("could not undo upvote")
-                return
-            }
-            upvoteViewModel.delete(upvoteId: upvote.id, completion: { (response, error) in
-                if response == nil {
-                    print("could not undo upvote")
-                }
-                numberOfUpvotes = getNumberOfUpvotes()
-            })
+            deleteUpvote()
         }
     }
     
@@ -198,39 +204,86 @@ struct DetailView: View {
         isDownvoted.toggle()
         if isDownvoted == isUpvoted && isDownvoted == true {
             isUpvoted.toggle()
+            deleteUpvote()
         }
         
-        let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
         if isDownvoted {
-            downvoteViewModel.insert(userId: userId, noteId: note.serverId, completion: { (response, error) in
-                if response == nil {
-                    print("could not downvote")
-                }
-                numberOfDownvotes = getNumberOfDownvotes()
-            })
+            insertDownvote()
         } else {
-            guard let downvote = downvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) else {
-                print("could not undo downvote")
-                return
-            }
-            downvoteViewModel.delete(downvoteId: downvote.id, completion: { (response, error) in
-                if response == nil {
-                    print("could not undo downvote")
-                }
-                numberOfDownvotes = getNumberOfDownvotes()
-            })
+            deleteDownvote()
         }
+    }
+    
+    private func insertUpvote() {
+        let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        upvoteViewModel.insert(userId: userId, noteId: note.serverId, completion: { (response, error) in
+            if response == nil {
+                print("could not upvote")
+            }
+            numberOfUpvotes = getNumberOfUpvotes()
+        })
+    }
+    
+    private func deleteUpvote() {
+        let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        guard let upvote = upvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) else {
+            print("could not undo upvote")
+            return
+        }
+        upvoteViewModel.delete(upvoteId: upvote.id, completion: { (response, error) in
+            if response == nil {
+                print("could not undo upvote")
+            }
+            numberOfUpvotes = getNumberOfUpvotes()
+        })
+    }
+    
+    private func insertDownvote() {
+        let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        downvoteViewModel.insert(userId: userId, noteId: note.serverId, completion: { (response, error) in
+            if response == nil {
+                print("could not downvote")
+            }
+            numberOfDownvotes = getNumberOfDownvotes()
+        })
+    }
+    
+    private func deleteDownvote() {
+        let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        guard let downvote = downvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) else {
+            print("could not undo downvote")
+            return
+        }
+        downvoteViewModel.delete(downvoteId: downvote.id, completion: { (response, error) in
+            if response == nil {
+                print("could not undo downvote")
+            }
+            numberOfDownvotes = getNumberOfDownvotes()
+        })
     }
     
     private func refreshVoteButtons() {
         let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        
+        // refresh downvote button
         if let _ = downvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) {
             isDownvoted = true
         } else {
             isDownvoted = false
         }
         
-        numberOfDownvotes = String(getNumberOfDownvotes())
+        // refresh upvote button
+        if let _ = upvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) {
+            isUpvoted = true
+        } else {
+            isUpvoted = false
+        }
+        
+        // refresh downvote counter
+        numberOfDownvotes = getNumberOfDownvotes()
+        
+        // refresh upvote counter
+        numberOfUpvotes = getNumberOfUpvotes()
     }
     
     private func copyNoteContent() {
