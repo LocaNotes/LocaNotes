@@ -203,6 +203,7 @@ struct Login: View {
             }
             try keychainService.storeGenericPasswordFor(account: username as String, service: "storePassword", password: password as String)
             UserDefaults.standard.set(username, forKey: "username")
+            UserDefaults.standard.set(user?.serverId, forKey: "serverId")
             UserDefaults.standard.set(userId, forKey: "userId")
             DispatchQueue.main.async {
                 withAnimation {

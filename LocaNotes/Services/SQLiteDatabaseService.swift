@@ -78,6 +78,26 @@ public class SQLiteDatabaseService {
                     // create Comment table
                     try db.createTable(table: Comment.self)
                     
+                    // create Downvote table
+                    try db.createTable(table: Downvote.self)
+                    restService.queryAllDownvotes { [self] (response, error) in
+                        if response != nil {
+                            for downvote in response! {
+                                let serverId = downvote.id
+                                let userServerId = downvote.userID
+                                let noteServerId = downvote.noteID
+                                let createdAt = downvote.createdAt
+                                let updatedAt = downvote.updatedAt
+                                let v = downvote.v
+                                do {
+                                    try db.insertDownvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+                                } catch {
+                                    print(error.localizedDescription)
+                                }
+                            }
+                        }
+                    }
+                    
                     // set a key saying that the database is made (prevent a new DB getting created every time)
                     UserDefaults.standard.set(true, forKey: "is_db_created")
                 } catch {
@@ -206,6 +226,26 @@ public class SQLiteDatabaseService {
     
     func queryAllPrivacies() throws -> [Privacy]? {
         return try db.queryAllPrivacies()
+    }
+    
+    func queryAllDownvotes() throws -> [Downvote]? {
+        return try db.queryAllDownvotes()
+    }
+    
+    func insertDownvote(serverId: String, userServerId: String, noteServerId: String, createdAt: String, updatedAt: String, v: Int32) throws {
+        return try db.insertDownvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+    }
+    
+    func queryDownvoteBy(userId: String, noteId: String) throws -> Downvote? {
+        return try db.queryDownvoteBy(userId: userId, noteId: noteId)
+    }
+    
+    func deleteDownvoteBy(serverId: String) throws {
+        return try db.deleteDownvoteBy(serverId: serverId)
+    }
+    
+    func getNumberOfDownvotesBy(noteId: String) throws -> Int {
+        return try db.getNumberOfDownvotesBy(noteId: noteId)
     }
 }
 

@@ -178,10 +178,12 @@ struct NoteCell: View {
     var privacyLabel: PrivacyLabel
     
     var body: some View {
-        NavigationLink(destination: DetailView(note: note, privacyLabel: privacyLabel)) {
-            HStack {
-                Text(String(note.userId))
-                Text("\(String(substring(string: note.body, offset: NSString(string: note.body).length / 2)))...")
+        VStack {
+            NavigationLink(destination: DetailView(note: note, privacyLabel: privacyLabel)) {
+                HStack {
+                    Text(String(note.userId))
+                    Text("\(String(substring(string: note.body, offset: NSString(string: note.body).length / 2)))...")
+                }
             }
         }
     }
