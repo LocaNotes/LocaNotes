@@ -384,7 +384,7 @@ struct DetailView: View {
             print("could not insert comment into server")
             return
         }
-        comments.append(response!)
+        comments.insert(response!, at: 0)
     }
 }
 

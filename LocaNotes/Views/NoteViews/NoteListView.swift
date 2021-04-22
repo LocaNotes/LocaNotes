@@ -213,6 +213,7 @@ struct NoteCell: View {
                     }
                     HStack {
                         Text("\(note.body.substring(offset: note.body.count / 2))...")
+                            .lineLimit(2)
                         Spacer()
                     }
                 }
