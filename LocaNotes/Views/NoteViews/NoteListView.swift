@@ -177,28 +177,43 @@ struct NoteCell: View {
     
     var privacyLabel: PrivacyLabel
     
+    let userViewModel: UserViewModel
+    
+    @State var username = ""
+    
+    init(note: Note, privacyLabel: PrivacyLabel) {
+        self.note = note
+        self.privacyLabel = privacyLabel
+        userViewModel = UserViewModel()
+    }
+    
     var body: some View {
         VStack {
             NavigationLink(destination: DetailView(note: note, privacyLabel: privacyLabel)) {
-                HStack {
-                    Text(String(note.userId))
-                    Text("\(String(substring(string: note.body, offset: NSString(string: note.body).length / 2)))...")
+                VStack {
+                    HStack {
+                        Text(username)
+                            .italic()
+                        Spacer()
+                    }
+                    HStack {
+                        Text("\(note.body.substring(offset: note.body.count / 2))...")
+                        Spacer()
+                    }
                 }
             }
-        }
+        }.onAppear(perform: loadUser)
     }
-}
-
-/**
- Returns a substring up to the specified index of the specified string
- - Parameters:
-    - string: the string to take a substring of
-    - offset: the ending index of the substring
- */
-private func substring(string: String, offset: Int) -> String.SubSequence {
-    let index = string.index(string.startIndex, offsetBy: offset)
-    let substring = string[..<index]
-    return substring
+    
+    private func loadUser() {
+        userViewModel.getUserBy(serverId: note.userServerId, completion: { (response, error) in
+            if response == nil {
+                print("could not query user from server")
+                return
+            }
+            username = response![0].username
+        })
+    }
 }
 
 //struct NoteListView_Previews: PreviewProvider {
