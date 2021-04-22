@@ -581,6 +581,36 @@ public class RESTService {
         }.resume()
     }
     
+    func queryCommentsFromServerBy(noteId: String, completion: RestResponseReturnBlock<[MongoCommentElement]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/comment"
+        
+        let queryItemUserId = URLQueryItem(name: "noteId", value: noteId)
+        
+        components.queryItems = [queryItemUserId]
+                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let comments = try? decoder.decode([MongoCommentElement].self, from: data!)
+            completion?(comments, nil)
+        }.resume()
+    }
+    
     func queryAllServerPublicNotes(completion: RestResponseReturnBlock<[MongoNoteElement]>) {
         var components = URLComponents()
         components.scheme = "http"
@@ -852,6 +882,68 @@ public class RESTService {
             let decoder = JSONDecoder()
             let upvotes = try? decoder.decode(MongoUpvote.self, from: data!)
             restCompletion?(upvotes, nil, deleteCompletion)
+        }.resume()
+    }
+    
+    func getUserBy(serverId: String, completion: RestResponseReturnBlock<[MongoUserElement]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/user"
+        
+        let queryItemUserId = URLQueryItem(name: "userId", value: serverId)
+        
+        components.queryItems = [queryItemUserId]
+                                                                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let user = try? decoder.decode([MongoUserElement].self, from: data!)
+            completion?(user, nil)
+        }.resume()
+    }
+    
+    func insertComment(userId: String, noteId: String, body: String, completion: RestResponseReturnBlock<MongoCommentElement>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/comment"
+        
+        let queryItemUserId = URLQueryItem(name: "userId", value: userId)
+        let queryItemNoteId = URLQueryItem(name: "noteId", value: noteId)
+        let queryItemBody = URLQueryItem(name: "body", value: body)
+        
+        components.queryItems = [queryItemUserId, queryItemNoteId, queryItemBody]
+                                                                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "POST"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let comment = try? decoder.decode(MongoCommentElement.self, from: data!)
+            completion?(comment, nil)
         }.resume()
     }
 }

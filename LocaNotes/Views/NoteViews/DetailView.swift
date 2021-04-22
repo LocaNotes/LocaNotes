@@ -26,7 +26,15 @@ struct DetailView: View {
     let downvoteViewModel: DownvoteViewModel
     let upvoteViewModel: UpvoteViewModel
     
+    let userId: String
+    
+    let commentViewModel: CommentViewModel
+    
+    @State var comments = [MongoCommentElement]()
+    
     @Environment(\.presentationMode) var mode: Binding<PresentationMode>
+    
+    @State var showCommentSheet: Bool = false
     
     init (note: Note, privacyLabel: PrivacyLabel) {
         self.note = note
@@ -35,7 +43,7 @@ struct DetailView: View {
         self.downvoteViewModel = DownvoteViewModel()
         self.upvoteViewModel = UpvoteViewModel()
         
-        let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
         
         // determine whether the downvote button should be marked as upvoted
         if let _ = downvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) {
@@ -68,6 +76,8 @@ struct DetailView: View {
             print("could not get number of upvotes")
             _numberOfUpvotes = .init(wrappedValue: "0")
         }
+        
+        self.commentViewModel = CommentViewModel()
     }
     
     var body: some View {
@@ -146,13 +156,38 @@ struct DetailView: View {
                         
                         Spacer()
                     }
+                    
+                    Divider()
+                    
+                    VStack {
+                        ForEach(comments, id: \.id) { comment in
+//                            VStack {
+//                                HStack {
+//                                    Text(comment.userID)
+//                                        .font(.system(size: 10, weight: .light, design: .default))
+//                                        .padding(.trailing)
+//                                    Text(String(comment.createdAt))
+//                                        .font(.system(size: 10, weight: .light, design: .default))
+//                                    Spacer()
+//                                }
+//                                Text(comment.body)
+//                                    .multilineTextAlignment(.leading)
+//                                    .font(.system(size: 14))
+//                                    .lineLimit(nil)
+//                            }
+//                            .padding(.bottom, 10)
+//                            .background(Color.white)
+                            CommentView(comment: comment)
+                        }
+                    }
+                    .background(Color.gray)
                 }
             }
             .padding()
             
             ZStack(alignment: .bottom) {
                 Button(action: {
-                    
+                    showCommentSheet.toggle()
                 }) {
                     Text("Comment...")
                         .foregroundColor(.white)
@@ -163,7 +198,25 @@ struct DetailView: View {
             .shadow(color: Color.black, radius: 10, x: 0, y: 10)
             //.alignmentGuide(.bottom) { d in d[.bottom] / 2 }
         }
-        .onAppear(perform: refreshVoteButtons)
+        .sheet(isPresented: $showCommentSheet, content: {
+            EditCommentView(userId: userId, noteId: note.serverId, postCommentCallback: postCommentCallback(response:error:))
+        })
+        .onAppear(perform: refresh)
+    }
+    
+    private func refresh() {
+        loadComments()
+        refreshVoteButtons()
+    }
+    
+    private func loadComments() {
+        commentViewModel.queryCommentsFromServerBy(noteId: note.serverId, completion: { (response, error) in
+            guard let response = response else {
+                print("couldn't load comments")
+                return
+            }
+            comments = response
+        })
     }
     
     private func getNumberOfUpvotes() -> String {
@@ -288,6 +341,140 @@ struct DetailView: View {
     
     private func copyNoteContent() {
         self.noteContent = note.body
+    }
+    
+    private func postCommentCallback(response: MongoCommentElement?, error: Error?) {
+        if response == nil {
+            print("could not insert comment into server")
+            return
+        }
+        comments.append(response!)
+    }
+}
+
+struct CommentView: View {
+    let comment: MongoCommentElement
+    @State var username: String = ""
+    let userViewModel: UserViewModel
+    let currentUserId: String
+    
+    init(comment: MongoCommentElement) {
+        self.comment = comment
+        userViewModel = UserViewModel()
+        currentUserId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+    }
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Text(username)
+                    .font(.system(size: 12, weight: .light, design: .default))
+                    .padding(.trailing)
+                Text(beautifyCreatedAt())
+                    .font(.system(size: 12, weight: .light, design: .default))
+                Spacer()
+                
+                overflowButton
+            }
+            Text(comment.body)
+                .multilineTextAlignment(.leading)
+                .font(.system(size: 14))
+                .lineLimit(nil)
+        }
+        .padding(.bottom, 10)
+        .background(Color.white)
+        .onAppear(perform: loadUsername)
+    }
+    
+    var overflowButton: some View {
+        Group {
+            if currentUserId == comment.userID {
+                Menu {
+                    Button(action: {
+                        
+                    }) {
+                        Label("Edit", systemImage: "paintbrush")
+                    }
+                    Button(action: {
+                        
+                    }) {
+                        Label("Delete", systemImage: "trash")
+                    }
+                    
+                } label: {
+                    Image(systemName: "ellipsis")
+                }
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
+    private func loadUsername() {
+        userViewModel.getUserBy(serverId: comment.userID, completion: { (response, error) in
+            if response == nil {
+                print("could not load user for comment")
+                return
+            }
+            username = response![0].username
+        })
+    }
+    
+    private func beautifyCreatedAt() -> String {
+        let createdAt = comment.createdAt
+        
+        var result = createdAt.substring(offset: 19)
+        result = result.replacingOccurrences(of: "T", with: " ")
+        
+        return String(result)
+    }
+}
+
+struct EditCommentView: View {
+    //@Binding var commentContent: String
+    
+    @State var commentContent: String
+    
+    @Environment(\.presentationMode) var presentationMode
+    
+    let userId: String
+    let noteId: String
+    
+    let postCommentCallback: RESTService.RestResponseReturnBlock<MongoCommentElement>
+    
+//    init(commentContent: Binding<String> = Binding.constant(""), userId: String, noteId: String, postCommentCallback: RESTService.RestResponseReturnBlock<MongoCommentElement>) {
+//        _commentContent = commentContent
+//        self.userId = userId
+//        self.noteId = noteId
+//        self.postCommentCallback = postCommentCallback
+//    }
+    
+    init(commentContent: String = "", userId: String, noteId: String, postCommentCallback: RESTService.RestResponseReturnBlock<MongoCommentElement>) {
+        _commentContent = .init(wrappedValue: commentContent)
+        self.userId = userId
+        self.noteId = noteId
+        self.postCommentCallback = postCommentCallback
+    }
+    
+    var body: some View {
+        NavigationView {
+            TextEditor(text: $commentContent)
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button(action: {
+                            postComment()
+                        }) {
+                            Text("Post")
+                        }
+                    }
+                }
+        }
+    }
+    
+    private func postComment() {
+        let commentViewModel = CommentViewModel()
+        commentViewModel.insertComment(userId: userId, noteId: noteId, body: commentContent, completion: postCommentCallback)
+        presentationMode.wrappedValue.dismiss()
     }
 }
 

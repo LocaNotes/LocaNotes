@@ -24,15 +24,14 @@ public class UserViewModel {
         let password = mongoUser.password
         
         let createdAt = mongoUser.createdAt
-        let index = createdAt.index(createdAt.startIndex, offsetBy: 19)
-        let substring = createdAt[..<index]
+        let substring = createdAt.substring(offset: 19)
         let timestamp = String(substring) + "Z"
         
         let formatter = ISO8601DateFormatter()
         let date = formatter.date(from: timestamp)
         let unix = date?.timeIntervalSince1970
         let createdAtUnix = Int32(unix!)
-        
+                        
         do {
             try userRepository.insertUser(serverId: serverId, firstName: firstName, lastName: lastName, email: email, username: username, password: password, createdAt: createdAtUnix)
         } catch {
@@ -82,5 +81,9 @@ public class UserViewModel {
                 createUserByMongoUser(mongoUser: user)
             }
         }
+    }
+    
+    func getUserBy(serverId: String, completion: RESTService.RestResponseReturnBlock<[MongoUserElement]>) {
+        userRepository.getUserBy(serverId: serverId, completion: completion)
     }
 }

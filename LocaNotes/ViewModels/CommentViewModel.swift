@@ -21,6 +21,10 @@ public class CommentViewModel {
         commentsRepository.queryCommentsFromServerBy(userId: userId, completion: completion)
     }
     
+    func queryCommentsFromServerBy(noteId: String, completion: RESTService.RestResponseReturnBlock<[MongoCommentElement]>) {
+        commentsRepository.queryFromServerBy(noteId: noteId, completion: completion)
+    }
+    
     func queryLocalCommentBy(serverId: String) -> Comment? {
         do {
             return try commentsRepository.queryLocalCommentBy(serverId: serverId)
@@ -69,6 +73,10 @@ public class CommentViewModel {
                 print("\(error.localizedDescription)")
             }
         }
+    }
+    
+    func insertComment(userId: String, noteId: String, body: String, completion: RESTService.RestResponseReturnBlock<MongoCommentElement>) {
+        commentsRepository.insertComment(userId: userId, noteId: noteId, body: body, completion: completion)
     }
 }
 
