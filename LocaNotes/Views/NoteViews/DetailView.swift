@@ -36,6 +36,9 @@ struct DetailView: View {
     
     @State var showCommentSheet: Bool = false
     
+    @State var showReportToast: Bool = false
+    @State var reportToastMessage: String = ""
+    
     init (note: Note, privacyLabel: PrivacyLabel) {
         self.note = note
         self.privacyLabel = privacyLabel
@@ -155,28 +158,34 @@ struct DetailView: View {
                         }
                         
                         Spacer()
+                        
+                        Menu {
+                            Button {
+                                reportNote(reportOption: ReportOption.offensiveBehavior)
+                            } label: {
+                                Text(ReportOption.offensiveBehavior.rawValue)
+                            }
+                            
+                            Button {
+                                reportNote(reportOption: ReportOption.falseInformation)
+                            } label: {
+                                Text(ReportOption.falseInformation.rawValue)
+                            }
+                            
+                            Button {
+                                reportNote(reportOption: ReportOption.other)
+                            } label: {
+                                Text(ReportOption.other.rawValue)
+                            }
+                        } label: {
+                            Label("Report", systemImage: "exclamationmark.shield")
+                        }
                     }
                     
                     Divider()
                     
                     VStack {
                         ForEach(comments, id: \.id) { comment in
-//                            VStack {
-//                                HStack {
-//                                    Text(comment.userID)
-//                                        .font(.system(size: 10, weight: .light, design: .default))
-//                                        .padding(.trailing)
-//                                    Text(String(comment.createdAt))
-//                                        .font(.system(size: 10, weight: .light, design: .default))
-//                                    Spacer()
-//                                }
-//                                Text(comment.body)
-//                                    .multilineTextAlignment(.leading)
-//                                    .font(.system(size: 14))
-//                                    .lineLimit(nil)
-//                            }
-//                            .padding(.bottom, 10)
-//                            .background(Color.white)
                             CommentView(comment: comment)
                         }
                     }
@@ -198,6 +207,9 @@ struct DetailView: View {
             .shadow(color: Color.black, radius: 10, x: 0, y: 10)
             //.alignmentGuide(.bottom) { d in d[.bottom] / 2 }
         }
+        .alert(isPresented: $showReportToast) {
+            makeReportToast(message: reportToastMessage)
+        }
         .sheet(isPresented: $showCommentSheet, content: {
             EditCommentView(userId: userId, noteId: note.serverId, postCommentCallback: postCommentCallback(response:error:))
         })
@@ -207,6 +219,30 @@ struct DetailView: View {
     private func refresh() {
         loadComments()
         refreshVoteButtons()
+    }
+    
+    private func makeReportToast(message: String) -> Alert {
+        return Alert(title: Text("Toast"), message: Text(message), dismissButton: .cancel())
+    }
+    
+    private func reportNote(reportOption: ReportOption) {
+        let closure: ((MongoReportElement?, Error?) -> Void)? = { (response, error) in
+            if response == nil {
+                reportToastMessage = "Unable to report note. Try again later."
+            } else {
+                reportToastMessage = "Successfully reported note."
+            }
+            showReportToast.toggle()
+        }
+        let reportViewModel = ReportViewModel()
+        switch reportOption {
+        case .falseInformation:
+            reportViewModel.insert(noteId: note.serverId, userId: userId, reportTagId: "6080f14cea85d3a0757e826c", completion: closure)
+        case .offensiveBehavior:
+            reportViewModel.insert(noteId: note.serverId, userId: userId, reportTagId: "6080f146ea85d3a0757e826b", completion: closure)
+        default:
+            reportViewModel.insert(noteId: note.serverId, userId: userId, reportTagId: "6080f137ea85d3a0757e826a", completion: closure)
+        }
     }
     
     private func loadComments() {
@@ -350,6 +386,12 @@ struct DetailView: View {
         }
         comments.append(response!)
     }
+}
+
+enum ReportOption: String {
+    case offensiveBehavior = "Offensive Behavior"
+    case falseInformation = "False Information"
+    case other = "Other"
 }
 
 struct CommentView: View {

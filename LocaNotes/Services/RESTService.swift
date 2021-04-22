@@ -946,6 +946,64 @@ public class RESTService {
             completion?(comment, nil)
         }.resume()
     }
+    
+    func queryReportTag(completion: RestResponseReturnBlock<[MongoReportTagElement]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/reporttag"
+                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let reportTags = try? decoder.decode([MongoReportTagElement].self, from: data!)
+            completion?(reportTags, nil)
+        }.resume()
+    }
+    
+    func insertReport(noteId: String, userId: String, reportTagId: String, completion: RestResponseReturnBlock<MongoReportElement>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/report"
+        
+        let queryItemNoteId = URLQueryItem(name: "noteId", value: noteId)
+        let queryItemUserId = URLQueryItem(name: "userId", value: userId)
+        let queryItemReportTagId = URLQueryItem(name: "reportTagId", value: reportTagId)
+        
+        components.queryItems = [queryItemUserId, queryItemNoteId, queryItemReportTagId]
+                                                                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "POST"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let report = try? decoder.decode(MongoReportElement.self, from: data!)
+            completion?(report, nil)
+        }.resume()
+    }
 }
 
 protocol RestErrorProtocol: LocalizedError {

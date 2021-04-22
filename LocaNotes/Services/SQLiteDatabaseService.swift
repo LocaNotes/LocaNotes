@@ -34,12 +34,13 @@ public class SQLiteDatabaseService {
                 print("Creating db...")
                 
                 do {
+                    let restService = RESTService()
+                    
                     // create User table
                     try db.createTable(table: User.self)
                     
                     // create NoteTag table
                     try db.createTable(table: NoteTag.self)
-                    let restService = RESTService()
                     restService.queryNoteTag { [self] (response, error) in
                         if response != nil {
                             for noteTag in response! {
@@ -56,7 +57,6 @@ public class SQLiteDatabaseService {
                     
                     // create Privacy table
                     try db.createTable(table: Privacy.self)
-//                    let privacyViewModel = PrivacyViewModel()
                     restService.queryPrivacy { [self] (response, error) in
                         if response != nil {
                             for privacy in response! {
@@ -82,6 +82,25 @@ public class SQLiteDatabaseService {
                     
                     // create Upvote table
                     try db.createTable(table: Upvote.self)
+                    
+                    // create ReportTag table
+                    try db.createTable(table: MongoReportTagElement.self)
+                    restService.queryReportTag { [self] (response, error) in
+                        if response != nil {
+                            for reportTag in response! {
+                                let serverId = reportTag.id
+                                let label = reportTag.label
+                                let createdAt = reportTag.createdAt
+                                let updatedAt = reportTag.updatedAt
+                                let v = reportTag.v
+                                do {
+                                    try db.insertReportTag(serverId: serverId, label: label, createdAt: createdAt, updatedAt: updatedAt, v: v)
+                                } catch {
+                                    print(error.localizedDescription)
+                                }
+                            }
+                        }
+                    }
                     
                     // set a key saying that the database is made (prevent a new DB getting created every time)
                     UserDefaults.standard.set(true, forKey: "is_db_created")
