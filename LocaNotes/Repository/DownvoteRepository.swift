@@ -32,6 +32,14 @@ public class DownvoteRepository {
         restService.insertDownvote(userId: userId, noteId: noteId, restCompletion: insertCallback(response:error:completion:), insertCompletion: completion)
     }
     
+    func insertIntoStorage(serverId: String, userServerId: String, noteServerId: String, createdAt: String, updatedAt: String, v: Int32) throws {
+        if let _ = try queryFromStorageBy(userId: userServerId, noteId: noteServerId) {
+            print("downvote exists in db already")
+        } else {
+            try sqliteDatabaseService.insertDownvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+        }
+    }
+    
     func delete(downvoteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvote>) {
         //restService.deleteDownvote(downvoteId: downvoteId, completion: completion)
         restService.deleteDownvote(downvoteId: downvoteId, restCompletion: { [self] (response, error, completion) in
@@ -61,7 +69,8 @@ public class DownvoteRepository {
             let v = response!.v
             
             do {
-                try sqliteDatabaseService.insertDownvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+                //try sqliteDatabaseService.insertDownvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+                try self.insertIntoStorage(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
                 completion?(response, error)
             } catch {
                 completion?(response, error)

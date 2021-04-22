@@ -32,6 +32,15 @@ public class UpvoteRepository {
         restService.insertUpvote(userId: userId, noteId: noteId, restCompletion: insertCallback(response:error:completion:), insertCompletion: completion)
     }
     
+    func insertIntoStorage(serverId: String, userServerId: String, noteServerId: String, createdAt: String, updatedAt: String, v: Int32) throws {
+        if let _ = try queryFromStorageBy(userId: userServerId, noteId: noteServerId) {
+            print("upvote exists in db already")
+        } else {
+            try sqliteDatabaseService.insertUpvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+        }
+        
+    }
+    
     func delete(upvoteId: String, completion: RESTService.RestResponseReturnBlock<MongoUpvote>) {
         //restService.deleteUpvote(upvoteId: upvoteId, completion: completion)
         restService.deleteUpvote(upvoteId: upvoteId, restCompletion: { [self] (response, error, completion) in
@@ -61,7 +70,8 @@ public class UpvoteRepository {
             let v = response!.v
             
             do {
-                try sqliteDatabaseService.insertUpvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+                //try sqliteDatabaseService.insertUpvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+                try self.insertIntoStorage(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
                 completion?(response, error)
             } catch {
                 completion?(response, error)

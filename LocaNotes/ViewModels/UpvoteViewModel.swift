@@ -32,6 +32,10 @@ public class UpvoteViewModel {
         upvoteRepository.insert(userId: userId, noteId: noteId, completion: completion)
     }
     
+    func insertIntoStorage(serverId: String, userId: String, noteId: String, createdAt: String, updatedAt: String, v: Int32) throws {
+        try upvoteRepository.insertIntoStorage(serverId: serverId, userServerId: userId, noteServerId: noteId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+    }
+    
     func delete(upvoteId: String, completion: RESTService.RestResponseReturnBlock<MongoUpvote>) {
         upvoteRepository.delete(upvoteId: upvoteId, completion: completion)
     }

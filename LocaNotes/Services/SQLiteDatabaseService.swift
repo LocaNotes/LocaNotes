@@ -27,7 +27,7 @@ public class SQLiteDatabaseService {
             db = try SQLiteDatabase.open(path: "\(path)/locanotes_db.sqlite3")
             print("Opened connection to database: \(path)/locanotes_db.sqlite3")
             
-            UserDefaults.standard.set(false, forKey: "is_db_created")
+//            UserDefaults.standard.set(false, forKey: "is_db_created")
             
             // create a database if one hasn't been created
             if (!UserDefaults.standard.bool(forKey: "is_db_created")) {
@@ -79,43 +79,9 @@ public class SQLiteDatabaseService {
                     
                     // create Downvote table
                     try db.createTable(table: Downvote.self)
-                    restService.queryAllDownvotes { [self] (response, error) in
-                        if response != nil {
-                            for downvote in response! {
-                                let serverId = downvote.id
-                                let userServerId = downvote.userID
-                                let noteServerId = downvote.noteID
-                                let createdAt = downvote.createdAt
-                                let updatedAt = downvote.updatedAt
-                                let v = downvote.v
-                                do {
-                                    try db.insertDownvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
-                                } catch {
-                                    print(error.localizedDescription)
-                                }
-                            }
-                        }
-                    }
                     
                     // create Upvote table
                     try db.createTable(table: Upvote.self)
-                    restService.queryAllUpvotes { [self] (response, error) in
-                        if response != nil {
-                            for upvote in response! {
-                                let serverId = upvote.id
-                                let userServerId = upvote.userID
-                                let noteServerId = upvote.noteID
-                                let createdAt = upvote.createdAt
-                                let updatedAt = upvote.updatedAt
-                                let v = upvote.v
-                                do {
-                                    try db.insertUpvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
-                                } catch {
-                                    print(error.localizedDescription)
-                                }
-                            }
-                        }
-                    }
                     
                     // set a key saying that the database is made (prevent a new DB getting created every time)
                     UserDefaults.standard.set(true, forKey: "is_db_created")

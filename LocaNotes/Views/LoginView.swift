@@ -290,8 +290,12 @@ struct Login: View {
         noteViewModel.insertNotesFromServer(notes: response!)
         let serverId = response![0].userID
         
-        let commentViewModel = CommentViewModel()
-        commentViewModel.queryCommentsFromServerBy(userId: serverId, completion: queryCommentsFromServerCallback(response:error:))
+//        let commentViewModel = CommentViewModel()
+//        commentViewModel.queryCommentsFromServerBy(userId: serverId, completion: queryCommentsFromServerCallback(response:error:))
+//        commentViewModel.queryAllFromServer(completion: queryCommentsFromServerCallback(response:error:))
+        
+        let downvoteViewModel = DownvoteViewModel()
+        downvoteViewModel.queryAllFromServer(completion: queryDownvotesFromServerCallback(response:error:))
     }
     
     private func queryCommentsFromServerCallback(response: [MongoCommentElement]?, error: Error?) {
@@ -308,6 +312,94 @@ struct Login: View {
         
         let commentsViewModel = CommentViewModel()
         commentsViewModel.insertCommentsFromServer(comments: response!)
+        
+        let downvoteViewModel = DownvoteViewModel()
+        downvoteViewModel.queryAllFromServer(completion: queryDownvotesFromServerCallback(response:error:))
+    }
+    
+    private func queryDownvotesFromServerCallback(response: [Downvote]?, error: Error?) {
+        if response == nil {
+            if error == nil {
+                restResponse = "Able to log in but received Unknown Error"
+                didReceiveRestError.toggle()
+                return
+            }
+            restResponse = "\(error?.localizedDescription)"
+            didReceiveRestError.toggle()
+            return
+        }
+        
+        let downvoteViewModel = DownvoteViewModel()
+        downvoteViewModel.queryAllFromServer(completion: { (response, error) in
+            if response == nil {
+                if error == nil {
+                    restResponse = "Able to log in but received Unknown Error"
+                    didReceiveRestError.toggle()
+                    return
+                }
+                restResponse = "\(error?.localizedDescription)"
+                didReceiveRestError.toggle()
+                return
+            }
+            
+            for downvote in response! {
+                let serverId = downvote.id
+                let userServerId = downvote.userID
+                let noteServerId = downvote.noteID
+                let createdAt = downvote.createdAt
+                let updatedAt = downvote.updatedAt
+                let v = downvote.v
+                do {
+                    try downvoteViewModel.insertIntoStorage(serverId: serverId, userId: userServerId, noteId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+                } catch {
+                    print(error.localizedDescription)
+                }
+            }
+            
+            let upvoteViewModel = UpvoteViewModel()
+            upvoteViewModel.queryAllFromServer(completion: queryUpvotesFromServerCallback(response:error:))
+        })
+    }
+    
+    private func queryUpvotesFromServerCallback(response: [Upvote]?, error: Error?) {
+        if response == nil {
+            if error == nil {
+                restResponse = "Able to log in but received Unknown Error"
+                didReceiveRestError.toggle()
+                return
+            }
+            restResponse = "\(error?.localizedDescription)"
+            didReceiveRestError.toggle()
+            return
+        }
+
+        let upvoteViewModel = UpvoteViewModel()
+        upvoteViewModel.queryAllFromServer(completion: { (response, error) in
+            if response == nil {
+                if error == nil {
+                    restResponse = "Able to log in but received Unknown Error"
+                    didReceiveRestError.toggle()
+                    return
+                }
+                restResponse = "\(error?.localizedDescription)"
+                didReceiveRestError.toggle()
+                return
+            }
+            
+            for upvote in response! {
+                let serverId = upvote.id
+                let userServerId = upvote.userID
+                let noteServerId = upvote.noteID
+                let createdAt = upvote.createdAt
+                let updatedAt = upvote.updatedAt
+                let v = upvote.v
+                do {
+                    try upvoteViewModel.insertIntoStorage(serverId: serverId, userId: userServerId, noteId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+                } catch {
+                    print(error.localizedDescription)
+                }
+            }
+        })
     }
 }
 
