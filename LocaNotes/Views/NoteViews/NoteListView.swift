@@ -11,11 +11,10 @@ struct NoteListView: View {
     @ObservedObject var viewModel: NoteViewModel
     
     @Binding var searchText: String
-    
-    @State private var sort: SortOption = SortOption.new
-    
-    @State private var filter: FilterOption = FilterOption.all
-    
+        
+    @Binding var sort: SortOption
+    @Binding var filter: FilterOption
+        
     var privacyLabel: PrivacyLabel
     
     var body: some View {
@@ -43,7 +42,7 @@ struct NoteListView: View {
                     generateRow(nearbyOnly: false)
                 }
             }
-            .navigationBarItems(leading: FilterSort(sort: $sort, filter: $filter))
+            //.navigationBarItems(leading: FilterSort(sort: $sort, filter: $filter))
             .onAppear(perform: viewModel.refresh)
         )
     }
@@ -62,43 +61,8 @@ struct NoteListView: View {
                     generateRow(nearbyOnly: false)
                 }
             }
-            .navigationBarItems(leading: FilterSort(sort: $sort, filter: $filter), trailing: EditButton())
             .onAppear(perform: viewModel.refresh)
         )
-    }
-    
-    struct FilterSort: View {
-        @Binding var sort: SortOption
-        @Binding var filter: FilterOption
-        
-        var body: some View {
-            HStack {
-                Menu {
-                    Picker(selection: $filter, label: Text("Filter options")) {
-                        Text("All").tag(FilterOption.all)
-                        Text("Emergency").tag(FilterOption.emergency)
-                        Text("Dining").tag(FilterOption.dining)
-                        Text("Meme").tag(FilterOption.meme)
-                        Text("Other").tag(FilterOption.other)
-                        Divider()
-                    }
-                } label: {
-//                    Label("Filter", systemImage: "line.horizontal.3.decrease.circle")
-                    Image(systemName: "line.horizontal.3.decrease.circle")
-                }
-                
-                Menu {
-                    Picker(selection: $sort, label: Text("Sorting options")) {
-                        Text("New").tag(SortOption.new)
-                        Text("Most Upvotes").tag(SortOption.mostUpvotes)
-                        Text("Most Downvotes").tag(SortOption.mostDownvotes)
-                    }
-                } label: {
-//                    Label("Sort", systemImage: "arrow.up.arrow.down")
-                    Image(systemName: "arrow.up.arrow.down")
-                }
-            }
-        }
     }
     
     func generateRow(nearbyOnly: Bool) -> some View {
@@ -149,9 +113,27 @@ struct NoteListView: View {
         case .new:
             sortedNotes.sort { $0.createdAt > $1.createdAt }
         case .mostUpvotes:
-            sortedNotes.sort { $0.upvotes > $1.upvotes }
+            sortedNotes.sort {
+                do {
+                    let upvoteViewModel = UpvoteViewModel()
+                    let count0 = try upvoteViewModel.getNumberOfUpvotesFromStorageBy(noteId: $0.serverId)
+                    let count1 = try upvoteViewModel.getNumberOfUpvotesFromStorageBy(noteId: $1.serverId)
+                    return count0 > count1
+                } catch {
+                    return false
+                }
+            }
         case .mostDownvotes:
-            sortedNotes.sort { $0.downvotes > $1.downvotes }
+            sortedNotes.sort {
+                do {
+                    let downvoteViewModel = DownvoteViewModel()
+                    let count0 = try downvoteViewModel.getNumberOfDownvotesFromStorageBy(noteId: $0.serverId)
+                    let count1 = try downvoteViewModel.getNumberOfDownvotesFromStorageBy(noteId: $1.serverId)
+                    return count0 > count1
+                } catch {
+                    return false
+                }
+            }
         }
         return sortedNotes
     }
