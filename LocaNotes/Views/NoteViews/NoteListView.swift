@@ -42,7 +42,7 @@ struct NoteListView: View {
                     generateRow(nearbyOnly: false)
                 }
             }
-            //.navigationBarItems(leading: FilterSort(sort: $sort, filter: $filter))
+            .navigationBarItems(leading: FilterSort(sort: $sort, filter: $filter))
             .onAppear(perform: viewModel.refresh)
         )
     }
@@ -61,8 +61,41 @@ struct NoteListView: View {
                     generateRow(nearbyOnly: false)
                 }
             }
+            .navigationBarItems(leading: FilterSort(sort: $sort, filter: $filter), trailing: EditButton())
             .onAppear(perform: viewModel.refresh)
         )
+    }
+    
+    struct FilterSort: View {
+        @Binding var sort: SortOption
+        @Binding var filter: FilterOption
+        
+        var body: some View {
+            HStack {
+                Menu {
+                    Picker(selection: $filter, label: Text("Filter options")) {
+                        Text("All").tag(FilterOption.all)
+                        Text("Emergency").tag(FilterOption.emergency)
+                        Text("Dining").tag(FilterOption.dining)
+                        Text("Meme").tag(FilterOption.meme)
+                        Text("Other").tag(FilterOption.other)
+                        Divider()
+                    }
+                } label: {
+                    Image(systemName: "line.horizontal.3.decrease.circle")
+                }
+                
+                Menu {
+                    Picker(selection: $sort, label: Text("Sorting options")) {
+                        Text("New").tag(SortOption.new)
+                        Text("Most Upvotes").tag(SortOption.mostUpvotes)
+                        Text("Most Downvotes").tag(SortOption.mostDownvotes)
+                    }
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                }
+            }
+        }
     }
     
     func generateRow(nearbyOnly: Bool) -> some View {
