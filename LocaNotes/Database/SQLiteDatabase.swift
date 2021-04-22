@@ -1725,3 +1725,28 @@ extension SQLiteDatabase {
         return num
     }
 }
+
+extension SQLiteDatabase {
+    func insertReportTag(serverId: String, label: String, createdAt: String, updatedAt: String, v: Int32) throws {
+        let insertSql = "INSERT INTO Upvote (ServerId, Label, CreatedAt, UpdatedAt, V) VALUES (?, ?, ?, ?, ?);"
+        
+        let insertStatement = try prepareStatement(sql: insertSql)
+        defer {
+            sqlite3_finalize(insertStatement)
+        }
+        
+        guard
+            sqlite3_bind_text(insertStatement, 1, serverId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 2, label, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 3, createdAt, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 4, updatedAt, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 5, v) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        guard sqlite3_step(insertStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
+}
