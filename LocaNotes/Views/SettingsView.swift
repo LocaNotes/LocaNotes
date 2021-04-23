@@ -205,6 +205,20 @@ struct PasswordResetScreen: View {
     @State var newPassword: String = ""
     @State var confirmPassword: String = ""
     
+    // necessary if the user is logged in, so that the rest service can get the user id
+    var email: String
+    
+    // idea is that if there's a callback then some view is using an environment object, like a view router,
+    // to show this view (e.g. forgot password)
+    var callback: () -> Void
+    
+    init(email: String = "", callback: @escaping () -> Void = {
+        // do nothing
+    }) {
+        self.email = email
+        self.callback = callback
+    }
+    
     var body: some View {
         VStack {
             TextField("New password", text: self.$newPassword)
@@ -218,6 +232,7 @@ struct PasswordResetScreen: View {
             HStack {
                 Button(action: {
                     presentationMode.wrappedValue.dismiss()
+                    callback()
                 }) {
                     HStack {
                         Image(systemName: "xmark")
@@ -284,7 +299,7 @@ struct PasswordResetScreen: View {
     
     private func resetPassword() {
         let restService = RESTService()
-        restService.resetPassword(password: self.newPassword, completion: resetPasswordCallback(response:error:))
+        restService.resetPassword(email: self.email, password: self.newPassword, completion: resetPasswordCallback(response:error:))
     }
 }
 

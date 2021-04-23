@@ -24,7 +24,9 @@ struct ForgotPasswordView: View {
             ForgotPasswordEnterTemporaryPasswordView(email: self.$email)
                 .transition(.slide)
         case .resetPassword:
-            ForgotPasswordResetPasswordView()
+            ForgotPasswordResetPasswordView(email: self.$email, callback: {
+                viewRouter.currentPage = .enterEmail
+            })
                 .transition(.slide)
         }
     }
@@ -132,6 +134,7 @@ struct ForgotPasswordEnterTemporaryPasswordView: View {
             HStack {
                 Button(action: {
                     presentationMode.wrappedValue.dismiss()
+                    viewRouter.currentPage = .enterEmail
                 }) {
                     HStack {
                         Image(systemName: "xmark")
@@ -194,8 +197,17 @@ struct ForgotPasswordResetPasswordView: View {
     
     @State private var confirmNewPassword = ""
     
+    @Binding private var email: String
+    
+    private var callback: () -> Void
+    
+    init(email: Binding<String>, callback: @escaping () -> Void) {
+        _email = email
+        self.callback = callback
+    }
+    
     var body: some View {
-        PasswordResetScreen()
+        PasswordResetScreen(email: self.email, callback: callback)
     }
 }
 

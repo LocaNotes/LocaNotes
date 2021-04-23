@@ -46,6 +46,10 @@ class UserRepository {
         restService.getUserBy(serverId: serverId, completion: completion)
     }
     
+    func getUserBy(email: String) throws -> User? {
+        return try sqliteDatabaseService.getUserBy(email: email)
+    }
+    
     func forgotPasswordSendEmail(email: String, completion: RESTService.RestLoginReturnBlock<MongoUserElement>) {
         restService.forgotPasswordSendEmail(email: email, completion: completion)
     }

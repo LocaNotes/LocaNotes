@@ -724,6 +724,76 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
+    func getUserBy(email: String) throws -> User? {
+        let querySql = "SELECT * FROM User WHERE Email = ?;"
+        guard let queryStatement = try? prepareStatement(sql: querySql) else {
+            throw SQLiteError.Prepare(message: errorMessage)
+        }
+        defer {
+            sqlite3_finalize(queryStatement)
+        }
+        
+        guard
+            sqlite3_bind_text(queryStatement, 1, email, -1, SQLITE_TRANSIENT) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        var user: User
+        
+        if sqlite3_step(queryStatement) == SQLITE_ROW {
+            
+            let id = sqlite3_column_int(queryStatement, 0)
+            
+            guard let queryResultCol1 = sqlite3_column_text(queryStatement, 1) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let serverId = String(cString: queryResultCol1)
+            
+            guard let queryResultCol2 = sqlite3_column_text(queryStatement, 2) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let firstName = String(cString: queryResultCol2)
+            
+            guard let queryResultCol3 = sqlite3_column_text(queryStatement, 3) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let lastName = String(cString: queryResultCol3)
+            
+            guard let queryResultCol4 = sqlite3_column_text(queryStatement, 4) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let email = String(cString: queryResultCol4)
+            
+            guard let queryResultCol5 = sqlite3_column_text(queryStatement, 5) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let username = String(cString: queryResultCol5)
+
+            guard let queryResultCol6 = sqlite3_column_text(queryStatement, 6) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let password = String(cString: queryResultCol6)
+            
+            let timeCreated = sqlite3_column_int(queryStatement, 7)
+            
+            user = User(userId: id, serverId: serverId, firstName: firstName, lastName: lastName, email: email, username: username, password: password, createdAt: timeCreated)
+        } else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+        
+        print("returning user")
+        return user
+    }
+}
+
+extension SQLiteDatabase {
     func updateEmailFor(userId: Int32, email: String) throws {
         let updateSql = "UPDATE User SET Email = ? WHERE UserId = ?;"
         

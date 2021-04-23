@@ -191,6 +191,10 @@ public class SQLiteDatabaseService {
         return try db.getUserBy(userId: userId)
     }
     
+    func getUserBy(email: String) throws -> User? {
+        return try db.getUserBy(email: email)
+    }
+    
     func queryUserBy(serverId: String) throws -> User? {
         return try db.queryUserBy(serverId: serverId)
     }

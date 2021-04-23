@@ -187,21 +187,26 @@ public class RESTService {
         }
     }
     
-    func resetPassword(password: String, completion: RestLoginReturnBlock<MongoUserElement>) {
-        let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
-        
+    func resetPassword(email: String, password: String, completion: RestLoginReturnBlock<MongoUserElement>) {
         do {
+            var user: User?
             let userRepository = UserRepository()
-            guard let user = try userRepository.getUserBy(userId: userId) else {
-                completion?(nil, nil)
-                return
+            if email.count > 0 {
+                user = try userRepository.getUserBy(email: email)
+            } else {
+                let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
+                user = try userRepository.getUserBy(userId: userId)
+                if user == nil {
+                    completion?(nil, nil)
+                    return
+                }
             }
             
             var components = URLComponents()
             components.scheme = "http"
             components.host = "localhost"
             components.port = 3000
-            components.path = "/user/resetpassword/\(user.serverId)"
+            components.path = "/user/resetpassword/\(user!.serverId)"
             
             let queryItemPassword = URLQueryItem(name: "password", value: password)
             
