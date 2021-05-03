@@ -105,7 +105,7 @@ struct AddFriendsView: View {
     
     var body: some View {
         VStack {
-            SearchBarView(searchText: $searchText, onEditingChangedCallback: searchForUser)
+            SearchBarView(searchText: $searchText, onCommitCallback: searchForUser)
             List(users, id: \.id) { user in
                 UserCell(user: user)
             }
