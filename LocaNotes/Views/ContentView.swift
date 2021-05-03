@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
         
-    @EnvironmentObject var viewRouter: ViewRouter
+    @EnvironmentObject private var viewRouter: ViewRouter
         
     var body: some View {
         switch viewRouter.currentPage {
