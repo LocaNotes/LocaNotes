@@ -1009,6 +1009,147 @@ public class RESTService {
             completion?(report, nil)
         }.resume()
     }
+    
+    func searchForUserBy(username: String, completion: RestResponseReturnBlock<[MongoUserElement]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/user"
+        
+        let queryItemUsername = URLQueryItem(name: "username", value: username)
+        
+        components.queryItems = [queryItemUsername]
+                                                                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let user = try? decoder.decode([MongoUserElement].self, from: data!)
+            completion?(user, nil)
+        }.resume()
+    }
+    
+    func getFriendListFor(userId: String, completion: RestResponseReturnBlock<[MongoUserElement]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/friend/users/\(userId)"
+        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        print(url)
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let users = try? decoder.decode([MongoUserElement].self, from: data!)
+            completion?(users, nil)
+        }.resume()
+    }
+    
+    func addFriend(frienderId: String, friendeeId: String, completion: RestResponseReturnBlock<MongoFriendElement>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/friend"
+        
+        let queryItemUserId = URLQueryItem(name: "userId", value: frienderId)
+        let queryItemFriendUserId = URLQueryItem(name: "friendUserId", value: friendeeId)
+        
+        components.queryItems = [queryItemUserId, queryItemFriendUserId]
+                                                                        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "POST"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+
+            let decoder = JSONDecoder()
+            let friend = try? decoder.decode(MongoFriendElement.self, from: data!)
+            completion?(friend, nil)
+        }.resume()
+    }
+    
+    func removeFriend(frienderId: String, friendeeId: String, completion: RestResponseReturnBlock<MongoFriendElement>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/friend/\(frienderId)/\(friendeeId)"
+        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "DELETE"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let friend = try? decoder.decode(MongoFriendElement.self, from: data!)
+            completion?(friend, nil)
+        }.resume()
+    }
+    
+    func checkIfFriends(frienderId: String, friendeeId: String, completion: RestResponseReturnBlock<[MongoFriendElement]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/friend/\(frienderId)/\(friendeeId)"
+        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let friend = try? decoder.decode([MongoFriendElement].self, from: data!)
+            completion?(friend, nil)
+        }.resume()
+    }
 }
 
 protocol RestErrorProtocol: LocalizedError {

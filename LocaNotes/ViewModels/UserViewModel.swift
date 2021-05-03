@@ -86,4 +86,24 @@ public class UserViewModel {
     func getUserBy(serverId: String, completion: RESTService.RestResponseReturnBlock<[MongoUserElement]>) {
         userRepository.getUserBy(serverId: serverId, completion: completion)
     }
+    
+    func searchForUserBy(username: String, completion: RESTService.RestResponseReturnBlock<[MongoUserElement]>) {
+        userRepository.searchForUserBy(username: username, completion: completion)
+    }
+    
+    func getFriendListFor(userId: String, completion: RESTService.RestResponseReturnBlock<[MongoUserElement]>) {
+        userRepository.getFriendListFor(userId: userId, completion: completion)
+    }
+    
+    func addFriend(frienderId: String, friendeeId: String, completion: RESTService.RestResponseReturnBlock<MongoFriendElement>) {
+        userRepository.addFriend(frienderId: frienderId, friendeeId: friendeeId, completion: completion)
+    }
+    
+    func removeFriend(frienderId: String, friendeeId: String, completion: RESTService.RestResponseReturnBlock<MongoFriendElement>) {
+        userRepository.removeFriend(frienderId: frienderId, friendeeId: friendeeId, completion: completion)
+    }
+    
+    func checkIfFriends(frienderId: String, friendeeId: String, completion: RESTService.RestResponseReturnBlock<[MongoFriendElement]>) {
+        userRepository.checkIfFriends(frienderId: frienderId, friendeeId: friendeeId, completion: completion)
+    }
 }
