@@ -9,29 +9,29 @@ import SwiftUI
 
 struct SignUp: View {
     
-    @EnvironmentObject var viewRouter: ViewRouter
+    @EnvironmentObject private var viewRouter: ViewRouter
     
-    let textFieldInputValidationService = TextFieldInputValidationService()
+    private let textFieldInputValidationService = TextFieldInputValidationService()
 
-    @State var firstName = ""
-    @State var lastName = ""
-    @State var mail = ""
-    @State var username = ""
-    @State var pass = ""
-    @State var repass = ""
+    @State private var firstName = ""
+    @State private var lastName = ""
+    @State private var mail = ""
+    @State private var username = ""
+    @State private var pass = ""
+    @State private var repass = ""
     
-    @State var firstNameIsValid = true
-    @State var lastNameIsValid = true
-    @State var emailIsValid = true
-    @State var usernameIsValid = true
-    @State var passwordIsValid = true
+    @State private var firstNameIsValid = true
+    @State private var lastNameIsValid = true
+    @State private var emailIsValid = true
+    @State private var usernameIsValid = true
+    @State private var passwordIsValid = true
     
-    @State var passwordError = ""
+    @State private var passwordError = ""
     
-    @State var didReceiveRestError = false
-    @State var restResponse = ""
+    @State private var didReceiveRestError = false
+    @State private var restResponse = ""
         
-    struct FirstName: View {
+    private struct FirstName: View {
         
         @Binding var firstName: String
         @Binding var isValid: Bool
@@ -53,7 +53,7 @@ struct SignUp: View {
         }
     }
     
-    struct LastName: View {
+    private struct LastName: View {
         
         @Binding var lastName: String
         @Binding var isValid: Bool
@@ -75,7 +75,7 @@ struct SignUp: View {
         }
     }
     
-    struct Email: View {
+    private struct Email: View {
         
         @Binding var email: String
         @Binding var isValid: Bool
@@ -98,7 +98,7 @@ struct SignUp: View {
         }
     }
     
-    struct Username: View {
+    private struct Username: View {
         
         @Binding var username: String
         @Binding var isValid: Bool
@@ -121,7 +121,7 @@ struct SignUp: View {
         }
     }
     
-    struct Password: View {
+    private struct Password: View {
         
         @Binding var password: String
         @Binding var isValid: Bool
@@ -217,19 +217,14 @@ struct SignUp: View {
             didReceiveRestError.toggle()
             return
         }
-        let keychainService = KeychainService()
-        do {
-            try keychainService.storeGenericPasswordFor(account: user.username as String, service: "storePassword", password: user.password as String)
-            UserDefaults.standard.set(user.username, forKey: "username")
-            UserDefaults.standard.set(user.userId, forKey: "userId")
-            DispatchQueue.main.async {
-                withAnimation {
-                    viewRouter.currentPage = .mainPage
-                }
+        
+        UserDefaults.standard.set(user.username, forKey: "username")
+        UserDefaults.standard.set(user.userId, forKey: "userId")
+        UserDefaults.standard.set(user.serverId, forKey: "serverId")
+        DispatchQueue.main.async {
+            withAnimation {
+                viewRouter.currentPage = .loginPage
             }
-        } catch {
-            restResponse = "\(error)"
-            didReceiveRestError.toggle()
         }
     }
     
