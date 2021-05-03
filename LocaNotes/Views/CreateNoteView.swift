@@ -19,10 +19,10 @@ struct CreateNoteView: View {
     @State private var selectedPrivacy = PrivacyLabel.privateNote.rawValue
     
     // for the privacy drawer
-    @State var showPrivacyDrawer = false
+    @State private var showPrivacyDrawer = false
     
     // for the note tags drawer
-    @State var showNoteTagDrawer = false
+    @State private var showNoteTagDrawer = false
     
     // what the user types in the text editor
     @State private var noteContent = ""
@@ -132,7 +132,7 @@ struct RadioButtonsSheet: View {
     @Binding var selectedPrivacy: String
     @Binding var show: Bool
     
-    let data = [PrivacyLabel.publicNote.rawValue, PrivacyLabel.privateNote.rawValue]
+    private let data = [PrivacyLabel.publicNote.rawValue, PrivacyLabel.privateNote.rawValue]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -165,7 +165,7 @@ struct NoteTagRadioButtonsSheet: View {
     @Binding var selectedTag: String
     @Binding var show: Bool
     
-    let data = [noteTagLabel.emergency.rawValue, noteTagLabel.dining.rawValue, noteTagLabel.meme.rawValue, noteTagLabel.other.rawValue]
+    private let data = [noteTagLabel.emergency.rawValue, noteTagLabel.dining.rawValue, noteTagLabel.meme.rawValue, noteTagLabel.other.rawValue]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {

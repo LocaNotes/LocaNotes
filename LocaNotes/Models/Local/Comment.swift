@@ -15,11 +15,11 @@ struct Comment {
     let userId: Int32
     let userServerId: String
     let body: String
-    let timeCommented: Int32 
+    let timeCommented: Int32
 }
 
 extension Comment: SQLTable {
-    
+
     // represents the sql statement to create the Note table
     static var createStatement: String {
         return """

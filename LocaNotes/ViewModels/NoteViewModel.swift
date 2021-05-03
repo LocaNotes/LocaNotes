@@ -62,7 +62,7 @@ public class NoteViewModel: ObservableObject {
 //        }
         
         for note in notes {
-            print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.createdAt) | \(note.body)")
+            print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.createdAt) | \(note.body.substring(start: 0, offset: note.body.count / 2))")
         }
         
         self.notes = notes

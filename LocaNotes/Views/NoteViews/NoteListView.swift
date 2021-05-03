@@ -117,7 +117,7 @@ struct NoteListView: View {
         return (
             ForEach (notes.filter({ note in
                 self.searchText.isEmpty ? true :
-                    String(note.body).lowercased().contains(self.searchText.lowercased())
+                    note.body.lowercased().contains(self.searchText.lowercased())
             }), id: \.noteId) { note in
                 NoteCell(note: note, privacyLabel: privacyLabel)
             }
@@ -188,18 +188,25 @@ enum SortOption {
 
 struct NoteCell: View {
     
-    let note: Note
+    private let note: Note
     
-    var privacyLabel: PrivacyLabel
+    private let privacyLabel: PrivacyLabel
     
-    let userViewModel: UserViewModel
+    private let userViewModel: UserViewModel
     
-    @State var username = ""
-    
+    @State private var username = ""
+        
     init(note: Note, privacyLabel: PrivacyLabel) {
         self.note = note
         self.privacyLabel = privacyLabel
         userViewModel = UserViewModel()
+//        userViewModel.getUserBy(serverId: note.userServerId, completion: { [self] (response, error) in
+//            if response == nil {
+//                print("could not query user from server")
+//                return
+//            }
+//            username = response![0].username
+//        })
     }
     
     var body: some View {

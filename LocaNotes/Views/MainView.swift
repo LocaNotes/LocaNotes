@@ -8,18 +8,13 @@
 import SwiftUI
 
 struct MainView: View {
-    
-    //    @State var selectedIndex = 0
-    //    @State var shouldShowModel = false
-    //
-    //    let tabBarImageNames = ["person", "gear", "plus.app.fill", "pencil", "lasso"]
         
-    let noteViewModel = NoteViewModel()
-    let userViewModel = UserViewModel()
+    private let noteViewModel = NoteViewModel()
+    private let userViewModel = UserViewModel()
     
-    @EnvironmentObject var viewRouter: ViewRouter
+    @EnvironmentObject private var viewRouter: ViewRouter
         
-    @State var selectedTab = 0
+    @State private var selectedTab = 0
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -41,7 +36,7 @@ struct MainView: View {
                     Text("New Note")
                 }
                 .tag(3)
-            SettingsView(viewModel: userViewModel)
+            SettingsView()
                 .font(.system(size: 30, weight: .bold))
                 .tabItem {
                     Image(systemName: "gear")
@@ -55,63 +50,6 @@ struct MainView: View {
                 }
                 .tag(5)
         }
-        
-//        VStack(spacing: 0) {
-//
-//            ZStack {
-//
-//                Spacer()
-//                    .fullScreenCover(isPresented: $shouldShowModel, content: {
-//                        Button(action: {shouldShowModel.toggle()}, label: {
-//                            Text("Fullscreen cover")
-//                        })
-//                    })
-//
-//                switch selectedIndex {
-//                case 0:
-//                    PrivateNoteListView()
-//                case 1:
-//                    ScrollView {
-//                        Text("test")
-//                    }
-//                default:
-//                    // need navigation view so that the text is flush against the bottom
-//                    NavigationView {
-//                        Text("remaining tabs")
-//                    }
-//                }
-//            }
-//
-//            Divider()
-//                .padding(.bottom, 12)
-//
-//            HStack {
-//                ForEach(0..<5) { num in
-//                    Button(action: {
-//
-//                        if num == 2 {
-//                            shouldShowModel.toggle()
-//                            return
-//                        }
-//
-//                        selectedIndex = num
-//                    }, label: {
-//                        Spacer()
-//
-//                        if num == 2 {
-//                            Image(systemName: tabBarImageNames[num])
-//                                .font(.system(size: 44, weight: .bold))
-//                                .foregroundColor(.red)
-//                        } else {
-//                            Image(systemName: tabBarImageNames[num])
-//                                .font(.system(size: 24, weight: .bold))
-//                                .foregroundColor(selectedIndex == num ? Color(.label) : Color(white: 0.8))
-//                        }
-//                        Spacer()
-//                    })
-//                }
-//            }
-//        }
     }
 }
 
