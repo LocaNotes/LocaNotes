@@ -16,6 +16,29 @@ struct NoteListView: View {
     @Binding var filter: FilterOption
         
     var privacyLabel: PrivacyLabel
+        
+    private var privateNotes: [Note] {
+        return viewModel.privateNotes
+    }
+    
+    private var nearbyPrivateNotes: [Note] {
+        return viewModel.nearbyPrivateNotes
+    }
+    
+    private var filteredSortedPrivateNotes: [Note] {
+        var notes = viewModel.privateNotes
+        notes = filter(notes: notes)
+        notes = sort(notes: notes)
+        return notes
+    }
+    
+    init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, privacyLabel: PrivacyLabel) {
+        self.viewModel = NoteViewModel()
+        self._searchText = searchText
+        self._sort = sort
+        self._filter = filter
+        self.privacyLabel = privacyLabel
+    }
     
     var body: some View {
         SearchBarView(searchText: $searchText)
@@ -35,38 +58,36 @@ struct NoteListView: View {
             List {
                 if !nearbyNotes.isEmpty {
                     Section(header: Text("Nearby")) {
-                        generateRow(nearbyOnly: true)
+                        generateRows(nearbyOnly: true)
                     }
                 }
                 Section(header: Text("All")) {
-                    generateRow(nearbyOnly: false)
+                    generateRows(nearbyOnly: false)
                 }
             }
-            .navigationBarItems(leading: FilterSort(sort: $sort, filter: $filter))
+            .navigationBarItems(leading: FilterSortButtons(sort: $sort, filter: $filter))
             .onAppear(perform: viewModel.refresh)
         )
     }
     
     func generatePrivateList() -> some View {
-        print(sort)
-        let nearbyNotes: [Note] = viewModel.nearbyPrivateNotes
         return (
             List {
-                if !nearbyNotes.isEmpty {
+                if !nearbyPrivateNotes.isEmpty {
                     Section(header: Text("Nearby")) {
-                        generateRow(nearbyOnly: true)
+                        generateRows(nearbyOnly: true)
                     }
                 }
                 Section(header: Text("All")) {
-                    generateRow(nearbyOnly: false)
+                    generateRows(nearbyOnly: false)
                 }
             }
-            .navigationBarItems(leading: FilterSort(sort: $sort, filter: $filter), trailing: EditButton())
+            .navigationBarItems(leading: FilterSortButtons(sort: $sort, filter: $filter), trailing: EditButton())
             .onAppear(perform: viewModel.refresh)
         )
     }
     
-    struct FilterSort: View {
+    struct FilterSortButtons: View {
         @Binding var sort: SortOption
         @Binding var filter: FilterOption
         
@@ -98,7 +119,7 @@ struct NoteListView: View {
         }
     }
     
-    func generateRow(nearbyOnly: Bool) -> some View {
+    func generateRows(nearbyOnly: Bool) -> some View {
         var notes: [Note]
         switch (nearbyOnly, self.privacyLabel) {
         case (true, PrivacyLabel.privateNote):
@@ -121,8 +142,22 @@ struct NoteListView: View {
             }), id: \.noteId) { note in
                 NoteCell(note: note, privacyLabel: privacyLabel)
             }
-            .onDelete(perform: viewModel.deleteNote)
+            .onDelete(perform: deletePrivateNote)
         )
+    }
+    
+    private func deletePrivateNote(at offsets: IndexSet) {
+        let selectedNoteId = filteredSortedPrivateNotes[offsets.first!].noteId
+        var index: Int = -1
+        for i in 0..<privateNotes.count {
+            let id = privateNotes[i].noteId
+            if id == selectedNoteId {
+                index = i
+            }
+        }
+        if index > -1 {
+            viewModel.deleteNote(at: IndexSet(integer: index))
+        }
     }
     
     func filter(notes: [Note]) -> [Note] {

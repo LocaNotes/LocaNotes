@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CreateNoteView: View {
         
-    var noteViewModel: NoteViewModel
+    private let noteViewModel: NoteViewModel
     
     @Binding var selectedTab: Int
     
@@ -26,6 +26,11 @@ struct CreateNoteView: View {
     
     // what the user types in the text editor
     @State private var noteContent = ""
+    
+    init(selectedTab: Binding<Int>) {
+        noteViewModel = NoteViewModel()
+        self._selectedTab = selectedTab
+    }
     
     var body: some View {
         ZStack {

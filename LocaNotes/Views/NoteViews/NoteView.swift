@@ -8,15 +8,14 @@
 import SwiftUI
 
 struct NoteView: View {
-    @ObservedObject var viewModel: NoteViewModel
+    @StateObject var viewModel = NoteViewModel()
     
     var privacyLabel: PrivacyLabel
     
     // what the user types in the search bar
     @State private var searchText: String = ""
     
-    init (viewModel: NoteViewModel, privacyLabel: PrivacyLabel) {
-        self.viewModel = viewModel
+    init (privacyLabel: PrivacyLabel) {
         self.privacyLabel = privacyLabel
     }
     

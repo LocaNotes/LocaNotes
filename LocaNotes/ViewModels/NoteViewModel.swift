@@ -14,7 +14,7 @@ public class NoteViewModel: ObservableObject {
     // all notes
     @Published var notes: [Note] = []
     
-    var privateNotes: [Note] = []
+    @Published var privateNotes: [Note] = []
     
     // only the notes that are nearby the user
     var nearbyPrivateNotes: [Note] = []
@@ -105,20 +105,21 @@ public class NoteViewModel: ObservableObject {
      - Parameter offsets: an index set containing the index of the note to delete
      */
     func deleteNote(at offsets: IndexSet) {
-        let noteIdToDelete: Int32 = notes[offsets.first!].noteId
+        let noteIdToDelete = privateNotes[offsets.first!].noteId
         do {
-            let note = notes[offsets.first!]
+            let note = privateNotes[offsets.first!]
+            
             try notesRepository.deleteNoteById(id: note.noteId, serverId: note.serverId)
-            notes.remove(atOffsets: offsets)
-        } catch {
-            print("couldn't delete: \(error)")
-        }
-        
-        // now delete the note from nearby notes
-        for (i, note) in nearbyPrivateNotes.enumerated() {
-            if note.noteId == noteIdToDelete {
-                nearbyPrivateNotes.remove(at: i)
+            privateNotes.remove(atOffsets: offsets)
+            
+            // now delete the note from nearby notes
+            for (i, note) in nearbyPrivateNotes.enumerated() {
+                if note.noteId == noteIdToDelete {
+                    nearbyPrivateNotes.remove(at: i)
+                }
             }
+        } catch {
+            print("couldn't delete: \(error.localizedDescription)")
         }
     }
     
@@ -137,9 +138,9 @@ public class NoteViewModel: ObservableObject {
         }
         
         // now delete the note from notes
-        for (i, note) in notes.enumerated() {
+        for (i, note) in privateNotes.enumerated() {
             if note.noteId == noteIdToDelete {
-                notes.remove(at: i)
+                privateNotes.remove(at: i)
             }
         }
     }

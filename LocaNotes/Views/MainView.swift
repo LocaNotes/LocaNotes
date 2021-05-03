@@ -8,29 +8,26 @@
 import SwiftUI
 
 struct MainView: View {
-        
-    private let noteViewModel = NoteViewModel()
-    private let userViewModel = UserViewModel()
-    
+                
     @EnvironmentObject private var viewRouter: ViewRouter
         
     @State private var selectedTab = 0
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            NoteView(viewModel: noteViewModel, privacyLabel: PrivacyLabel.privateNote)
+            NoteView(privacyLabel: PrivacyLabel.privateNote)
                 .tabItem {
                     Image(systemName: "homekit")
                     Text("Home")
                 }
                 .tag(0)
-            NoteView(viewModel: noteViewModel, privacyLabel: PrivacyLabel.publicNote)
+            NoteView(privacyLabel: PrivacyLabel.publicNote)
                 .tabItem {
                     Image(systemName: "globe")
                     Text("Social")
                 }
                 .tag(1)
-            CreateNoteView(noteViewModel: noteViewModel, selectedTab: self.$selectedTab)
+            CreateNoteView(selectedTab: self.$selectedTab)
                 .tabItem {
                     Image(systemName: "pencil")
                     Text("New Note")
