@@ -10,7 +10,7 @@ import SwiftUI
 @main
 struct LocaNotesApp: App {
     
-    @StateObject var viewRouter = ViewRouter()
+    @StateObject private var viewRouter = ViewRouter()
     
     var body: some Scene {
         WindowGroup {
