@@ -9,63 +9,63 @@ import SwiftUI
 import MessageUI
 
 struct SettingsView: View {
-    let viewModel: UserViewModel
-    let supportEmail = ["eli.develops@gmail.com"] //Email for app support
+    private let viewModel: UserViewModel
+    private let supportEmail = ["eli.develops@gmail.com"] //Email for app support
     
-    @State var showEmailSheet: Bool = false
-    @State var showPasswordSheet: Bool = false
-    @State var showUsernameSheet: Bool = false
+    @State private var showEmailSheet: Bool = false
+    @State private var showPasswordSheet: Bool = false
+    @State private var showUsernameSheet: Bool = false
+    
+    init() {
+        viewModel = UserViewModel()
+    }
     
     var body: some View {
-        NavigationView {
-            VStack {
                 
-                List {
-                    Button(action: {
-                        //update email
-                        self.showEmailSheet.toggle()
-                    }, label: {
-                        Text("Update Email")
-                    })
-                    .sheet(isPresented: $showEmailSheet, content: {
-                        EmailResetScreen()
-                    })
-                    
-                    Button(action: {
-                        //update password
-                        //self.resetPassword()
-                        self.showPasswordSheet.toggle()
-                    }, label: {
-                        Text("Update Password")
-                    })
-                    .sheet(isPresented: $showPasswordSheet, content: {
-                        PasswordResetScreen()
-                    })
-                    
-                    Button(action: {
-                        self.showUsernameSheet.toggle()
-                    }, label: {
-                        Text("Update Username")
-                    })
-                    .sheet(isPresented: $showUsernameSheet, content: {
-                        UsernameResetScreen()
-                    })
-                    
-                    Button(action: {
-                        
-                        let url = URL(string: String("mailto:".appending(supportEmail[0])).appending("?subject=LocaNotes:%20Bug%20Report"))
-                        print(url ?? "something happened with the url :(")
-                        UIApplication.shared.open(url!)
-                        
-                        //present(mail!, animated: true, completion: nil)
-                    }, label: {
-                        Text("Send A Support Request")
-                            .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
-                    })
-                }
-                .navigationTitle("Settings")
-            }
+        List {
+            Button(action: {
+                //update email
+                self.showEmailSheet.toggle()
+            }, label: {
+                Text("Update Email")
+            })
+            .sheet(isPresented: $showEmailSheet, content: {
+                EmailResetScreen()
+            })
+            
+            Button(action: {
+                //update password
+                //self.resetPassword()
+                self.showPasswordSheet.toggle()
+            }, label: {
+                Text("Update Password")
+            })
+            .sheet(isPresented: $showPasswordSheet, content: {
+                PasswordResetScreen()
+            })
+            
+            Button(action: {
+                self.showUsernameSheet.toggle()
+            }, label: {
+                Text("Update Username")
+            })
+            .sheet(isPresented: $showUsernameSheet, content: {
+                UsernameResetScreen()
+            })
+            
+            Button(action: {
+                
+                let url = URL(string: String("mailto:".appending(supportEmail[0])).appending("?subject=LocaNotes:%20Bug%20Report"))
+                print(url ?? "something happened with the url :(")
+                UIApplication.shared.open(url!)
+                
+                //present(mail!, animated: true, completion: nil)
+            }, label: {
+                Text("Send A Support Request")
+                    .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
+            })
         }
+        .navigationTitle("Settings")
     }
     
    /* class BugReporting: UIViewController, MFMailComposeViewControllerDelegate {
@@ -397,8 +397,8 @@ struct UsernameResetScreen: View {
     }
 }
 
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView(viewModel: UserViewModel())
-    }
-}
+//struct SettingsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        SettingsView(viewModel: UserViewModel())
+//    }
+//}
