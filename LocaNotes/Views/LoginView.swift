@@ -190,44 +190,20 @@ struct Login: View {
             }
         }
     
-        
-        
-//        if !userViewModel.mongoUserDoesExistInSqliteDatabase(mongoUserElement: user[0]) {
-//            userViewModel.createUserByMongoUser(mongoUser: user[0])
-//        }
-        
-        let keychainService = KeychainService()
-        do {
-            guard let username = user?.username, let password = user?.password, let userId = user?.userId else {
-                return
+        UserDefaults.standard.set(user?.username, forKey: "username")
+        UserDefaults.standard.set(user?.serverId, forKey: "serverId")
+        UserDefaults.standard.set(user?.userId, forKey: "userId")
+        DispatchQueue.main.async {
+            withAnimation {
+                viewRouter.currentPage = .mainPage
             }
-            try keychainService.storeGenericPasswordFor(account: username as String, service: "storePassword", password: password as String)
-            UserDefaults.standard.set(username, forKey: "username")
-            UserDefaults.standard.set(user?.serverId, forKey: "serverId")
-            UserDefaults.standard.set(userId, forKey: "userId")
-            DispatchQueue.main.async {
-                withAnimation {
-                    viewRouter.currentPage = .mainPage
-                }
-            }
-//            do {
-//                if let u = UserDefaults.standard.string(forKey: "username") {
-//                    let s = try keychainService.getGenericPasswordFor(account: u, service: "storePassword")
-//                    print("\(u) and \(s)")
-//                }
-//            } catch {
-//                print("fail")
-//            }
-            
-            let noteViewModel = NoteViewModel()
-            guard let serverId = user?.serverId else {
-                return
-            }
-            noteViewModel.queryServerNotesBy(userId: serverId, completion: queryNotesFromServerCallback(response:error:))
-        } catch {
-            restResponse = "\(error)"
-            didReceiveRestError.toggle()
         }
+        
+        let noteViewModel = NoteViewModel()
+        guard let serverId = user?.serverId else {
+            return
+        }
+        noteViewModel.queryServerNotesBy(userId: serverId, completion: queryNotesFromServerCallback(response:error:))
     }
     
     private func authenticateUser() {
