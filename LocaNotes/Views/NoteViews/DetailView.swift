@@ -38,7 +38,7 @@ struct DetailView: View {
     
     @State var showReportToast: Bool = false
     @State var reportToastMessage: String = ""
-    
+            
     init (note: Note, privacyLabel: PrivacyLabel) {
         self.note = note
         self.privacyLabel = privacyLabel
@@ -395,23 +395,28 @@ enum ReportOption: String {
 }
 
 struct CommentView: View {
-    let comment: MongoCommentElement
-    @State var username: String = ""
-    let userViewModel: UserViewModel
-    let currentUserId: String
+    private let comment: MongoCommentElement
+    private let userViewModel: UserViewModel
+    private let currentUserId: String
+//    @State private var showUserDetail: Bool = false
+    @State private var user: MongoUserElement
     
     init(comment: MongoCommentElement) {
         self.comment = comment
         userViewModel = UserViewModel()
         currentUserId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        _user = .init(wrappedValue: MongoUserElement(id: "", firstName: "", lastName: "", email: "", username: "", password: "", createdAt: "", updatedAt: "", v: -1))
     }
     
     var body: some View {
         VStack {
             HStack {
-                Text(username)
-                    .font(.system(size: 12, weight: .light, design: .default))
-                    .padding(.trailing)
+                NavigationLink(destination: UserDetailView(user: user), label: {
+                    Text(user.username)
+                })
+                .font(.system(size: 12, weight: .light, design: .default))
+                .padding(.trailing)
+                
                 Text(beautifyCreatedAt())
                     .font(.system(size: 12, weight: .light, design: .default))
                 Spacer()
@@ -425,7 +430,10 @@ struct CommentView: View {
         }
         .padding(.bottom, 10)
         .background(Color.white)
-        .onAppear(perform: loadUsername)
+//        .sheet(isPresented: $showUserDetail, content: {
+//            UserDetailView(user: user)
+//        })
+        .onAppear(perform: loadUser)
     }
     
     var overflowButton: some View {
@@ -452,13 +460,13 @@ struct CommentView: View {
         }
     }
     
-    private func loadUsername() {
+    private func loadUser() {
         userViewModel.getUserBy(serverId: comment.userID, completion: { (response, error) in
             if response == nil {
                 print("could not load user for comment")
                 return
             }
-            username = response![0].username
+            user = response![0]
         })
     }
     
