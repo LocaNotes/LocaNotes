@@ -51,8 +51,9 @@ struct NoteMapView: View {
      */
     private func noteToAnno(_ note: Note) -> Annotation{
         let annotation = Annotation()
-        annotation.title = String(substring(string: note.body, offset: (note.body.count > 15 ? 15 : note.body.count)))
-        annotation.subtitle = String(note.body)
+        let body = String(note.body)
+        annotation.title = body.substring(offset: body.count > 15 ? 15 : note.body.count)
+        annotation.subtitle = body
         annotation.coordinate = CLLocationCoordinate2D(latitude: Double(note.latitude)!, longitude: Double(note.longitude)!)
         annotation.id = note.noteId
         annotation.userId = note.userId
@@ -123,15 +124,3 @@ struct NoteMapView: View {
 //        NoteMapView()
 //    }
 //}
-
-/**
- Returns a substring up to the specified index of the specified string
- - Parameters:
-    - string: the string to take a substring of
-    - offset: the ending index of the substring
- */
-private func substring(string: String, offset: Int) -> String.SubSequence {
-    let index = string.index(string.startIndex, offsetBy: offset)
-    let substring = string[..<index]
-    return substring
-}
