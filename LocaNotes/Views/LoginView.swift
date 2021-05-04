@@ -100,6 +100,7 @@ struct Home: View {
 struct Login: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
+    @EnvironmentObject var noteViewModel: NoteViewModel
     
     @State var username = ""
     @State var pass = ""
@@ -166,7 +167,7 @@ struct Login: View {
         }
     }
     
-    private func authenticateCallback(response: MongoUser?, error: Error?) {
+    private func authenticateCallback(response: [MongoUserElement]?, error: Error?) {
         if response == nil {
             if error == nil {
                 restResponse = "Unknown Error"
@@ -293,7 +294,7 @@ struct Login: View {
 //        downvoteViewModel.queryAllFromServer(completion: queryDownvotesFromServerCallback(response:error:))
 //    }
     
-    private func queryDownvotesFromServerCallback(response: [Downvote]?, error: Error?) {
+    private func queryDownvotesFromServerCallback(response: [MongoDownvoteElement]?, error: Error?) {
         if response == nil {
             if error == nil {
                 restResponse = "Able to log in but received Unknown Error"
@@ -375,6 +376,10 @@ struct Login: View {
                     print(error.localizedDescription)
                 }
             }
+            
+            //let noteViewModel = NoteViewModel()
+            let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+            noteViewModel.getSharedNotesFor(receiverId: userId)
         })
     }
 }

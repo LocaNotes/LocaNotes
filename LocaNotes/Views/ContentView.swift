@@ -10,15 +10,18 @@ import SwiftUI
 struct ContentView: View {
         
     @EnvironmentObject private var viewRouter: ViewRouter
+    @StateObject private var noteViewModel = NoteViewModel()
         
     var body: some View {
         switch viewRouter.currentPage {
         case .loginPage:
             LoginView()
                 .transition(.scale)
+                .environmentObject(noteViewModel)
         case .mainPage:
             MainView()
                 .transition(.scale)
+                .environmentObject(noteViewModel)
         }
     }
 }

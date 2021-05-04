@@ -9,7 +9,8 @@ import SwiftUI
 
 struct CreateNoteView: View {
         
-    private let noteViewModel: NoteViewModel
+//    private let noteViewModel: NoteViewModel
+    @EnvironmentObject var noteViewModel: NoteViewModel
     
     @Binding var selectedTab: Int
     
@@ -28,7 +29,7 @@ struct CreateNoteView: View {
     @State private var noteContent = ""
     
     init(selectedTab: Binding<Int>) {
-        noteViewModel = NoteViewModel()
+//        noteViewModel = NoteViewModel()
         self._selectedTab = selectedTab
     }
     

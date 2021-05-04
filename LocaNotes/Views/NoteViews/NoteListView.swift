@@ -8,41 +8,46 @@
 import SwiftUI
 
 struct NoteListView: View {
-    @ObservedObject var viewModel: NoteViewModel
+//    @ObservedObject var viewModel: NoteViewModel
+    
+    @EnvironmentObject var noteViewModel: NoteViewModel
     
     @Binding var searchText: String
         
-    @Binding var sort: SortOption
-    @Binding var filter: FilterOption
+    @Binding var sortOption: SortOption
+    @Binding var filterOption: FilterOption
         
-    var privacyLabel: PrivacyLabel
+    private var privacyLabel: PrivacyLabel
         
     private var privateNotes: [Note] {
-        return viewModel.privateNotes
+//        return viewModel.privateNotes
+        return noteViewModel.privateNotes
     }
     
     private var nearbyPrivateNotes: [Note] {
-        return viewModel.nearbyPrivateNotes
+//        return viewModel.nearbyPrivateNotes
+        return noteViewModel.nearbyPrivateNotes
     }
     
     private var filteredSortedPrivateNotes: [Note] {
-        var notes = viewModel.privateNotes
+//        var notes = viewModel.privateNotes
+        var notes = noteViewModel.privateNotes
         notes = filter(notes: notes)
         notes = sort(notes: notes)
         return notes
     }
     
     init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, privacyLabel: PrivacyLabel) {
-        self.viewModel = NoteViewModel()
+//        self.viewModel = NoteViewModel()
         self._searchText = searchText
-        self._sort = sort
-        self._filter = filter
+        self._sortOption = sort
+        self._filterOption = filter
         self.privacyLabel = privacyLabel
     }
     
     var body: some View {
         SearchBarView(searchText: $searchText)
-            .frame(width: UIScreen.main.bounds.width+20, height: 40, alignment: .bottom)
+            .frame(width: UIScreen.main.bounds.width + 20, height: 40, alignment: .bottom)
         
         switch privacyLabel {
         case PrivacyLabel.privateNote:
@@ -53,7 +58,8 @@ struct NoteListView: View {
     }
     
     func generatePublicList() -> some View {
-        let nearbyNotes: [Note] = viewModel.nearbyPublicNotes
+//        let nearbyNotes: [Note] = viewModel.nearbyPublicNotes
+        let nearbyNotes: [Note] = noteViewModel.nearbyPublicNotes
         return (
             List {
                 if !nearbyNotes.isEmpty {
@@ -65,8 +71,9 @@ struct NoteListView: View {
                     generateRows(nearbyOnly: false)
                 }
             }
-            .navigationBarItems(leading: FilterSortButtons(sort: $sort, filter: $filter))
-            .onAppear(perform: viewModel.refresh)
+            .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption))
+//            .onAppear(perform: viewModel.refresh)
+            .onAppear(perform: noteViewModel.refresh)
         )
     }
     
@@ -82,8 +89,9 @@ struct NoteListView: View {
                     generateRows(nearbyOnly: false)
                 }
             }
-            .navigationBarItems(leading: FilterSortButtons(sort: $sort, filter: $filter), trailing: EditButton())
-            .onAppear(perform: viewModel.refresh)
+            .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
+//            .onAppear(perform: viewModel.refresh)
+            .onAppear(perform: noteViewModel.refresh)
         )
     }
     
@@ -123,13 +131,17 @@ struct NoteListView: View {
         var notes: [Note]
         switch (nearbyOnly, self.privacyLabel) {
         case (true, PrivacyLabel.privateNote):
-            notes = viewModel.nearbyPrivateNotes
+//            notes = viewModel.nearbyPrivateNotes
+            notes = noteViewModel.nearbyPrivateNotes
         case (true, PrivacyLabel.publicNote):
-            notes = viewModel.nearbyPublicNotes
+//            notes = viewModel.nearbyPublicNotes
+            notes = noteViewModel.nearbyPublicNotes
         case (false, PrivacyLabel.privateNote):
-            notes = viewModel.privateNotes
+//            notes = viewModel.privateNotes
+            notes = noteViewModel.privateNotes
         case (false, PrivacyLabel.publicNote):
-            notes = viewModel.publicNotes
+//            notes = viewModel.publicNotes
+            notes = noteViewModel.publicNotes
         }
         
         notes = filter(notes: notes)
@@ -147,21 +159,31 @@ struct NoteListView: View {
     }
     
     private func deletePrivateNote(at offsets: IndexSet) {
+        let loggedInUserId = UserDefaults.standard.string(forKey: "serverId")
         let selectedNoteId = filteredSortedPrivateNotes[offsets.first!].noteId
         var index: Int = -1
         for i in 0..<privateNotes.count {
-            let id = privateNotes[i].noteId
+            let note = privateNotes[i]
+            let id = note.noteId
             if id == selectedNoteId {
                 index = i
+                
+                // If loggedInUserId isnt the same as the note's author, then the note is shared
+                // and we shouldn't delete it. userServerId could be empty if it's a private note
+                // and not shared
+                if loggedInUserId != note.userServerId && !note.userServerId.isEmpty {
+                    return
+                }
             }
         }
         if index > -1 {
-            viewModel.deleteNote(at: IndexSet(integer: index))
+//            viewModel.deleteNote(at: IndexSet(integer: index))
+            noteViewModel.deleteNote(at: IndexSet(integer: index))
         }
     }
     
     func filter(notes: [Note]) -> [Note] {
-        switch filter {
+        switch filterOption {
         case .all:
             return notes
         case .emergency:
@@ -177,7 +199,7 @@ struct NoteListView: View {
     
     func sort(notes: [Note]) -> [Note] {
         var sortedNotes: [Note] = notes
-        switch sort {
+        switch sortOption {
         case .new:
             sortedNotes.sort { $0.createdAt > $1.createdAt }
         case .mostUpvotes:
