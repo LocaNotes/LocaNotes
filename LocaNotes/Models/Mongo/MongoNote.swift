@@ -27,5 +27,3 @@ struct MongoNoteElement: Codable {
         case v = "__v"
     }
 }
-
-typealias MongoNote = [MongoNoteElement]

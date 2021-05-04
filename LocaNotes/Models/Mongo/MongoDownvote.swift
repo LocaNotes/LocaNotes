@@ -7,7 +7,7 @@
 import Foundation
 
 // MARK: - MongoDownvote
-struct MongoDownvote: Codable {
+struct MongoDownvoteElement: Codable {
     let downvoteId: Int32?
     let id, userID, noteID, createdAt: String
     let updatedAt: String
@@ -23,7 +23,7 @@ struct MongoDownvote: Codable {
     }
 }
 
-extension MongoDownvote: SQLTable {
+extension MongoDownvoteElement: SQLTable {
     
     // represents the sql statement to create the Note table
 //    static var createStatement: String {
@@ -57,5 +57,3 @@ extension MongoDownvote: SQLTable {
         """
     }
 }
-
-typealias Downvote = MongoDownvote

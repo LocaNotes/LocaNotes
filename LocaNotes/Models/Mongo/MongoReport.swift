@@ -24,5 +24,3 @@ struct MongoReportElement: Codable {
         case v = "__v"
     }
 }
-
-typealias MongoReport = [MongoReportElement]

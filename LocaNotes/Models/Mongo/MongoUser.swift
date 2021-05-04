@@ -16,5 +16,3 @@ struct MongoUserElement: Codable {
         case v = "__v"
     }
 }
-
-typealias MongoUser = [MongoUserElement]

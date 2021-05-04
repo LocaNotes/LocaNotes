@@ -18,5 +18,3 @@ struct MongoPrivacyElement: Codable {
         case v = "__v"
     }
 }
-
-typealias MongoPrivacy = [MongoPrivacyElement]
