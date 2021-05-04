@@ -17,7 +17,8 @@ struct NoteListView: View {
     @Binding var sortOption: SortOption
     @Binding var filterOption: FilterOption
         
-    private var privacyLabel: PrivacyLabel
+//    private var privacyLabel: PrivacyLabel
+    private var layout: NoteViewLayout
         
     private var privateNotes: [Note] {
 //        return viewModel.privateNotes
@@ -37,24 +38,43 @@ struct NoteListView: View {
         return notes
     }
     
-    init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, privacyLabel: PrivacyLabel) {
-//        self.viewModel = NoteViewModel()
+    private var stories: [Note] {
+        return noteViewModel.stories
+    }
+    
+//    init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, privacyLabel: PrivacyLabel) {
+////        self.viewModel = NoteViewModel()
+//        self._searchText = searchText
+//        self._sortOption = sort
+//        self._filterOption = filter
+//        self.privacyLabel = privacyLabel
+//    }
+    
+    init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, layout: NoteViewLayout) {
         self._searchText = searchText
         self._sortOption = sort
         self._filterOption = filter
-        self.privacyLabel = privacyLabel
+        self.layout = layout
     }
     
     var body: some View {
         SearchBarView(searchText: $searchText)
             .frame(width: UIScreen.main.bounds.width + 20, height: 40, alignment: .bottom)
         
-        switch privacyLabel {
-        case PrivacyLabel.privateNote:
+//        switch privacyLabel {
+//        case PrivacyLabel.privateNote:
+//            generatePrivateList()
+//        case PrivacyLabel.publicNote:
+//            generatePublicList()
+//        }
+        switch layout {
+        case NoteViewLayout.privateNotes:
             generatePrivateList()
-        case PrivacyLabel.publicNote:
+        case NoteViewLayout.publicNotes:
             generatePublicList()
-        }        
+        case NoteViewLayout.stories:
+            generateStoriesList()
+        }
     }
     
     func generatePublicList() -> some View {
@@ -95,6 +115,14 @@ struct NoteListView: View {
         )
     }
     
+    func generateStoriesList() -> some View {
+        List {
+            generateRows(nearbyOnly: false)
+        }
+        .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
+        .onAppear(perform: noteViewModel.refresh)
+    }
+    
     struct FilterSortButtons: View {
         @Binding var sort: SortOption
         @Binding var filter: FilterOption
@@ -129,19 +157,31 @@ struct NoteListView: View {
     
     func generateRows(nearbyOnly: Bool) -> some View {
         var notes: [Note]
-        switch (nearbyOnly, self.privacyLabel) {
-        case (true, PrivacyLabel.privateNote):
-//            notes = viewModel.nearbyPrivateNotes
+//        switch (nearbyOnly, self.privacyLabel) {
+//        case (true, PrivacyLabel.privateNote):
+////            notes = viewModel.nearbyPrivateNotes
+//            notes = noteViewModel.nearbyPrivateNotes
+//        case (true, PrivacyLabel.publicNote):
+////            notes = viewModel.nearbyPublicNotes
+//            notes = noteViewModel.nearbyPublicNotes
+//        case (false, PrivacyLabel.privateNote):
+////            notes = viewModel.privateNotes
+//            notes = noteViewModel.privateNotes
+//        case (false, PrivacyLabel.publicNote):
+////            notes = viewModel.publicNotes
+//            notes = noteViewModel.publicNotes
+//        }
+        switch (nearbyOnly, self.layout) {
+        case (true, NoteViewLayout.privateNotes):
             notes = noteViewModel.nearbyPrivateNotes
-        case (true, PrivacyLabel.publicNote):
-//            notes = viewModel.nearbyPublicNotes
+        case (true, NoteViewLayout.publicNotes):
             notes = noteViewModel.nearbyPublicNotes
-        case (false, PrivacyLabel.privateNote):
-//            notes = viewModel.privateNotes
+        case (false, NoteViewLayout.privateNotes):
             notes = noteViewModel.privateNotes
-        case (false, PrivacyLabel.publicNote):
-//            notes = viewModel.publicNotes
+        case (false, NoteViewLayout.publicNotes):
             notes = noteViewModel.publicNotes
+        case (_, NoteViewLayout.stories):
+            notes = noteViewModel.stories
         }
         
         notes = filter(notes: notes)
@@ -152,7 +192,8 @@ struct NoteListView: View {
                 self.searchText.isEmpty ? true :
                     note.body.lowercased().contains(self.searchText.lowercased())
             }), id: \.noteId) { note in
-                NoteCell(note: note, privacyLabel: privacyLabel)
+//                NoteCell(note: note, privacyLabel: privacyLabel)
+                NoteCell(note: note, layout: self.layout)
             }
             .onDelete(perform: deletePrivateNote)
         )
@@ -247,28 +288,36 @@ struct NoteCell: View {
     
     private let note: Note
     
-    private let privacyLabel: PrivacyLabel
+//    private let privacyLabel: PrivacyLabel
+    private let layout: NoteViewLayout
     
     private let userViewModel: UserViewModel
     
     @State private var username = ""
         
-    init(note: Note, privacyLabel: PrivacyLabel) {
+//    init(note: Note, privacyLabel: PrivacyLabel) {
+//        self.note = note
+//        self.privacyLabel = privacyLabel
+//        userViewModel = UserViewModel()
+////        userViewModel.getUserBy(serverId: note.userServerId, completion: { [self] (response, error) in
+////            if response == nil {
+////                print("could not query user from server")
+////                return
+////            }
+////            username = response![0].username
+////        })
+//    }
+    
+    init(note: Note, layout: NoteViewLayout) {
         self.note = note
-        self.privacyLabel = privacyLabel
+        self.layout = layout
         userViewModel = UserViewModel()
-//        userViewModel.getUserBy(serverId: note.userServerId, completion: { [self] (response, error) in
-//            if response == nil {
-//                print("could not query user from server")
-//                return
-//            }
-//            username = response![0].username
-//        })
     }
     
     var body: some View {
         VStack {
-            NavigationLink(destination: DetailView(note: note, privacyLabel: privacyLabel)) {
+//            NavigationLink(destination: DetailView(note: note, privacyLabel: privacyLabel)) {
+            NavigationLink(destination: DetailView(note: note, layout: layout)) {
                 VStack {
                     HStack {
                         Text(username)

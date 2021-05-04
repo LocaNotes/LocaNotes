@@ -18,7 +18,8 @@ struct DetailView: View {
     private let userViewModel: UserViewModel
     
     private let note: Note
-    @State private var privacyLabel: PrivacyLabel
+//    @State private var privacyLabel: PrivacyLabel
+    @State private var layout: NoteViewLayout
     @State private var noteContent = ""
     
     @State private var comments = [MongoCommentElement]()
@@ -45,9 +46,70 @@ struct DetailView: View {
     private let shareNoteSuccess: String
     private let shareNoteError: String
             
-    init (note: Note, privacyLabel: PrivacyLabel) {
+//    init (note: Note, privacyLabel: PrivacyLabel) {
+//        self.note = note
+//        self._privacyLabel = State<PrivacyLabel>(initialValue: privacyLabel)
+//        self.noteViewModel = NoteViewModel()
+//        self.downvoteViewModel = DownvoteViewModel()
+//        self.upvoteViewModel = UpvoteViewModel()
+//        self.userViewModel = UserViewModel()
+//
+//        userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+//
+//        // determine whether the downvote button should be marked as upvoted
+//        if let _ = downvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) {
+//            _isDownvoted = .init(wrappedValue: true)
+//        } else {
+//            _isDownvoted = .init(wrappedValue: false)
+//        }
+//
+//        // determine whether the upvote button should be marked as upvoted
+//        if let _ = upvoteViewModel.queryFromStorageBy(userId: userId, noteId: note.serverId) {
+//            _isUpvoted = .init(wrappedValue: true)
+//        } else {
+//            _isUpvoted = .init(wrappedValue: false)
+//        }
+//
+//        // get the number of downvotes
+//        do {
+//            let num = try String(downvoteViewModel.getNumberOfDownvotesFromStorageBy(noteId: note.serverId))
+//            _numberOfDownvotes = .init(wrappedValue: num)
+//        } catch {
+//            print("could not get number of downvotes")
+//            _numberOfDownvotes = .init(wrappedValue: "0")
+//        }
+//
+//        // get the number of upvotes
+//        do {
+//            let num = try String(upvoteViewModel.getNumberOfUpvotesFromStorageBy(noteId: note.serverId))
+//            _numberOfUpvotes = .init(wrappedValue: num)
+//        } catch {
+//            print("could not get number of upvotes")
+//            _numberOfUpvotes = .init(wrappedValue: "0")
+//        }
+//
+//        self.commentViewModel = CommentViewModel()
+//
+//        shareNoteSuccess = "Successfully shared note."
+//        shareNoteError = "Could not share note."
+//
+//        // check to see if the note is shared with the user
+//        do {
+//            let _ = try noteViewModel.checkIfSharedForLocal(noteId: note.serverId, receiverId: userId)
+//            self._privacyLabel = State<PrivacyLabel>(initialValue: .publicNote)
+//        } catch {
+//            // either something went wrong or the note is not shared with the user
+//
+//            // if we're here but the author of the note is not the logged in user, set to public note
+//            if note.userServerId != userId {
+//                self.privacyLabel = .publicNote
+//            }
+//        }
+//    }
+    
+    init (note: Note, layout: NoteViewLayout) {
         self.note = note
-        self._privacyLabel = State<PrivacyLabel>(initialValue: privacyLabel)
+        self._layout = State<NoteViewLayout>(initialValue: layout)
         self.noteViewModel = NoteViewModel()
         self.downvoteViewModel = DownvoteViewModel()
         self.upvoteViewModel = UpvoteViewModel()
@@ -92,26 +154,37 @@ struct DetailView: View {
         shareNoteSuccess = "Successfully shared note."
         shareNoteError = "Could not share note."
         
-        // check to see if the note is shared with the user
-        do {
-            let _ = try noteViewModel.checkIfSharedForLocal(noteId: note.serverId, receiverId: userId)
-            self._privacyLabel = State<PrivacyLabel>(initialValue: .publicNote)
-        } catch {
-            // either something went wrong or the note is not shared with the user
-            
-            // if we're here but the author of the note is not the logged in user, set to public note 
-            if note.userServerId != userId {
-                self.privacyLabel = .publicNote
+        // check if the note is a shared private note
+        if layout == .privateNotes {
+            // check to see if the note is shared with the user
+            do {
+                let _ = try noteViewModel.checkIfSharedForLocal(noteId: note.serverId, receiverId: userId)
+                self._layout = State<NoteViewLayout>(initialValue: .publicNotes)
+            } catch {
+                // either something went wrong or the note is not shared with the user
+                
+                // if we're here but the author of the note is not the logged in user, set to public note
+                if note.userServerId != userId {
+                    self.layout = .publicNotes
+                }
             }
         }
     }
     
     var body: some View {
-        switch privacyLabel {
-        case PrivacyLabel.privateNote:
+        //        switch privacyLabel {
+        //        case PrivacyLabel.privateNote:
+        //            generatePrivateDetail()
+        //        default:
+        //            generatePublicDetail()
+        //        }
+        switch layout {
+        case .privateNotes:
             generatePrivateDetail()
-        default:
+        case .publicNotes:
             generatePublicDetail()
+        case .stories:
+            generateStoryDetail()
         }
     }
     
@@ -483,6 +556,80 @@ struct DetailView: View {
             return
         }
         comments.insert(response!, at: 0)
+    }
+    
+    private func generateStoryDetail() -> some View {
+        VStack {
+            ScrollView {
+                VStack {
+                    Text(note.body)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    Divider()
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Menu {
+                            Button {
+                                reportNote(reportOption: ReportOption.offensiveBehavior)
+                            } label: {
+                                Text(ReportOption.offensiveBehavior.rawValue)
+                            }
+                            
+                            Button {
+                                reportNote(reportOption: ReportOption.falseInformation)
+                            } label: {
+                                Text(ReportOption.falseInformation.rawValue)
+                            }
+                            
+                            Button {
+                                reportNote(reportOption: ReportOption.other)
+                            } label: {
+                                Text(ReportOption.other.rawValue)
+                            }
+                        } label: {
+                            Label("Report", systemImage: "exclamationmark.shield")
+                        }
+                    }
+                    
+                    Divider()
+                    
+                    VStack {
+                        ForEach(comments, id: \.id) { comment in
+                            CommentView(comment: comment)
+                        }
+                    }
+                    .background(Color.gray)
+                }
+            }
+            .padding()
+            
+            ZStack(alignment: .bottom) {
+                Button(action: {
+                    showCommentSheet.toggle()
+                }) {
+                    Text("Comment...")
+                        .foregroundColor(.white)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .background(Color.purple)
+            .shadow(color: Color.black, radius: 10, x: 0, y: 10)
+            //.alignmentGuide(.bottom) { d in d[.bottom] / 2 }
+        }
+        .alert(isPresented: $showReportToast) {
+            makeReportToast(message: reportToastMessage)
+        }
+        .sheet(isPresented: $showCommentSheet, content: {
+            EditCommentView(userId: userId, noteId: note.serverId, postCommentCallback: postCommentCallback(response:error:))
+        })
+        .onAppear(perform: refreshStoryDetail)
+    }
+    
+    private func refreshStoryDetail() {
+        loadComments()
     }
 }
 

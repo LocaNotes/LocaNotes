@@ -15,13 +15,13 @@ struct MainView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            NoteView(privacyLabel: PrivacyLabel.privateNote)
+            NoteView(layout: NoteViewLayout.privateNotes)
                 .tabItem {
                     Image(systemName: "homekit")
                     Text("Home")
                 }
                 .tag(0)
-            NoteView(privacyLabel: PrivacyLabel.publicNote)
+            NoteView(layout: NoteViewLayout.publicNotes)
                 .tabItem {
                     Image(systemName: "globe")
                     Text("Social")
@@ -33,11 +33,10 @@ struct MainView: View {
                     Text("New Note")
                 }
                 .tag(3)
-            SettingsView()
-                .font(.system(size: 30, weight: .bold))
+            NoteView(layout: NoteViewLayout.stories)
                 .tabItem {
-                    Image(systemName: "gear")
-                    Text("Settings")
+                    Image(systemName: "book")
+                    Text("Stories")
                 }
                 .tag(4)
             AccountView()

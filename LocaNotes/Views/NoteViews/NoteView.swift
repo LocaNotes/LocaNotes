@@ -8,15 +8,21 @@
 import SwiftUI
 
 struct NoteView: View {
+    
     @StateObject var viewModel = NoteViewModel()
     
-    var privacyLabel: PrivacyLabel
+//    var privacyLabel: PrivacyLabel
+    var layout: NoteViewLayout
     
     // what the user types in the search bar
     @State private var searchText: String = ""
     
-    init (privacyLabel: PrivacyLabel) {
-        self.privacyLabel = privacyLabel
+//    init (privacyLabel: PrivacyLabel) {
+//        self.privacyLabel = privacyLabel
+//    }
+    
+    init (layout: NoteViewLayout) {
+        self.layout = layout
     }
     
     @State var refreshAnnos: Bool = false
@@ -28,14 +34,19 @@ struct NoteView: View {
     var body: some View {
         NavigationView {
             VStack {
-                NoteMapView(viewModel: viewModel, searchText: $searchText, privacyLabel: privacyLabel)
-                NoteListView(viewModel: viewModel, searchText: $searchText, sort: $sort, filter: $filter, privacyLabel: privacyLabel)
+                NoteMapView(viewModel: viewModel, searchText: $searchText, privacyLabel: layout == NoteViewLayout.privateNotes ? .privateNote : .publicNote)
+//                NoteListView(viewModel: viewModel, searchText: $searchText, sort: $sort, filter: $filter, privacyLabel: privacyLabel)
+                NoteListView(viewModel: viewModel, searchText: $searchText, sort: $sort, filter: $filter, layout: layout)
             }
         }
     }
 }
 
-
+enum NoteViewLayout {
+    case privateNotes
+    case publicNotes
+    case stories
+}
 
 //struct NoteView_Previews: PreviewProvider {
 //    static var previews: some View {

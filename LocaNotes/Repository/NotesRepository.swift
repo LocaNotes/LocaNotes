@@ -60,8 +60,8 @@ class NotesRepository {
         - downvotes: the number of downvotes the notes has
      - Throws: `SQLiteError.Insert` if the note could not be inserted
      */
-    func insertNewPublicNote(userId: Int32, noteTagId: Int32, privacyId: Int32, title: String, latitude: String, longitude: String, body: String, isStory: Int32, UICompletion: (() -> Void)?) throws {
-        restService.insertNote(userId: userId, privacyId: privacyId, noteTagId: noteTagId, title: title, latitude: latitude, longitude: longitude, body: body, isStory: (isStory == 1 ? true : false), completion: insertNoteCallback(response:error:), UICompletion: UICompletion)
+    func insertNewPublicNote(userId: Int32, noteTagId: Int32, privacyId: Int32, title: String, latitude: String, longitude: String, body: String, isStory: Bool, UICompletion: (() -> Void)?) throws {
+        restService.insertNote(userId: userId, privacyId: privacyId, noteTagId: noteTagId, title: title, latitude: latitude, longitude: longitude, body: body, isStory: isStory, completion: insertNoteCallback(response:error:), UICompletion: UICompletion)
     }
     
     func insertNewPrivateNote(userId: Int32, noteTagId: Int32, privacyId: Int32, title: String, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32, UICompletion: (() -> Void)?) {
@@ -151,25 +151,25 @@ class NotesRepository {
         var privacyId: Int32
         switch (mongoNoteElement.privacyID) {
         case "6061432c9a65a46b36955c44": // public
-            privacyId = 1
+            privacyId = 2
         case "606143349a65a46b36955c45": // private
-            privacyId = 2
+            privacyId = 1
         default:
-            privacyId = 2
+            privacyId = 1
         }
         
         var noteTagId: Int32
         switch (mongoNoteElement.noteTagID) {
         case "606143549a65a46b36955c46": // emergency
-            noteTagId = 1
+            noteTagId = 4
         case "606143599a65a46b36955c47": // dining
-            noteTagId = 2
-        case "6061435c9a65a46b36955c48": // meme
             noteTagId = 3
+        case "6061435c9a65a46b36955c48": // meme
+            noteTagId = 2
         case "606143609a65a46b36955c49": // other
-            noteTagId = 4
+            noteTagId = 1
         default:
-            noteTagId = 4
+            noteTagId = 1
         }
         
         let title = mongoNoteElement.title
@@ -205,8 +205,8 @@ class NotesRepository {
         restService.queryServerNotesBy(userId: userId, completion: completion)
     }
     
-    func queryAllServerPublicNotes(completion: RESTService.RestResponseReturnBlock<[MongoNoteElement]>) {
-        restService.queryAllServerPublicNotes(completion: completion)
+    func queryAllServerPublicRegularNotes(completion: RESTService.RestResponseReturnBlock<[MongoNoteElement]>) {
+        restService.queryAllServerPublicRegularNotes(completion: completion)
     }
     
     func queryAllPublicNotesFromStorage() throws -> [Note]? {

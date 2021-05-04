@@ -364,23 +364,23 @@ public class RESTService {
             
             var privacyIdServer: String
             switch (privacyId) {
-            case 1: // public
-                privacyIdServer = "6061432c9a65a46b36955c44"
-            case 2: // private
+            case 1: // private
                 privacyIdServer = "606143349a65a46b36955c45"
+            case 2: // public
+                privacyIdServer = "6061432c9a65a46b36955c44"
             default:
                 privacyIdServer = "606143349a65a46b36955c45"
             }
             
             var noteTagIdServer: String
             switch (noteTagId) {
-            case 1: // emergency
+            case 4: // emergency
                 noteTagIdServer = "606143549a65a46b36955c46"
-            case 2: // dining
+            case 3: // dining
                 noteTagIdServer = "606143599a65a46b36955c47"
-            case 3: // meme
+            case 2: // meme
                 noteTagIdServer = "6061435c9a65a46b36955c48"
-            case 4: // other
+            case 1: // other
                 noteTagIdServer = "606143609a65a46b36955c49"
             default:
                 noteTagIdServer = "606143609a65a46b36955c49"
@@ -616,7 +616,7 @@ public class RESTService {
         }.resume()
     }
     
-    func queryAllServerPublicNotes(completion: RestResponseReturnBlock<[MongoNoteElement]>) {
+    func queryAllServerPublicRegularNotes(completion: RestResponseReturnBlock<[MongoNoteElement]>) {
         var components = URLComponents()
         components.scheme = "http"
         components.host = "localhost"

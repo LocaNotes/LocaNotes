@@ -19,11 +19,16 @@ struct CreateNoteView: View {
     // used in the toggle to show the user's preference between public or private
     @State private var selectedPrivacy = PrivacyLabel.privateNote.rawValue
     
+    @State private var selectedStoryOption = StoryOptions.isRegular.rawValue
+    
     // for the privacy drawer
     @State private var showPrivacyDrawer = false
     
     // for the note tags drawer
     @State private var showNoteTagDrawer = false
+    
+    // for picking whether or note a story
+    @State private var showStoryDrawer = false
     
     // what the user types in the text editor
     @State private var noteContent = ""
@@ -54,15 +59,27 @@ struct CreateNoteView: View {
                     .disabled(self.noteContent == "" ? true : false)
                     Button(action: {
                         UIApplication.shared.endEditing(true)
+                        self.showNoteTagDrawer = false
+                        self.showStoryDrawer = false
                         self.showPrivacyDrawer.toggle()
                     }) {
                         Image(systemName: "link")
                     }
                     Button(action: {
                         UIApplication.shared.endEditing(true)
+                        self.showPrivacyDrawer = false
+                        self.showStoryDrawer = false
                         self.showNoteTagDrawer.toggle()
                     }) {
                         Image(systemName: "tray.circle")
+                    }
+                    Button(action: {
+                        UIApplication.shared.endEditing(true)
+                        self.showPrivacyDrawer = false
+                        self.showNoteTagDrawer = false
+                        self.showStoryDrawer.toggle()
+                    }) {
+                        Image(systemName: "book")
                     }
                 }
                 
@@ -80,6 +97,11 @@ struct CreateNoteView: View {
             VStack {
                 NoteTagRadioButtonsSheet(selectedTag: self.$selectedTag, show: self.$showNoteTagDrawer)
                     .offset(y: self.showNoteTagDrawer ? (UIApplication.shared.windows.last?.safeAreaInsets.bottom)! + 15 : UIScreen.main.bounds.height)
+            }
+            
+            VStack {
+                StoryRadioButtonsSheet(selectedOption: self.$selectedStoryOption, show: self.$showStoryDrawer)
+                    .offset(y: self.showStoryDrawer ? (UIApplication.shared.windows.last?.safeAreaInsets.bottom)! + 15 : UIScreen.main.bounds.height)
             }
         }
         .padding()
@@ -108,7 +130,15 @@ struct CreateNoteView: View {
             privacyId = 2
         }
         
-        noteViewModel.insertNewNote(body: noteContent, noteTagId: noteTagId, privacyId: privacyId, UICompletion: completion)
+        var isStory: Int
+        switch selectedStoryOption {
+        case StoryOptions.isStory.rawValue:
+            isStory = 1
+        default:
+            isStory = 0
+        }
+        
+        noteViewModel.insertNewNote(body: noteContent, noteTagId: noteTagId, privacyId: privacyId, isStory: isStory, UICompletion: completion)
     }
     
     private func completion() {
@@ -132,6 +162,11 @@ enum noteTagLabel: String {
 enum PrivacyLabel: String {
     case publicNote = "Public"
     case privateNote = "Private"
+}
+
+enum StoryOptions: String {
+    case isStory = "Story"
+    case isRegular = "Regular Note"
 }
 
 struct RadioButtonsSheet: View {
@@ -186,6 +221,38 @@ struct NoteTagRadioButtonsSheet: View {
                         Text(value)
                         Spacer()
                         Image(systemName: self.selectedTag == value ? "largecircle.fill.circle" : "circle")
+                    }
+                }
+            }
+        }
+        .padding(.vertical)
+        .padding(.horizontal, 25)
+        .padding(.bottom, (UIApplication.shared.windows.last?.safeAreaInsets.bottom)! + 10)
+        .background(Color(UIColor.label))
+        .foregroundColor(Color(UIColor.systemBackground))
+        .cornerRadius(30)
+    }
+}
+
+struct StoryRadioButtonsSheet: View {
+    @Binding var selectedOption: String
+    @Binding var show: Bool
+    
+    private let data = [StoryOptions.isRegular.rawValue, StoryOptions.isStory.rawValue]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Create Story?")
+                .font(.title)
+            ForEach(data, id: \.self) {value in
+                Button(action: {
+                    self.selectedOption = value
+                    self.show.toggle()
+                }) {
+                    HStack {
+                        Text(value)
+                        Spacer()
+                        Image(systemName: self.selectedOption == value ? "largecircle.fill.circle" : "circle")
                     }
                     
                 }

@@ -248,10 +248,10 @@ struct Login: View {
         userViewModel.insertUsersFromServer(users: response!)
         
         let noteViewModel = NoteViewModel()
-        noteViewModel.queryAllServerPublicNotes(completion: queryAllServerPublicNotesCallback(response:error:))
+        noteViewModel.queryAllServerPublicRegularNotes(completion: queryAllServerPublicRegularNotesCallback(response:error:))
     }
     
-    private func queryAllServerPublicNotesCallback(response: [MongoNoteElement]?, error: Error?) {
+    private func queryAllServerPublicRegularNotesCallback(response: [MongoNoteElement]?, error: Error?) {
         if response == nil {
             if error == nil {
                 restResponse = "Able to log in but received Unknown Error"
