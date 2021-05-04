@@ -85,4 +85,8 @@ class UserRepository {
     func checkIfFriends(frienderId: String, friendeeId: String, completion: RESTService.RestResponseReturnBlock<[MongoFriendElement]>) {
         restService.checkIfFriends(frienderId: frienderId, friendeeId: friendeeId, completion: completion)
     }
+    
+    func updateUser(radius: Double, userId: String, completion: RESTService.RestResponseReturnBlock<MongoUserElement>) {
+        restService.updateUser(radius: radius, userId: userId, completion: completion)
+    }
 }

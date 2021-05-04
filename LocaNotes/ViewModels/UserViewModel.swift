@@ -106,4 +106,8 @@ public class UserViewModel {
     func checkIfFriends(frienderId: String, friendeeId: String, completion: RESTService.RestResponseReturnBlock<[MongoFriendElement]>) {
         userRepository.checkIfFriends(frienderId: frienderId, friendeeId: friendeeId, completion: completion)
     }
+    
+    func updateUser(radius: Double, userId: String, completion: RESTService.RestResponseReturnBlock<MongoUserElement>) {
+        userRepository.updateUser(radius: radius, userId: userId, completion: completion)
+    }
 }

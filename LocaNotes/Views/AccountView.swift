@@ -10,33 +10,54 @@ import SwiftUI
 struct AccountView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
+    
+    @State private var radius: Double
         
     init() {
         UITableView.appearance().tableFooterView = UIView()
         UITableView.appearance().separatorStyle = .none
+        let userRadius = UserDefaults.standard.double(forKey: "userRadius")
+        self._radius = .init(wrappedValue: userRadius)
     }
     
     var body: some View {
         NavigationView {
-            List {
-                NavigationLink(destination: FriendsView()) {
-                    Text("Friends")
-                }
-                
-                NavigationLink(destination: SettingsView(), label: {
-                    Text("Settings")
-                })
-                
-                Button(action: {
-                    withAnimation {
-                        viewRouter.currentPage = .loginPage
+            VStack {
+                List {
+                    NavigationLink(destination: FriendsView()) {
+                        Text("Friends")
                     }
-                }) {
-                    Text("Log out")
+                    
+                    NavigationLink(destination: SettingsView(), label: {
+                        Text("Settings")
+                    })
+                    
+                    Button(action: {
+                        withAnimation {
+                            viewRouter.currentPage = .loginPage
+                        }
+                    }) {
+                        Text("Log out")
+                    }
                 }
+                Text("Current radius: \(radius) miles")
+                Slider(value: $radius, in: 1...100, step: 1.0)
             }
             .navigationBarTitle("Account")
         }
+        .onDisappear(perform: updateUserRadius)
+    }
+    
+    private func updateUserRadius() {
+        let userViewModel = UserViewModel()
+        let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        userViewModel.updateUser(radius: self.radius, userId: userId, completion: { (response, error) in
+            if response == nil {
+                print("update radius error: \(error?.localizedDescription)")
+            } else {
+                UserDefaults.standard.set(radius, forKey: "userRadius")
+            }
+        })
     }
 }
 

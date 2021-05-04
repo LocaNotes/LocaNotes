@@ -194,6 +194,7 @@ struct Login: View {
         UserDefaults.standard.set(user?.username, forKey: "username")
         UserDefaults.standard.set(user?.serverId, forKey: "serverId")
         UserDefaults.standard.set(user?.userId, forKey: "userId")
+        UserDefaults.standard.set(response?[0].radius, forKey: "userRadius")
         DispatchQueue.main.async {
             withAnimation {
                 viewRouter.currentPage = .mainPage

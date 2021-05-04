@@ -8,11 +8,12 @@ import Foundation
 struct MongoUserElement: Codable {
     let id, firstName, lastName, email: String
     let username, password, createdAt, updatedAt: String
-    let v: Int
+    let v, radius: Int
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case firstName, lastName, email, username, password, createdAt, updatedAt
         case v = "__v"
+        case radius
     }
 }

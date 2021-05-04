@@ -383,7 +383,10 @@ public class NoteViewModel: ObservableObject {
             self.stories.removeAll()
             var temp: [Note] = []
             for note in self.notes {
-                let userFilterRadiusInMeters = 80467.2 // 50 miles
+                let userRadius = UserDefaults.standard.double(forKey: "userRadius")
+//                let userFilterRadiusInMeters = 80467.2 // 50 miles
+                // convert to meters
+                let userFilterRadiusInMeters = userRadius * 1609.344
                 
                 guard let latitude = Double(String(note.latitude)) else { return }
                 guard let longitude = Double(String(note.longitude)) else { return }
@@ -394,17 +397,25 @@ public class NoteViewModel: ObservableObject {
                 let createdAt = Double(note.createdAt)
                 let difference = now - createdAt
                 
+                let userId = UserDefaults.standard.integer(forKey: "userId")
+                
                 // only show stories if they are no older than 24 hours
                 if difference < 86400 {
+                    let userServerId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+                    
                     if note.isStory == 1 {
+                        
                         // add nearby public stories
                         if note.privacyId == 2 {
                             if (distance < userFilterRadiusInMeters) {
                                 temp.append(note)
                             }
-                        } else {
+                        } else if note.userId == userId {
+                            // add stories that the user themself has written
+                            temp.append(note)
+                        }
+                        else {
                             // add shared private stories
-                            let userServerId = UserDefaults.standard.string(forKey: "serverId") ?? ""
                             do {
                                 let _ = try self.checkIfSharedForLocal(noteId: note.serverId, receiverId: userServerId)
                                 temp.append(note)

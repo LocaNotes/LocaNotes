@@ -1264,6 +1264,36 @@ public class RESTService {
             completion?(share, nil)
         }.resume()
     }
+    
+    func updateUser(radius: Double, userId: String, completion: RestResponseReturnBlock<MongoUserElement>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/user/updateuserradius/\(userId)"
+        
+        let queryItemRadius = URLQueryItem(name: "radius", value: String(radius))
+        
+        components.queryItems = [queryItemRadius]
+        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+                
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "PATCH"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let user = try? decoder.decode(MongoUserElement.self, from: data!)
+            completion?(user, nil)
+        }.resume()
+    }
 }
 
 protocol RestErrorProtocol: LocalizedError {

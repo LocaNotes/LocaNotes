@@ -650,7 +650,7 @@ struct CommentView: View {
         self.comment = comment
         userViewModel = UserViewModel()
         currentUserId = UserDefaults.standard.string(forKey: "serverId") ?? ""
-        _user = .init(wrappedValue: MongoUserElement(id: "", firstName: "", lastName: "", email: "", username: "", password: "", createdAt: "", updatedAt: "", v: -1))
+        _user = .init(wrappedValue: MongoUserElement(id: "", firstName: "", lastName: "", email: "", username: "", password: "", createdAt: "", updatedAt: "", v: -1, radius: 50))
     }
     
     var body: some View {

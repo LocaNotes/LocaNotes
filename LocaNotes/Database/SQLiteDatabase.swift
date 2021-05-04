@@ -1798,7 +1798,7 @@ extension SQLiteDatabase {
 
 extension SQLiteDatabase {
     func insertReportTag(serverId: String, label: String, createdAt: String, updatedAt: String, v: Int32) throws {
-        let insertSql = "INSERT INTO Upvote (ServerId, Label, CreatedAt, UpdatedAt, V) VALUES (?, ?, ?, ?, ?);"
+        let insertSql = "INSERT INTO ReportTag (ServerId, Label, CreatedAt, UpdatedAt, V) VALUES (?, ?, ?, ?, ?);"
         
         let insertStatement = try prepareStatement(sql: insertSql)
         defer {
