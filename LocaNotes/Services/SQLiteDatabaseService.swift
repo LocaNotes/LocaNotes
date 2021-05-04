@@ -79,7 +79,7 @@ public class SQLiteDatabaseService {
                     try db.createTable(table: Comment.self)
                     
                     // create Downvote table
-                    try db.createTable(table: Downvote.self)
+                    try db.createTable(table: MongoDownvoteElement.self)
                     
                     // create Upvote table
                     try db.createTable(table: Upvote.self)
@@ -97,11 +97,14 @@ public class SQLiteDatabaseService {
                                 do {
                                     try db.insertReportTag(serverId: serverId, label: label, createdAt: createdAt, updatedAt: updatedAt, v: v)
                                 } catch {
-                                    print(error.localizedDescription)
+                                    print("error fetching report tags: \(error.localizedDescription)")
                                 }
                             }
                         }
                     }
+                    
+                    // create Share table
+                    try db.createTable(table: MongoShareElement.self)
                     
                     // set a key saying that the database is made (prevent a new DB getting created every time)
                     UserDefaults.standard.set(true, forKey: "is_db_created")
@@ -237,7 +240,7 @@ public class SQLiteDatabaseService {
         return try db.queryAllPrivacies()
     }
     
-    func queryAllDownvotes() throws -> [Downvote]? {
+    func queryAllDownvotes() throws -> [MongoDownvoteElement]? {
         return try db.queryAllDownvotes()
     }
     
@@ -245,7 +248,7 @@ public class SQLiteDatabaseService {
         return try db.insertDownvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
     }
     
-    func queryDownvoteBy(userId: String, noteId: String) throws -> Downvote? {
+    func queryDownvoteBy(userId: String, noteId: String) throws -> MongoDownvoteElement? {
         return try db.queryDownvoteBy(userId: userId, noteId: noteId)
     }
     
@@ -275,6 +278,22 @@ public class SQLiteDatabaseService {
 
     func getNumberOfUpvotesBy(noteId: String) throws -> Int {
         return try db.getNumberOfUpvotesBy(noteId: noteId)
+    }
+    
+    func insertShare(serverId: String, noteId: String, receiverId: String, createdAt: String, updatedAt: String, v: Int) throws {
+        try db.insertShare(serverId: serverId, noteId: noteId, receiverId: receiverId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+    }
+    
+    func checkIfSharedFor(noteId: String, receiverId: String) throws -> MongoShareElement {
+        return try db.checkIfSharedFor(noteId: noteId, receiverId: receiverId)
+    }
+    
+    func updateNote(noteId: Int32, serverId: String, userServerId: String) throws {
+        try db.updateNote(noteId: noteId, serverId: serverId, userServerId: userServerId)
+    }
+    
+    func selectNoteBy(noteId: Int32) throws -> Note {
+        return try db.selectNoteBy(noteId: noteId)
     }
 }
 

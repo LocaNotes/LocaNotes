@@ -14,15 +14,16 @@ public class NoteViewModel: ObservableObject {
     // all notes
     @Published var notes: [Note] = []
     
+    // private notes that the user has written and private notes shared to the user
     @Published var privateNotes: [Note] = []
     
-    // only the notes that are nearby the user
-    var nearbyPrivateNotes: [Note] = []
+    // only the private notes that are nearby the user
+    @Published var nearbyPrivateNotes: [Note] = []
     
     // all public notes except for ones written by the user
     @Published var publicNotes: [Note] = []
     
-    var nearbyPublicNotes: [Note] = []
+    @Published var nearbyPublicNotes: [Note] = []
         
     private let notesRepository: NotesRepository
     
@@ -43,35 +44,20 @@ public class NoteViewModel: ObservableObject {
      Queries all notes from the database and updates `notes` and `nearbyNotes`
      */
     public func refresh() {
-//        guard let notes: [Note] = databaseService.queryAllNotes() else {
-//            print("query returned nil")
-//            return
-//        }
-        
         guard let notes = self.queryAllFromStorage() else {
             print("queryAllFromStorage returned nil")
             return
         }
         
-        let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
-//            let password = try keychainService.getGenericPasswordFor(account: username, service: "storePassword")
-        
-//        guard let allNotesWrittenByCurrentUser: [Note] = self.queryNotesBy(userId: userId) else {
-//            print("queryNotesBy returned nil")
-//            return
-//        }
-        
-        for note in notes {
-            print("\(note.noteId) | \(note.userId) | \(note.latitude) | \(note.longitude) | \(note.createdAt) | \(note.body.substring(start: 0, offset: note.body.count / 2))")
+        DispatchQueue.main.async {
+            self.notes = notes
         }
         
-        self.notes = notes
+        self.filterForAllPrivateNotes()
+        self.filterForNearbyPrivateNotes()
         
-        filterForAllPrivateNotes()
-        filterForNearbyPrivateNotes()
-        
-        queryAllPublicNotesFromStorage()
-        filterForNearbyPublicNotes()
+        self.queryAllPublicNotesFromStorage()
+        self.filterForNearbyPublicNotes()
     }
     
     private func queryNotesBy(userId: Int32) -> [Note]? {
@@ -189,6 +175,7 @@ public class NoteViewModel: ObservableObject {
     
     func insertNewPrivateNote(userId: Int32, noteTagId: Int32, privacyId: Int32, title: String, latitude: String, longitude: String, createdAt: Int32, body: String, isStory: Int32, upvotes: Int32, downvotes: Int32, UICompletion: (() -> Void)?) {
         notesRepository.insertNewPrivateNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes, UICompletion: UICompletion)
+        self.refresh()
     }
     
     func insertNotesFromServer(notes: [MongoNoteElement]) {
@@ -237,7 +224,7 @@ public class NoteViewModel: ObservableObject {
                         return
                     }
                         
-                    try notesRepository.insertNoteLocally(
+                    notesRepository.insertNoteLocally(
                         serverId: serverId,
                         userId: user.userId,
                         userServerId: userServerId,
@@ -279,17 +266,19 @@ public class NoteViewModel: ObservableObject {
      the note is within the user's set radius.
      */
     func filterForNearbyPrivateNotes() {
-        nearbyPrivateNotes.removeAll()
-        for note in privateNotes {
-            let userFilterRadiusInMeters = 80467.2 // 50 miles
-            
-            guard let latitude = Double(String(note.latitude)) else { return }
-            guard let longitude = Double(String(note.longitude)) else { return }
-            
-            let distance = locationViewModel.getDistanceBetweenNoteAndUser(latitude: latitude, longitude: longitude)
-                        
-            if (distance < userFilterRadiusInMeters) {
-                nearbyPrivateNotes.append(note)
+        DispatchQueue.main.async {
+            self.nearbyPrivateNotes.removeAll()
+            for note in self.privateNotes {
+                let userFilterRadiusInMeters = 80467.2 // 50 miles
+                
+                guard let latitude = Double(String(note.latitude)) else { return }
+                guard let longitude = Double(String(note.longitude)) else { return }
+                
+                let distance = self.locationViewModel.getDistanceBetweenNoteAndUser(latitude: latitude, longitude: longitude)
+                            
+                if (distance < userFilterRadiusInMeters) {
+                    self.nearbyPrivateNotes.append(note)
+                }
             }
         }
     }
@@ -299,19 +288,23 @@ public class NoteViewModel: ObservableObject {
             guard let publicNotes = try notesRepository.queryAllPublicNotesFromStorage() else {
                 return
             }
-            self.publicNotes = publicNotes
+            DispatchQueue.main.async {
+                self.publicNotes = publicNotes
+            }
         } catch {
             print("\(error.localizedDescription)")
         }
     }
     
     func filterForNearbyPublicNotes() {
-        let userFilterRadiusInMeters = 80467.2 // 50 miles
-        self.nearbyPublicNotes = self.publicNotes.filter { note in
-            guard let latitude = Double(String(note.latitude)) else { return false }
-            guard let longitude = Double(String(note.longitude)) else { return false }
-            let distance = locationViewModel.getDistanceBetweenNoteAndUser(latitude: latitude, longitude: longitude)
-            return distance < userFilterRadiusInMeters
+        DispatchQueue.main.async {
+            let userFilterRadiusInMeters = 80467.2 // 50 miles
+            self.nearbyPublicNotes = self.publicNotes.filter { note in
+                guard let latitude = Double(String(note.latitude)) else { return false }
+                guard let longitude = Double(String(note.longitude)) else { return false }
+                let distance = self.locationViewModel.getDistanceBetweenNoteAndUser(latitude: latitude, longitude: longitude)
+                return distance < userFilterRadiusInMeters
+            }
         }
     }
     
@@ -328,7 +321,49 @@ public class NoteViewModel: ObservableObject {
                 privacyId = privacy.privacyId
             }
         }
+        
         let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
-        self.privateNotes = notes.filter { $0.userId == userId && $0.privacyId == privacyId }
+        let userServerId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        let filteredNotes = self.notes.filter {
+            do {
+                let _ = try self.checkIfSharedForLocal(noteId: $0.serverId, receiverId: userServerId)
+                return true 
+            } catch {
+                return $0.userId == userId && $0.privacyId == privacyId
+            }
+        }
+        DispatchQueue.main.async {
+            self.privateNotes = filteredNotes
+        }
+    }
+    
+    func checkIfSharedForLocal(noteId: String, receiverId: String) throws -> MongoShareElement {
+        return try notesRepository.checkIfSharedForLocal(noteId: noteId, receiverId: receiverId)
+    }
+    
+    func checkIfSharedFor(noteId: String, receiverId: String, completion: RESTService.RestResponseReturnBlock<[MongoShareElement]>) {
+        notesRepository.checkIfSharedFor(noteId: noteId, receiverId: receiverId, completion: completion)
+    }
+    
+    func getSharedNotesFor(receiverId: String) {
+        notesRepository.getSharedNotesFor(receiverId: receiverId, completion: { (response, error) in
+            if response == nil {
+                return
+            }
+            self.insertNotesFromServer(notes: response!)
+            self.refresh()
+        })
+    }
+    
+    func sharePrivateNoteWith(noteId: String, receiverId: String, completion: RESTService.RestResponseReturnBlock<MongoShareElement>) {
+        notesRepository.sharePrivateNoteWith(noteId: noteId, receiverId: receiverId, completion: completion)
+    }
+    
+    func pushToServer(note: Note, completion: RESTService.RestResponseReturnBlock<MongoNoteElement>) {
+        notesRepository.pushToServer(note: note, completion: completion)
+    }
+    
+    func selectNoteBy(noteId: Int32) throws -> Note {
+        return try notesRepository.selectNoteBy(noteId: noteId)
     }
 }

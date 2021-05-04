@@ -8,7 +8,7 @@
 import Foundation
 
 public class DownvoteViewModel {
-    var downvotes: [Downvote] = []
+    var downvotes: [MongoDownvoteElement] = []
 
     private let downvoteRepository: DownvoteRepository
 
@@ -16,11 +16,11 @@ public class DownvoteViewModel {
         self.downvoteRepository = DownvoteRepository()
     }
     
-    func queryAllFromServer(completion: RESTService.RestResponseReturnBlock<[MongoDownvote]>) {
+    func queryAllFromServer(completion: RESTService.RestResponseReturnBlock<[MongoDownvoteElement]>) {
         downvoteRepository.queryAllFromServer(completion: completion)
     }
     
-    func queryFromStorageBy(userId: String, noteId: String) -> Downvote? {
+    func queryFromStorageBy(userId: String, noteId: String) -> MongoDownvoteElement? {
         do {
             return try downvoteRepository.queryFromStorageBy(userId: userId, noteId: noteId)
         } catch {
@@ -28,7 +28,7 @@ public class DownvoteViewModel {
         }
     }
     
-    func insert(userId: String, noteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvote>) {
+    func insert(userId: String, noteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvoteElement>) {
         downvoteRepository.insert(userId: userId, noteId: noteId, completion: completion)
     }
     
@@ -36,7 +36,7 @@ public class DownvoteViewModel {
         try downvoteRepository.insertIntoStorage(serverId: serverId, userServerId: userId, noteServerId: noteId, createdAt: createdAt, updatedAt: updatedAt, v: v)
     }
     
-    func delete(downvoteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvote>) {
+    func delete(downvoteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvoteElement>) {
         downvoteRepository.delete(downvoteId: downvoteId, completion: completion)
     }
     

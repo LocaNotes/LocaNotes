@@ -1367,7 +1367,7 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func queryAllDownvotes() throws -> [Downvote] {
+    func queryAllDownvotes() throws -> [MongoDownvoteElement] {
         let querySql  = "SELECT * FROM Downvote;"
         guard let queryStatement = try? prepareStatement(sql: querySql) else {
             throw SQLiteError.Prepare(message: errorMessage)
@@ -1376,7 +1376,7 @@ extension SQLiteDatabase {
             sqlite3_finalize(queryStatement)
         }
         
-        var downvotes: [Downvote] = []
+        var downvotes: [MongoDownvoteElement] = []
         while (sqlite3_step(queryStatement) == SQLITE_ROW) {
             
             // get downvote id
@@ -1420,7 +1420,7 @@ extension SQLiteDatabase {
             // get created at
             let v = sqlite3_column_int(queryStatement, 6)
             
-            let downvote = Downvote(
+            let downvote = MongoDownvoteElement(
                 downvoteId: downvoteId,
                 id: serverId,
                 userID: userServerId,
@@ -1463,7 +1463,7 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func queryDownvoteBy(userId: String, noteId: String) throws -> Downvote? {
+    func queryDownvoteBy(userId: String, noteId: String) throws -> MongoDownvoteElement? {
         let querySql  = "SELECT * FROM Downvote WHERE UserServerId LIKE ? AND NoteServerId LIKE ?;"
         guard let queryStatement = try? prepareStatement(sql: querySql) else {
             throw SQLiteError.Prepare(message: errorMessage)
@@ -1479,7 +1479,7 @@ extension SQLiteDatabase {
             throw SQLiteError.Bind(message: errorMessage)
         }
         
-        var downvote: Downvote
+        var downvote: MongoDownvoteElement
         if sqlite3_step(queryStatement) == SQLITE_ROW {
             
             // get downvote id
@@ -1523,7 +1523,7 @@ extension SQLiteDatabase {
             // get created at
             let v = sqlite3_column_int(queryStatement, 6)
             
-            downvote = Downvote(
+            downvote = MongoDownvoteElement(
                 downvoteId: downvoteId,
                 id: serverId,
                 userID: userServerId,
@@ -1816,6 +1816,220 @@ extension SQLiteDatabase {
         }
         
         guard sqlite3_step(insertStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
+}
+
+extension SQLiteDatabase {
+    func insertShare(serverId: String, noteId: String, receiverId: String, createdAt: String, updatedAt: String, v: Int) throws {
+        let insertSql = "INSERT INTO SHARE (ServerId, NoteId, ReceiverId, CreatedAt, UpdatedAt, V) VALUES (?, ?, ?, ?, ?, ?);"
+        let insertStatement = try prepareStatement(sql: insertSql)
+        defer {
+            sqlite3_finalize(insertStatement)
+        }
+        guard
+            sqlite3_bind_text(insertStatement, 1, serverId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 2, noteId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 3, receiverId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 4, createdAt, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(insertStatement, 5, updatedAt, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_int(insertStatement, 6, Int32(v)) == SQLITE_OK
+
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        guard sqlite3_step(insertStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
+}
+
+extension SQLiteDatabase {
+    func checkIfSharedFor(noteId: String, receiverId: String) throws -> MongoShareElement {
+        let querySql  = "SELECT * FROM Share WHERE NoteId LIKE ? AND ReceiverId LIKE ?;"
+        guard let queryStatement = try? prepareStatement(sql: querySql) else {
+            throw SQLiteError.Prepare(message: errorMessage)
+        }
+        defer {
+            sqlite3_finalize(queryStatement)
+        }
+        
+        guard
+            sqlite3_bind_text(queryStatement, 1, noteId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(queryStatement, 2, receiverId, -1, SQLITE_TRANSIENT) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        var share: MongoShareElement
+        
+        if sqlite3_step(queryStatement) == SQLITE_ROW {
+            
+            let id = Int(sqlite3_column_int(queryStatement, 0))
+            
+            guard let queryResultCol1 = sqlite3_column_text(queryStatement, 1) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let serverId = String(cString: queryResultCol1)
+            
+            guard let queryResultCol2 = sqlite3_column_text(queryStatement, 2) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let noteId = String(cString: queryResultCol2)
+            
+            guard let queryResultCol3 = sqlite3_column_text(queryStatement, 3) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let receiverId = String(cString: queryResultCol3)
+            
+            guard let queryResultCol4 = sqlite3_column_text(queryStatement, 4) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let createdAt = String(cString: queryResultCol4)
+            
+            guard let queryResultCol5 = sqlite3_column_text(queryStatement, 5) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let updatedAt = String(cString: queryResultCol5)
+            
+            let v = Int(sqlite3_column_int(queryStatement, 6))
+            
+            share = MongoShareElement(shareId: id, id: serverId, noteID: noteId, receiverID: receiverId, createdAt: createdAt, updatedAt: updatedAt, v: v)
+        } else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+        return share
+    }
+}
+
+extension SQLiteDatabase {
+    func updateNote(noteId: Int32, serverId: String, userServerId: String) throws {
+        let updateSql = "UPDATE Note SET ServerId = ?, UserServerId = ? WHERE NoteId = ?;"
+        let updateStatement = try prepareStatement(sql: updateSql)
+        defer {
+            sqlite3_finalize(updateStatement)
+        }
+        guard
+            sqlite3_bind_text(updateStatement, 1, serverId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_text(updateStatement, 2, userServerId, -1, SQLITE_TRANSIENT) == SQLITE_OK &&
+            sqlite3_bind_int(updateStatement, 3, noteId) == SQLITE_OK
+        else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        guard sqlite3_step(updateStatement) == SQLITE_DONE else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+    }
+}
+
+extension SQLiteDatabase {
+    func selectNoteBy(noteId: Int32) throws -> Note {
+        let querySql  = "SELECT * FROM Note WHERE NoteId LIKE ?;"
+        guard let queryStatement = try? prepareStatement(sql: querySql) else {
+            throw SQLiteError.Prepare(message: errorMessage)
+        }
+        defer {
+            sqlite3_finalize(queryStatement)
+        }
+        
+        guard sqlite3_bind_int(queryStatement, 1, noteId) == SQLITE_OK else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        var note: Note
+        
+        if sqlite3_step(queryStatement) == SQLITE_ROW {
+            
+            // get note id
+            let noteId = sqlite3_column_int(queryStatement, 0)
+
+            // get server id
+            guard let queryResultCol1 = sqlite3_column_text(queryStatement, 1) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let serverId = String(cString: queryResultCol1)
+
+            // get user server id
+            guard let queryResultCol2 = sqlite3_column_text(queryStatement, 2) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let userServerId = String(cString: queryResultCol2)
+
+            // get user id
+            let userId = sqlite3_column_int(queryStatement, 3)
+
+            // get note tag id
+            let noteTagId = sqlite3_column_int(queryStatement, 4)
+
+            // get privacy id
+            let privacyId = sqlite3_column_int(queryStatement, 5)
+
+            // get latitude
+            guard let queryResultCol6 = sqlite3_column_text(queryStatement, 6) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let latitude = String(cString: queryResultCol6)
+
+            // get longitude
+            guard let queryResultCol7 = sqlite3_column_text(queryStatement, 7) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let longitude = String(cString: queryResultCol7)
+
+            // get timestamp
+            let createdAt = sqlite3_column_int(queryStatement, 8)
+            
+            // get title
+            guard let queryResultCol9 = sqlite3_column_text(queryStatement, 9) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let title = String(cString: queryResultCol9)
+
+            // get body
+            guard let queryResultCol10 = sqlite3_column_text(queryStatement, 10) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let body = String(cString: queryResultCol10)
+
+            // get isStory
+            let isStory = sqlite3_column_int(queryStatement, 11)
+
+            // get upvotes
+            let upvotes = sqlite3_column_int(queryStatement, 12)
+
+            // get downvotes
+            let downvotes = sqlite3_column_int(queryStatement, 13)
+            
+            note = Note(
+                noteId: noteId,
+                serverId: serverId,
+                userServerId: userServerId,
+                userId: userId,
+                privacyId: privacyId,
+                noteTagId: noteTagId,
+                title: title,
+                latitude: latitude,
+                longitude: longitude,
+                createdAt: createdAt,
+                body: body,
+                isStory: isStory,
+                downvotes: downvotes,
+                upvotes: upvotes
+            )
+            return note
+        } else {
             throw SQLiteError.Step(message: errorMessage)
         }
     }

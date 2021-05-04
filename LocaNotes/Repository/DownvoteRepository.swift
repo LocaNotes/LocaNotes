@@ -16,19 +16,19 @@ public class DownvoteRepository {
         self.restService = RESTService()
     }
     
-    func queryAllFromServer(completion: RESTService.RestResponseReturnBlock<[MongoDownvote]>) {
+    func queryAllFromServer(completion: RESTService.RestResponseReturnBlock<[MongoDownvoteElement]>) {
         restService.queryAllDownvotes(completion: completion)
     }
     
-    func queryAllFromStorage() throws -> [Downvote]? {
+    func queryAllFromStorage() throws -> [MongoDownvoteElement]? {
         return try sqliteDatabaseService.queryAllDownvotes()
     }
     
-    func queryFromStorageBy(userId: String, noteId: String) throws -> Downvote? {
+    func queryFromStorageBy(userId: String, noteId: String) throws -> MongoDownvoteElement? {
         return try sqliteDatabaseService.queryDownvoteBy(userId: userId, noteId: noteId)
     }
     
-    func insert(userId: String, noteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvote>) {
+    func insert(userId: String, noteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvoteElement>) {
         restService.insertDownvote(userId: userId, noteId: noteId, restCompletion: insertCallback(response:error:completion:), insertCompletion: completion)
     }
     
@@ -40,7 +40,7 @@ public class DownvoteRepository {
         }
     }
     
-    func delete(downvoteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvote>) {
+    func delete(downvoteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvoteElement>) {
         //restService.deleteDownvote(downvoteId: downvoteId, completion: completion)
         restService.deleteDownvote(downvoteId: downvoteId, restCompletion: { [self] (response, error, completion) in
             if response == nil {
@@ -57,7 +57,7 @@ public class DownvoteRepository {
         }, deleteCompletion: completion)
     }
     
-    func insertCallback(response: MongoDownvote?, error: Error?, completion: RESTService.RestResponseReturnBlock<MongoDownvote>) {
+    func insertCallback(response: MongoDownvoteElement?, error: Error?, completion: RESTService.RestResponseReturnBlock<MongoDownvoteElement>) {
         if response == nil {
             completion?(response, error)
         } else {

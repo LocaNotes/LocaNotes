@@ -9,42 +9,49 @@ import SwiftUI
 
 struct DetailView: View {
     
-    let viewModel: NoteViewModel
-    let note: Note
-    let privacyLabel: PrivacyLabel
-    
-    @State var noteContent = ""
-    
-    @State var editing = false
-        
-    @State var isDownvoted: Bool
-    @State var isUpvoted: Bool
-    
-    @State var numberOfDownvotes: String
-    @State var numberOfUpvotes: String
-    
-    let downvoteViewModel: DownvoteViewModel
-    let upvoteViewModel: UpvoteViewModel
-    
-    let userId: String
-    
-    let commentViewModel: CommentViewModel
-    
-    @State var comments = [MongoCommentElement]()
-    
     @Environment(\.presentationMode) var mode: Binding<PresentationMode>
     
-    @State var showCommentSheet: Bool = false
+    private let noteViewModel: NoteViewModel
+    private let downvoteViewModel: DownvoteViewModel
+    private let upvoteViewModel: UpvoteViewModel
+    private let commentViewModel: CommentViewModel
+    private let userViewModel: UserViewModel
     
-    @State var showReportToast: Bool = false
-    @State var reportToastMessage: String = ""
+    private let note: Note
+    @State private var privacyLabel: PrivacyLabel
+    @State private var noteContent = ""
+    
+    @State private var comments = [MongoCommentElement]()
+    
+    @State private var editing = false
+        
+    @State private var isDownvoted: Bool
+    @State private var numberOfDownvotes: String
+    @State private var isUpvoted: Bool
+    @State private var numberOfUpvotes: String
+    
+    private let userId: String
+    
+    @State private var showCommentSheet: Bool = false
+    
+    @State private var showReportToast: Bool = false
+    @State private var reportToastMessage: String = ""
+    
+    @State private var friends: [MongoUserElement] = []
+    
+    @State private var showToast: Bool = false
+    @State private var toastMessage: String = ""
+    @State private var toastTitle: String = ""
+    private let shareNoteSuccess: String
+    private let shareNoteError: String
             
     init (note: Note, privacyLabel: PrivacyLabel) {
         self.note = note
-        self.privacyLabel = privacyLabel
-        self.viewModel = NoteViewModel()
+        self._privacyLabel = State<PrivacyLabel>(initialValue: privacyLabel)
+        self.noteViewModel = NoteViewModel()
         self.downvoteViewModel = DownvoteViewModel()
         self.upvoteViewModel = UpvoteViewModel()
+        self.userViewModel = UserViewModel()
         
         userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
         
@@ -81,6 +88,22 @@ struct DetailView: View {
         }
         
         self.commentViewModel = CommentViewModel()
+        
+        shareNoteSuccess = "Successfully shared note."
+        shareNoteError = "Could not share note."
+        
+        // check to see if the note is shared with the user
+        do {
+            let _ = try noteViewModel.checkIfSharedForLocal(noteId: note.serverId, receiverId: userId)
+            self._privacyLabel = State<PrivacyLabel>(initialValue: .publicNote)
+        } catch {
+            // either something went wrong or the note is not shared with the user
+            
+            // if we're here but the author of the note is not the logged in user, set to public note 
+            if note.userServerId != userId {
+                self.privacyLabel = .publicNote
+            }
+        }
     }
     
     var body: some View {
@@ -114,19 +137,94 @@ struct DetailView: View {
                 Button(action: {
                     self.editing.toggle()
                     UIApplication.shared.endEditing(true)
-                    viewModel.updateNoteBody(noteId: note.noteId, body: self.noteContent)
+                    noteViewModel.updateNoteBody(noteId: note.noteId, body: self.noteContent)
                     self.mode.wrappedValue.dismiss()
                 }) {
                     Image(systemName: "pencil")
                 }
                 .padding()
                 .disabled(self.noteContent == note.body ? true : false)
+                
+                Menu {
+                    ForEach(friends, id: \.id) { friend in
+                        Button(action: {
+                            sharePrivateNoteWith(receiverId: friend.id)
+                        }, label: {
+                            Text(friend.username)
+                        })
+                    }
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
             })
             .padding()
-            .onAppear(perform: self.copyNoteContent)
+            .alert(isPresented: $showToast) {
+                makeToast(title: toastTitle, message: toastMessage)
+            }
+            .onAppear(perform: preparePrivateDetail)
     }
     
-    func generatePublicDetail() -> some View {
+    private func makeToast(title: String, message: String) -> Alert {
+        return Alert(title: Text(title), message: Text(message), dismissButton: .cancel())
+    }
+    
+    private func showErrorToast(error: String) {
+        toastTitle = "Error"
+        toastMessage = error
+        showToast = true
+    }
+    
+    private func showSuccessToast(message: String) {
+        toastTitle = "Success"
+        toastMessage = message
+        showToast = true
+    }
+    
+    private func sharePrivateNoteWith(receiverId: String) {
+        if note.serverId.isEmpty {
+            // push note to server, update in local db, then share
+            noteViewModel.pushToServer(note: note) { (response, error) in
+                do {
+                    let updatedNote = try noteViewModel.selectNoteBy(noteId: note.noteId)
+                    noteViewModel.sharePrivateNoteWith(noteId: updatedNote.serverId, receiverId: receiverId, completion: { (response, error) in
+                        if response == nil {
+                            showErrorToast(error: shareNoteError)
+                        } else {
+                            showSuccessToast(message: shareNoteSuccess)
+                        }
+                    })
+                } catch {
+                    showErrorToast(error: shareNoteError)
+                }
+            }
+        } else {
+            // just share
+            noteViewModel.sharePrivateNoteWith(noteId: note.serverId, receiverId: receiverId, completion: { (response, error) in
+                if response == nil {
+                    showErrorToast(error: shareNoteError)
+                } else {
+                    showSuccessToast(message: shareNoteSuccess)
+                }
+            })
+        }
+    }
+    
+    private func loadFriendsList() {
+        userViewModel.getFriendListFor(userId: userId, completion: { [self] (response, error) in
+            if response == nil {
+                self.friends = []
+            } else {
+                self.friends = response!
+            }
+        })
+    }
+    
+    private func preparePrivateDetail() {
+        self.copyNoteContent()
+        self.loadFriendsList()
+    }
+    
+    private func generatePublicDetail() -> some View {
         VStack {
             ScrollView {
                 VStack {

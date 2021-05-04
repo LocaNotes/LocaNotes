@@ -212,4 +212,59 @@ class NotesRepository {
     func queryAllPublicNotesFromStorage() throws -> [Note]? {
         return try? sqliteDatabaseService.queryAllPublicNotes()
     }
+    
+    func checkIfSharedFor(noteId: String, receiverId: String, completion: RESTService.RestResponseReturnBlock<[MongoShareElement]>) {
+        restService.checkIfSharedFor(noteId: noteId, receiverId: receiverId, completion: completion)
+    }
+    
+    func getSharedNotesFor(receiverId: String, completion: RESTService.RestResponseReturnBlock<[MongoNoteElement]>) {
+        
+        // populate table locally
+        restService.getSharesFor(receiverId: receiverId, completion: { (response, error) in
+            guard let response = response else {
+                return
+            }
+            do {
+                for share in response {
+                    try self.sqliteDatabaseService.insertShare(serverId: share.id, noteId: share.noteID, receiverId: share.receiverID, createdAt: share.createdAt, updatedAt: share.updatedAt, v: share.v)
+                }
+                
+                // get actual notes
+                self.restService.getSharedNotesFor(receiverId: receiverId, completion: completion)
+            } catch {
+                print("\(error.localizedDescription)")
+            }
+        })
+    }
+    
+    func checkIfSharedForLocal(noteId: String, receiverId: String) throws -> MongoShareElement {
+        return try sqliteDatabaseService.checkIfSharedFor(noteId: noteId, receiverId: receiverId)
+    }
+    
+    func sharePrivateNoteWith(noteId: String, receiverId: String, completion: RESTService.RestResponseReturnBlock<MongoShareElement>) {
+        restService.sharePrivateNoteWith(noteId: noteId, receiverId: receiverId, completion: completion)
+    }
+    
+    func pushToServer(note: Note, completion: RESTService.RestResponseReturnBlock<MongoNoteElement>) {
+        restService.insertNote(userId: note.userId, privacyId: note.privacyId, noteTagId: note.noteTagId, title: note.title, latitude: note.latitude, longitude: note.longitude, body: note.body, isStory: (note.isStory != 0), completion: { (response, error) in
+            do {
+                guard let response = response else {
+                    completion?(nil, error)
+                    return
+                }
+                try self.updateNote(noteId: note.noteId, serverId: response.id, userServerId: response.userID)
+                completion?(response, error)
+            } catch {
+                completion?(response, error)
+            }
+        }, UICompletion: {})
+    }
+    
+    func updateNote(noteId: Int32, serverId: String, userServerId: String) throws {
+        try sqliteDatabaseService.updateNote(noteId: noteId, serverId: serverId, userServerId: userServerId)
+    }
+    
+    func selectNoteBy(noteId: Int32) throws -> Note {
+        return try sqliteDatabaseService.selectNoteBy(noteId: noteId)
+    }
 }

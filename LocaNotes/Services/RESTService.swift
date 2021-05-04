@@ -13,7 +13,7 @@ public class RESTService {
     
     typealias RestResponseReturnBlock<T> = ((T?, Error?) -> Void)?
     
-    typealias InsertDownvoteReturnBlock<T> = ((MongoDownvote?, Error?, RestResponseReturnBlock<T>) -> Void)?
+    typealias InsertDownvoteReturnBlock<T> = ((MongoDownvoteElement?, Error?, RestResponseReturnBlock<T>) -> Void)?
     
     typealias InsertUpvoteReturnBlock<T> = ((MongoUpvote?, Error?, RestResponseReturnBlock<T>) -> Void)?
     
@@ -24,7 +24,7 @@ public class RESTService {
 //        self.sqliteDatebaseService = SQLiteDatabaseService.shared
 //    }
     
-    func authenticateUser(username: String, password: String, completion: RestLoginReturnBlock<MongoUser>) {
+    func authenticateUser(username: String, password: String, completion: RestLoginReturnBlock<[MongoUserElement]>) {
         var components = URLComponents()
         components.scheme = "http"
         components.host = "localhost"
@@ -51,7 +51,7 @@ public class RESTService {
             
             let decoder = JSONDecoder()
             do {
-                let user = try decoder.decode(MongoUser.self, from: data!)
+                let user = try decoder.decode([MongoUserElement].self, from: data!)
                 completion?(user, nil)
             } catch let error {
                 completion?(nil, error)
@@ -724,7 +724,7 @@ public class RESTService {
         }.resume()
     }
     
-    func queryAllDownvotes(completion: RestResponseReturnBlock<[MongoDownvote]>) {
+    func queryAllDownvotes(completion: RestResponseReturnBlock<[MongoDownvoteElement]>) {
         var components = URLComponents()
         components.scheme = "http"
         components.host = "localhost"
@@ -745,12 +745,12 @@ public class RESTService {
             }
             
             let decoder = JSONDecoder()
-            let downvotes = try? decoder.decode([MongoDownvote].self, from: data!)
+            let downvotes = try? decoder.decode([MongoDownvoteElement].self, from: data!)
             completion?(downvotes, nil)
         }.resume()
     }
     
-    func insertDownvote(userId: String, noteId: String, restCompletion: InsertDownvoteReturnBlock<MongoDownvote>, insertCompletion: RestResponseReturnBlock<MongoDownvote>) {
+    func insertDownvote(userId: String, noteId: String, restCompletion: InsertDownvoteReturnBlock<MongoDownvoteElement>, insertCompletion: RestResponseReturnBlock<MongoDownvoteElement>) {
         var components = URLComponents()
         components.scheme = "http"
         components.host = "localhost"
@@ -776,12 +776,12 @@ public class RESTService {
             }
             
             let decoder = JSONDecoder()
-            let downvotes = try? decoder.decode(MongoDownvote.self, from: data!)
+            let downvotes = try? decoder.decode(MongoDownvoteElement.self, from: data!)
             restCompletion?(downvotes, nil, insertCompletion)
         }.resume()
     }
     
-    func deleteDownvote(downvoteId: String, restCompletion: ((MongoDownvote?, Error?, RestResponseReturnBlock<MongoDownvote>) -> Void)?, deleteCompletion: RestResponseReturnBlock<MongoDownvote>) {
+    func deleteDownvote(downvoteId: String, restCompletion: ((MongoDownvoteElement?, Error?, RestResponseReturnBlock<MongoDownvoteElement>) -> Void)?, deleteCompletion: RestResponseReturnBlock<MongoDownvoteElement>) {
         var components = URLComponents()
         components.scheme = "http"
         components.host = "localhost"
@@ -802,7 +802,7 @@ public class RESTService {
             }
             
             let decoder = JSONDecoder()
-            let downvotes = try? decoder.decode(MongoDownvote.self, from: data!)
+            let downvotes = try? decoder.decode(MongoDownvoteElement.self, from: data!)
             restCompletion?(downvotes, nil, deleteCompletion)
         }.resume()
     }
@@ -1148,6 +1148,120 @@ public class RESTService {
             let decoder = JSONDecoder()
             let friend = try? decoder.decode([MongoFriendElement].self, from: data!)
             completion?(friend, nil)
+        }.resume()
+    }
+    
+    func checkIfSharedFor(noteId: String, receiverId: String, completion: RestResponseReturnBlock<[MongoShareElement]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/share"
+        
+        let queryItemNoteId = URLQueryItem(name: "noteId", value: noteId)
+        let queryItemReceiverId = URLQueryItem(name: "receiverId", value: receiverId)
+        
+        components.queryItems = [queryItemNoteId, queryItemReceiverId]
+        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let share = try? decoder.decode([MongoShareElement].self, from: data!)
+            completion?(share, nil)
+        }.resume()
+    }
+    
+    func getSharedNotesFor(receiverId: String, completion: RestResponseReturnBlock<[MongoNoteElement]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/share/notes/\(receiverId)"
+        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+                
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let notes = try? decoder.decode([MongoNoteElement].self, from: data!)
+            completion?(notes, nil)
+        }.resume()
+    }
+    
+    func getSharesFor(receiverId: String, completion: RestResponseReturnBlock<[MongoShareElement]>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/share/\(receiverId)"
+        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+                
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "GET"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let shares = try? decoder.decode([MongoShareElement].self, from: data!)
+            completion?(shares, nil)
+        }.resume()
+    }
+    
+    func sharePrivateNoteWith(noteId: String, receiverId: String, completion: RestResponseReturnBlock<MongoShareElement>) {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 3000
+        components.path = "/share"
+        
+        let queryItemNoteId = URLQueryItem(name: "noteId", value: noteId)
+        let queryItemReceiverId = URLQueryItem(name: "receiverId", value: receiverId)
+        
+        components.queryItems = [queryItemNoteId, queryItemReceiverId]
+        
+        guard let url = components.url else { preconditionFailure("Failed to construct URL") }
+                
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "POST"
+                        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let returnedError = self.checkForErrors(data: data, response: response, error: error)
+            if returnedError != nil {
+                completion?(nil, returnedError)
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            let share = try? decoder.decode(MongoShareElement.self, from: data!)
+            completion?(share, nil)
         }.resume()
     }
 }
