@@ -340,7 +340,10 @@ struct NoteCell: View {
                 print("could not query user from server")
                 return
             }
-            username = response![0].username
+            if response!.count > 0 {
+                username = response![0].username
+            }
+            
         })
     }
 }
