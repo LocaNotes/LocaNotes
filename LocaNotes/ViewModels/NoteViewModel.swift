@@ -274,7 +274,9 @@ public class NoteViewModel: ObservableObject {
         DispatchQueue.main.async {
             self.nearbyPrivateNotes.removeAll()
             for note in self.privateNotes {
-                let userFilterRadiusInMeters = 80467.2 // 50 miles
+                let userRadius = UserDefaults.standard.double(forKey: "userRadius")
+                // convert to meters
+                let userFilterRadiusInMeters = userRadius * 1609.344
                 
                 guard let latitude = Double(String(note.latitude)) else { return }
                 guard let longitude = Double(String(note.longitude)) else { return }
@@ -305,7 +307,9 @@ public class NoteViewModel: ObservableObject {
     
     func filterForNearbyPublicNotes() {
         DispatchQueue.main.async {
-            let userFilterRadiusInMeters = 80467.2 // 50 miles
+            let userRadius = UserDefaults.standard.double(forKey: "userRadius")
+            // convert to meters
+            let userFilterRadiusInMeters = userRadius * 1609.344
             self.nearbyPublicNotes = self.publicNotes.filter { note in
                 guard let latitude = Double(String(note.latitude)) else { return false }
                 guard let longitude = Double(String(note.longitude)) else { return false }
@@ -401,6 +405,7 @@ public class NoteViewModel: ObservableObject {
                 
                 // only show stories if they are no older than 24 hours
                 if difference < 86400 {
+//                if difference < 10 {
                     let userServerId = UserDefaults.standard.string(forKey: "serverId") ?? ""
                     
                     if note.isStory == 1 {
