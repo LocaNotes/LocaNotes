@@ -30,6 +30,8 @@ struct SignUp: View {
     
     @State private var didReceiveRestError = false
     @State private var restResponse = ""
+    
+    @Binding var index: Int
         
     private struct FirstName: View {
         
@@ -138,12 +140,6 @@ struct SignUp: View {
                     SecureField(hint, text: self.$password)
                         .autocapitalization(.none)
                     
-                    Button(action: {
-                        
-                    }) {
-                        Image(systemName: "eye")
-                            .foregroundColor(.black)
-                    }
                 }
                 .padding(.vertical, 20)
                 
@@ -223,7 +219,8 @@ struct SignUp: View {
         UserDefaults.standard.set(user.serverId, forKey: "serverId")
         DispatchQueue.main.async {
             withAnimation {
-                viewRouter.currentPage = .loginPage
+//                viewRouter.currentPage = .loginPage
+                self.index = 0
             }
         }
     }

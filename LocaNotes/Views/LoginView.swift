@@ -77,7 +77,7 @@ struct Home: View {
             if self.index == 0 {
                 Login()
             } else {
-                SignUp()
+                SignUp(index: self.$index)
             }
             
             if self.index == 0 {
@@ -129,13 +129,6 @@ struct Login: View {
                     
                     SecureField("Enter password", text: self.$pass)
                         .autocapitalization(.none)
-                    
-                    Button(action: {
-                        
-                    }) {
-                        Image(systemName: "eye")
-                            .foregroundColor(.black)
-                    }
                 }
                 .padding(.vertical, 20)
             }
@@ -266,7 +259,7 @@ struct Login: View {
         
         let noteViewModel = NoteViewModel()
         noteViewModel.insertNotesFromServer(notes: response!)
-        let serverId = response![0].userID
+//        let serverId = response![0].userID
         
 //        let commentViewModel = CommentViewModel()
 //        commentViewModel.queryCommentsFromServerBy(userId: serverId, completion: queryCommentsFromServerCallback(response:error:))
