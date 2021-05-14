@@ -8,8 +8,6 @@
 import Foundation
 
 public class NoteViewModel: ObservableObject {
-        
-    var locationViewModel = LocationViewModel()
       
     // all notes
     @Published var notes: [Note] = []
@@ -38,9 +36,11 @@ public class NoteViewModel: ObservableObject {
     @Published var myStories: [Note] = []
         
     private let notesRepository: NotesRepository
+    private let locationViewModel: LocationViewModel
     
     public init() {
         self.notesRepository = NotesRepository()
+        self.locationViewModel = LocationViewModel()
     }
     
     func queryAllFromStorage() -> [Note]? {

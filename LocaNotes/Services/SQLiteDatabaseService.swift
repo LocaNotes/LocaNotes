@@ -295,6 +295,10 @@ public class SQLiteDatabaseService {
     func selectNoteBy(noteId: Int32) throws -> Note {
         return try db.selectNoteBy(noteId: noteId)
     }
+    
+    func queryNoteTagBy(noteTagId: Int32) throws -> NoteTag? {
+        return try db.queryNoteTagBy(noteTagId: noteTagId)
+    }
 }
 
 

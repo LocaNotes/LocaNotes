@@ -18,6 +18,8 @@ struct DetailView: View {
     private let userViewModel: UserViewModel
     
     private let note: Note
+    private let author: MongoUserElement
+    private let noteTag: String
 //    @State private var privacyLabel: PrivacyLabel
     @State private var layout: NoteViewLayout
     @State private var noteContent = ""
@@ -31,6 +33,7 @@ struct DetailView: View {
     @State private var isUpvoted: Bool
     @State private var numberOfUpvotes: String
     
+    // id of user that's logged in
     private let userId: String
     
     @State private var showCommentSheet: Bool = false
@@ -107,8 +110,10 @@ struct DetailView: View {
 //        }
 //    }
     
-    init (note: Note, layout: NoteViewLayout) {
+    init (note: Note, author: MongoUserElement, noteTag: String, layout: NoteViewLayout) {
         self.note = note
+        self.author = author
+        self.noteTag = noteTag
         self._layout = State<NoteViewLayout>(initialValue: layout)
         self.noteViewModel = NoteViewModel()
         self.downvoteViewModel = DownvoteViewModel()
@@ -299,6 +304,15 @@ struct DetailView: View {
     
     private func generatePublicDetail() -> some View {
         VStack {
+//            ZStack(alignment: .top) {
+//                HStack {
+//                    VStack {
+//
+//                        Text(noteTag)
+//                    }
+//                    Spacer()
+//                }
+//            }
             ScrollView {
                 VStack {
                     Text(note.body)
@@ -307,49 +321,60 @@ struct DetailView: View {
                     
                     Divider()
                     
-                    HStack {
+                    VStack {
                         HStack {
-                            Button(action: {
-                                upvote()
-                            }) {
-                                Image(systemName: "arrow.up")
-                                    .foregroundColor(isUpvoted ? .red : .black)
-                            }
-                            Text(numberOfUpvotes)
+                            NavigationLink(destination: UserDetailView(user: author), label: {
+                                Text(author.username)
+                            })
+                            Spacer()
+                            Text(noteTag)
                         }
+                        .font(.system(size: 12, weight: .light, design: .default))
                         
                         HStack {
-                            Button(action: {
-                                downvote()
-                            }) {
-                                Image(systemName: "arrow.down")
-                                    .foregroundColor(isDownvoted ? .blue : .black)
-                            }
-                            Text(numberOfDownvotes)
-                        }
-                        
-                        Spacer()
-                        
-                        Menu {
-                            Button {
-                                reportNote(reportOption: ReportOption.offensiveBehavior)
-                            } label: {
-                                Text(ReportOption.offensiveBehavior.rawValue)
+                            HStack {
+                                Button(action: {
+                                    upvote()
+                                }) {
+                                    Image(systemName: "arrow.up")
+                                        .foregroundColor(isUpvoted ? .red : .black)
+                                }
+                                Text(numberOfUpvotes)
                             }
                             
-                            Button {
-                                reportNote(reportOption: ReportOption.falseInformation)
-                            } label: {
-                                Text(ReportOption.falseInformation.rawValue)
+                            HStack {
+                                Button(action: {
+                                    downvote()
+                                }) {
+                                    Image(systemName: "arrow.down")
+                                        .foregroundColor(isDownvoted ? .blue : .black)
+                                }
+                                Text(numberOfDownvotes)
                             }
                             
-                            Button {
-                                reportNote(reportOption: ReportOption.other)
+                            Spacer()
+                            
+                            Menu {
+                                Button {
+                                    reportNote(reportOption: ReportOption.offensiveBehavior)
+                                } label: {
+                                    Text(ReportOption.offensiveBehavior.rawValue)
+                                }
+                                
+                                Button {
+                                    reportNote(reportOption: ReportOption.falseInformation)
+                                } label: {
+                                    Text(ReportOption.falseInformation.rawValue)
+                                }
+                                
+                                Button {
+                                    reportNote(reportOption: ReportOption.other)
+                                } label: {
+                                    Text(ReportOption.other.rawValue)
+                                }
                             } label: {
-                                Text(ReportOption.other.rawValue)
+                                Label("Report", systemImage: "exclamationmark.shield")
                             }
-                        } label: {
-                            Label("Report", systemImage: "exclamationmark.shield")
                         }
                     }
                     
@@ -568,29 +593,40 @@ struct DetailView: View {
                     
                     Divider()
                     
-                    HStack {
-                        Spacer()
+                    VStack {
+                        HStack {
+                            NavigationLink(destination: UserDetailView(user: author), label: {
+                                Text(author.username)
+                            })
+                            Spacer()
+                            Text(noteTag)
+                        }
+                        .font(.system(size: 12, weight: .light, design: .default))
                         
-                        Menu {
-                            Button {
-                                reportNote(reportOption: ReportOption.offensiveBehavior)
-                            } label: {
-                                Text(ReportOption.offensiveBehavior.rawValue)
-                            }
+                        HStack {
+                            Spacer()
                             
-                            Button {
-                                reportNote(reportOption: ReportOption.falseInformation)
+                            Menu {
+                                Button {
+                                    reportNote(reportOption: ReportOption.offensiveBehavior)
+                                } label: {
+                                    Text(ReportOption.offensiveBehavior.rawValue)
+                                }
+                                
+                                Button {
+                                    reportNote(reportOption: ReportOption.falseInformation)
+                                } label: {
+                                    Text(ReportOption.falseInformation.rawValue)
+                                }
+                                
+                                Button {
+                                    reportNote(reportOption: ReportOption.other)
+                                } label: {
+                                    Text(ReportOption.other.rawValue)
+                                }
                             } label: {
-                                Text(ReportOption.falseInformation.rawValue)
+                                Label("Report", systemImage: "exclamationmark.shield")
                             }
-                            
-                            Button {
-                                reportNote(reportOption: ReportOption.other)
-                            } label: {
-                                Text(ReportOption.other.rawValue)
-                            }
-                        } label: {
-                            Label("Report", systemImage: "exclamationmark.shield")
                         }
                     }
                     

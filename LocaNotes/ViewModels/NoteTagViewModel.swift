@@ -14,6 +14,10 @@ public class NoteTagViewModel {
         self.noteTagRepository = NoteTagRepository()
     }
     
+    func queryBy(noteTagId: Int32) throws -> NoteTag? {
+        return try noteTagRepository.queryBy(noteTagId: noteTagId)
+    }
+    
     func queryBy(serverId: String) -> NoteTag? {
         do {
             return try noteTagRepository.queryBy(serverId: serverId)

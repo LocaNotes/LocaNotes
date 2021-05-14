@@ -326,8 +326,22 @@ struct NoteCell: View {
     private let layout: NoteViewLayout
     
     private let userViewModel: UserViewModel
+    private let noteTagViewModel: NoteTagViewModel
     
-    @State private var username = ""
+    @State private var author = MongoUserElement(
+        id: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        username: "",
+        password: "",
+        createdAt: "",
+        updatedAt: "",
+        v: -1,
+        radius: -1
+    )
+    
+    @State private var noteTag = ""
         
 //    init(note: Note, privacyLabel: PrivacyLabel) {
 //        self.note = note
@@ -346,15 +360,16 @@ struct NoteCell: View {
         self.note = note
         self.layout = layout
         userViewModel = UserViewModel()
+        noteTagViewModel = NoteTagViewModel()
     }
     
     var body: some View {
         VStack {
 //            NavigationLink(destination: DetailView(note: note, privacyLabel: privacyLabel)) {
-            NavigationLink(destination: DetailView(note: note, layout: layout)) {
+            NavigationLink(destination: DetailView(note: note, author: author, noteTag: noteTag, layout: layout)) {
                 VStack {
                     HStack {
-                        Text(username)
+                        Text(author.username)
                             .italic()
                         Spacer()
                     }
@@ -365,20 +380,36 @@ struct NoteCell: View {
                     }
                 }
             }
-        }.onAppear(perform: loadUser)
+        }.onAppear(perform: loadNote)
     }
     
-    private func loadUser() {
+    private func loadNote() {
+        loadAuthor()
+        loadNoteTag()
+    }
+    
+    private func loadAuthor() {
         userViewModel.getUserBy(serverId: note.userServerId, completion: { (response, error) in
             if response == nil {
                 print("could not query user from server")
                 return
             }
             if response!.count > 0 {
-                username = response![0].username
+                author = response![0]
             }
-            
         })
+    }
+    
+    private func loadNoteTag() {
+        do {
+            let query = try noteTagViewModel.queryBy(noteTagId: note.noteTagId)
+            guard let noteTag = query else {
+                return
+            }
+            self.noteTag = noteTag.label
+        } catch {
+            print("could not query note tag")
+        }
     }
 }
 

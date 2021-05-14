@@ -2034,3 +2034,50 @@ extension SQLiteDatabase {
         }
     }
 }
+
+extension SQLiteDatabase {
+    func queryNoteTagBy(noteTagId: Int32) throws -> NoteTag? {
+        let querySql = "SELECT * FROM NoteTag WHERE NoteTagId = ?;"
+        guard let queryStatement = try? prepareStatement(sql: querySql) else {
+            throw SQLiteError.Prepare(message: errorMessage)
+        }
+        defer {
+            sqlite3_finalize(queryStatement)
+        }
+        
+        guard sqlite3_bind_int(queryStatement, 1, noteTagId) == SQLITE_OK else {
+            throw SQLiteError.Bind(message: errorMessage)
+        }
+        
+        var noteTag: NoteTag? = nil
+        
+        if sqlite3_step(queryStatement) == SQLITE_ROW {
+            
+            // get note tag id
+            let noteTagId = sqlite3_column_int(queryStatement, 0)
+
+            // get server id
+            guard let queryResultCol1 = sqlite3_column_text(queryStatement, 1) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let serverId = String(cString: queryResultCol1)
+            
+            // get label
+            guard let queryResultCol2 = sqlite3_column_text(queryStatement, 2) else {
+                print("Query result is nil")
+                throw SQLiteError.Step(message: errorMessage)
+            }
+            let label = String(cString: queryResultCol2)
+            
+            noteTag = NoteTag(
+                noteTagId: noteTagId,
+                serverId: serverId,
+                label: label
+            )
+        } else {
+            throw SQLiteError.Step(message: errorMessage)
+        }
+        return noteTag
+    }
+}

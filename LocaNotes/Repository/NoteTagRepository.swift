@@ -24,4 +24,8 @@ public class NoteTagRepository {
     func queryFromServer(completion: RESTService.RestResponseReturnBlock<[MongoNoteTagElement]>) {
         restService.queryNoteTag(completion: completion)
     }
+    
+    func queryBy(noteTagId: Int32) throws -> NoteTag? {
+        return try sqliteDatabaseService.queryNoteTagBy(noteTagId: noteTagId)
+    }
 }
