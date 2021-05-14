@@ -116,6 +116,7 @@ struct Login: View {
                         .foregroundColor(.black)
                     TextField("Enter username", text: self.$username)
                         .autocapitalization(.none)
+                        .disableAutocorrection(true)
                 }
                 .padding(.vertical, 20)
                 
@@ -129,6 +130,7 @@ struct Login: View {
                     
                     SecureField("Enter password", text: self.$pass)
                         .autocapitalization(.none)
+                        .disableAutocorrection(true)
                 }
                 .padding(.vertical, 20)
             }

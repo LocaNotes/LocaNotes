@@ -44,6 +44,7 @@ struct SignUp: View {
                     Image(systemName: "person")
                         .foregroundColor(.black)
                     TextField("First name", text: self.$firstName)
+                        .disableAutocorrection(true)
                 }
                 .padding(.vertical, 20)
                 Text("First Name has to be at least one character")
@@ -66,6 +67,7 @@ struct SignUp: View {
                     Image(systemName: "person.3")
                         .foregroundColor(.black)
                     TextField("Last name", text: self.$lastName)
+                        .disableAutocorrection(true)
                 }
                 .padding(.vertical, 20)
                 Text("Last Name has to be at least one character")
@@ -89,6 +91,7 @@ struct SignUp: View {
                         .foregroundColor(.black)
                     TextField("Email", text: self.$email)
                         .autocapitalization(.none)
+                        .disableAutocorrection(true)
                 }
                 .padding(.vertical, 20)
                 Text("Invalid Email")
@@ -112,6 +115,7 @@ struct SignUp: View {
                         .foregroundColor(.black)
                     TextField("Username", text: self.$username)
                         .autocapitalization(.none)
+                        .disableAutocorrection(true)
                 }
                 .padding(.vertical, 20)
                 Text("Username has to be at least one character")
@@ -139,6 +143,7 @@ struct SignUp: View {
                     
                     SecureField(hint, text: self.$password)
                         .autocapitalization(.none)
+                        .disableAutocorrection(true)
                     
                 }
                 .padding(.vertical, 20)
