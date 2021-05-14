@@ -201,23 +201,25 @@ struct UserDetailView: View {
             Text(user.username)
                 .font(.system(size: 30, weight: .bold))
             List {
-                Button(action: {
-                    
-                }, label: {
-                    Text("Send Direct Message")
-                })
+//                Button(action: {
+//                    
+//                }, label: {
+//                    Text("Send Direct Message")
+//                })
                 
-                if isFriendsWithCurrentUser {
-                    Button(action: {
-                        removeFriend()
-                    }) {
-                        Text("Remove Friend")
-                    }
-                } else {
-                    Button(action: {
-                        addFriend()
-                    }) {
-                        Text("Add Friend")
+                if loggedInUser != user.id {
+                    if isFriendsWithCurrentUser {
+                        Button(action: {
+                            removeFriend()
+                        }) {
+                            Text("Remove Friend")
+                        }
+                    } else {
+                        Button(action: {
+                            addFriend()
+                        }) {
+                            Text("Add Friend")
+                        }
                     }
                 }
             }
