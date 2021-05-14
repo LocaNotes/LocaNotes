@@ -593,12 +593,11 @@ struct DetailView: View {
                     
                     Divider()
                     
-                    VStack {
-                        HStack {
+                    HStack {
+                        VStack(alignment: .leading) {
                             NavigationLink(destination: UserDetailView(user: author), label: {
                                 Text(author.username)
                             })
-                            Spacer()
                             Text(noteTag)
                         }
                         .font(.system(size: 12, weight: .light, design: .default))

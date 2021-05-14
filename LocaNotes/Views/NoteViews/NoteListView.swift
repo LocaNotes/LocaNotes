@@ -142,10 +142,10 @@ struct NoteListView: View {
     
     func generateStoriesList() -> some View {
         List {
-            Section(header: Text("Nearby stories")) {
+            Section(header: Text("Nearby")) {
                 generateRows(notes: nearbyStories)
             }
-            Section(header: Text("Shared with me")) {
+            Section(header: Text("Friends")) {
                 generateRows(notes: sharedStories)
             }
             Section(header: Text("My stories")) {
@@ -370,7 +370,7 @@ struct NoteCell: View {
                 VStack {
                     HStack {
                         Text(author.username)
-                            .italic()
+                            .bold()
                         Spacer()
                     }
                     HStack {

@@ -29,7 +29,7 @@ public class NoteViewModel: ObservableObject {
     // nearby public stories
     @Published var nearbyStories: [Note] = []
      
-    // private stories shared to the user
+    // private or public stories that the user's friends wrote 
     @Published var sharedStories: [Note] = []
     
     // user's stories
@@ -174,11 +174,17 @@ public class NoteViewModel: ObservableObject {
         let upvotes = Int32(0)
         let downvotes = Int32(0)
         
-        switch privacyId {
-        case 2:
-            insertNewPublicNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes, UICompletion: UICompletion)
-        default:
+        switch (privacyId, isStory) {
+        case (1, 0):
+            // is private and not a story
             insertNewPrivateNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes, UICompletion: UICompletion)
+        default:
+            insertNewPublicNote(userId: userId, noteTagId: noteTagId, privacyId: privacyId, title: title, latitude: latitude, longitude: longitude, createdAt: createdAt, body: body, isStory: isStory, upvotes: upvotes, downvotes: downvotes, UICompletion: UICompletion)
+//        case (2, _):
+//            fallthrough
+//        case (1, 1):
+            
+            
         }
     }
     
@@ -440,22 +446,39 @@ public class NoteViewModel: ObservableObject {
             self.sharedStories.removeAll()
         }
         
+        let queue = DispatchQueue.global()
         let userServerId = UserDefaults.standard.string(forKey: "serverId") ?? ""
-        let temp = filterForStories(validate: { note in
-            // add shared private stories
-            do {
-                let _ = try self.checkIfSharedForLocal(noteId: note.serverId, receiverId: userServerId)
-                return true
-            } catch {
-                
-                // do not append: either not shared to user or error
-                print("\(error.localizedDescription)")
-                return false
-            }
-        })
+        let userViewModel = UserViewModel()
         
-        DispatchQueue.main.async {
-            self.sharedStories = temp
+        // we have to do this operation off the ui thread, or else the semaphores will freeze it up
+        queue.async {
+            let temp = self.filterForStories(validate: { note in
+                let semaphore = DispatchSemaphore(value: 0)
+                var validNote: Bool = false
+                queue.async {
+                    if note.userServerId.count > 0 {
+                        userViewModel.checkIfFriends(frienderId: userServerId, friendeeId: note.userServerId, completion: { response, error in
+                            if response != nil {
+                                if response!.count > 0 {
+                                    validNote = true
+                                }
+                            }
+                            semaphore.signal()
+                        })
+                    }
+                    
+                }
+                let _ = semaphore.wait(timeout: .now() + 2.0)
+                
+                if validNote {
+                    return true
+                }
+                return false
+            })
+            
+            DispatchQueue.main.async {
+                self.sharedStories = temp
+            }
         }
     }
     
@@ -489,7 +512,6 @@ public class NoteViewModel: ObservableObject {
             // only show stories if they are no older than 24 hours
             if difference < 86400 {
                 if note.isStory == 1 {
-                    
                     if validate(note) {
                         temp.append(note)
                     }
