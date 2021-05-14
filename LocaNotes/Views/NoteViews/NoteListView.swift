@@ -13,6 +13,8 @@ struct NoteListView: View {
     @EnvironmentObject var noteViewModel: NoteViewModel
     
     @Binding var searchText: String
+    
+    @Binding var isShowingMapView: Bool
         
     @Binding var sortOption: SortOption
     @Binding var filterOption: FilterOption
@@ -70,8 +72,16 @@ struct NoteListView: View {
 //        self.privacyLabel = privacyLabel
 //    }
     
-    init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, layout: NoteViewLayout) {
+//    init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, layout: NoteViewLayout) {
+//        self._searchText = searchText
+//        self._sortOption = sort
+//        self._filterOption = filter
+//        self.layout = layout
+//    }
+    
+    init(viewModel: NoteViewModel, searchText: Binding<String>, isShowingMapView: Binding<Bool>, sort: Binding<SortOption>, filter: Binding<FilterOption>, layout: NoteViewLayout) {
         self._searchText = searchText
+        self._isShowingMapView = isShowingMapView
         self._sortOption = sort
         self._filterOption = filter
         self.layout = layout
@@ -111,7 +121,8 @@ struct NoteListView: View {
                     generateRows(notes: publicNotes)
                 }
             }
-            .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption))
+            .navigationBarItems(leading: HeaderButtons(sort: $sortOption, filter: $filterOption, isShowingMapView: $isShowingMapView), trailing: EditButton())
+//            .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption))
 //            .onAppear(perform: viewModel.refresh)
             .onAppear(perform: noteViewModel.refresh)
         )
@@ -134,7 +145,8 @@ struct NoteListView: View {
                     }
                 }
             }
-            .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
+            .navigationBarItems(leading: HeaderButtons(sort: $sortOption, filter: $filterOption, isShowingMapView: $isShowingMapView), trailing: EditButton())
+//            .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
 //            .onAppear(perform: viewModel.refresh)
             .onAppear(perform: noteViewModel.refresh)
         )
@@ -152,8 +164,26 @@ struct NoteListView: View {
                 generateRows(notes: myStories)
             }
         }
-        .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
+        .navigationBarItems(leading: HeaderButtons(sort: $sortOption, filter: $filterOption, isShowingMapView: $isShowingMapView), trailing: EditButton())
+//        .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
         .onAppear(perform: noteViewModel.refresh)
+    }
+    
+    struct HeaderButtons: View {
+        @Binding var sort: SortOption
+        @Binding var filter: FilterOption
+        @Binding var isShowingMapView: Bool
+        
+        var body: some View {
+            HStack {
+                FilterSortButtons(sort: $sort, filter: $filter)
+                Button("Toggle Map") {
+                    withAnimation {
+                        isShowingMapView.toggle()
+                    }
+                }
+            }
+        }
     }
     
     struct FilterSortButtons: View {

@@ -31,12 +31,17 @@ struct NoteView: View {
     
     @State private var filter: FilterOption = FilterOption.all
     
+    @State private var isShowingMapView = true
+    
     var body: some View {
         NavigationView {
             VStack {
-                NoteMapView(viewModel: viewModel, searchText: $searchText, privacyLabel: layout == NoteViewLayout.privateNotes ? .privateNote : .publicNote)
+                if isShowingMapView {
+                    NoteMapView(viewModel: viewModel, searchText: $searchText, privacyLabel: layout == NoteViewLayout.privateNotes ? .privateNote : .publicNote)
+                }
 //                NoteListView(viewModel: viewModel, searchText: $searchText, sort: $sort, filter: $filter, privacyLabel: privacyLabel)
-                NoteListView(viewModel: viewModel, searchText: $searchText, sort: $sort, filter: $filter, layout: layout)
+//                NoteListView(viewModel: viewModel, searchText: $searchText, sort: $sort, filter: $filter, layout: layout)
+                NoteListView(viewModel: viewModel, searchText: $searchText, isShowingMapView: $isShowingMapView, sort: $sort, filter: $filter, layout: layout)
             }
         }
     }
