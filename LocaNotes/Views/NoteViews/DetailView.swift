@@ -218,7 +218,7 @@ struct DetailView: View {
                     noteViewModel.updateNoteBody(noteId: note.noteId, body: self.noteContent)
                     self.mode.wrappedValue.dismiss()
                 }) {
-                    Image(systemName: "pencil")
+                    Image(systemName: "checkmark")
                 }
                 .padding()
                 .disabled(self.noteContent == note.body ? true : false)

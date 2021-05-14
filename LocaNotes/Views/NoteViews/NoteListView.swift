@@ -177,10 +177,12 @@ struct NoteListView: View {
         var body: some View {
             HStack {
                 FilterSortButtons(sort: $sort, filter: $filter)
-                Button("Toggle Map") {
+                Button(action: {
                     withAnimation {
                         isShowingMapView.toggle()
                     }
+                }) {
+                    Image(systemName: "map.fill")
                 }
             }
         }
@@ -202,7 +204,7 @@ struct NoteListView: View {
                         Divider()
                     }
                 } label: {
-                    Image(systemName: "line.horizontal.3.decrease.circle")
+                    Image(systemName: "line.horizontal.3.decrease.circle.fill")
                 }
                 
                 Menu {

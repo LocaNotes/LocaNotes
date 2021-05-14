@@ -73,7 +73,7 @@ struct CreateNoteView: View {
                         self.showStoryDrawer = false
                         self.showPrivacyDrawer.toggle()
                     }) {
-                        Image(systemName: "link")
+                        Image(systemName: "lock")
                     }
                     Button(action: {
                         UIApplication.shared.endEditing(true)
@@ -81,7 +81,7 @@ struct CreateNoteView: View {
                         self.showStoryDrawer = false
                         self.showNoteTagDrawer.toggle()
                     }) {
-                        Image(systemName: "tray.circle")
+                        Image(systemName: "tag")
                     }
                     Button(action: {
                         UIApplication.shared.endEditing(true)
