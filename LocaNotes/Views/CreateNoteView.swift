@@ -33,9 +33,19 @@ struct CreateNoteView: View {
     // what the user types in the text editor
     @State private var noteContent = ""
     
+    @State private var showToast: Bool = false
+    @State private var toastMessage: String = ""
+    @State private var toastTitle: String = ""
+    private let createNoteSuccess: String
+    private let createNoteError: String
+    @State private var toastCompletion: () -> Void = {}
+    
     init(selectedTab: Binding<Int>) {
 //        noteViewModel = NoteViewModel()
         self._selectedTab = selectedTab
+        
+        createNoteSuccess = "Successfully created note."
+        createNoteError = "Could not create note."
     }
     
     var body: some View {
@@ -105,7 +115,41 @@ struct CreateNoteView: View {
             }
         }
         .padding()
+        .alert(isPresented: $showToast) {
+            makeToast(title: toastTitle, message: toastMessage, completion: toastCompletion)
+        }
         .animation(.default)
+    }
+    
+    private func makeToast(title: String, message: String, completion: @escaping () -> Void) -> Alert {
+//        return Alert(title: Text(title), message: Text(message), dismissButton: .cancel())
+        return Alert(title: Text(title), message: Text(message), dismissButton: .destructive(Text("OK")) {
+            completion()
+        })
+    }
+    
+    private func showErrorToast(error: String) {
+        self.toastCompletion = {
+            // do nothing
+        }
+        toastTitle = "Error"
+        toastMessage = error
+        showToast = true
+    }
+    
+    private func showSuccessToast(message: String) {
+        self.toastCompletion = {
+            // reset
+            DispatchQueue.main.async {
+                selectedTab = 0
+                noteContent = ""
+                selectedPrivacy = PrivacyLabel.privateNote.rawValue
+                UIApplication.shared.endEditing(true)
+            }
+        }
+        toastTitle = "Success"
+        toastMessage = message
+        showToast = true
     }
     
     // is it worth using the NotificationCenter instead of invoking the call?
@@ -138,17 +182,11 @@ struct CreateNoteView: View {
             isStory = 0
         }
         
-        noteViewModel.insertNewNote(body: noteContent, noteTagId: noteTagId, privacyId: privacyId, isStory: isStory, UICompletion: completion)
+        noteViewModel.insertNewNote(body: noteContent, noteTagId: noteTagId, privacyId: privacyId, isStory: isStory, UICompletion: createCompletion)
     }
     
-    private func completion() {
-        // reset
-        DispatchQueue.main.async {
-            selectedTab = 0
-            noteContent = ""
-            selectedPrivacy = PrivacyLabel.privateNote.rawValue
-            UIApplication.shared.endEditing(true)
-        }
+    private func createCompletion() {
+        showSuccessToast(message: createNoteSuccess)
     }
 }
 
