@@ -25,6 +25,10 @@ struct NoteListView: View {
         return noteViewModel.privateNotes
     }
     
+    private var sharedNotes: [Note] {
+        return noteViewModel.sharedNotes
+    }
+    
     private var nearbyPrivateNotes: [Note] {
 //        return viewModel.nearbyPrivateNotes
         return noteViewModel.nearbyPrivateNotes
@@ -38,8 +42,24 @@ struct NoteListView: View {
         return notes
     }
     
-    private var stories: [Note] {
-        return noteViewModel.stories
+    private var publicNotes: [Note] {
+        return noteViewModel.publicNotes
+    }
+    
+    private var nearbyPublicNotes: [Note] {
+        return noteViewModel.nearbyPublicNotes
+    }
+    
+    private var nearbyStories: [Note] {
+        return noteViewModel.nearbyStories
+    }
+    
+    private var sharedStories: [Note] {
+        return noteViewModel.sharedStories
+    }
+    
+    private var myStories: [Note] {
+        return noteViewModel.myStories
     }
     
 //    init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, privacyLabel: PrivacyLabel) {
@@ -84,11 +104,11 @@ struct NoteListView: View {
             List {
                 if !nearbyNotes.isEmpty {
                     Section(header: Text("Nearby")) {
-                        generateRows(nearbyOnly: true)
+                        generateRows(notes: nearbyPublicNotes)
                     }
                 }
-                Section(header: Text("All")) {
-                    generateRows(nearbyOnly: false)
+                Section(header: Text("Public Notes")) {
+                    generateRows(notes: publicNotes)
                 }
             }
             .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption))
@@ -102,11 +122,16 @@ struct NoteListView: View {
             List {
                 if !nearbyPrivateNotes.isEmpty {
                     Section(header: Text("Nearby")) {
-                        generateRows(nearbyOnly: true)
+                        generateRows(notes: nearbyPrivateNotes)
                     }
                 }
-                Section(header: Text("All")) {
-                    generateRows(nearbyOnly: false)
+                Section(header: Text("Private Notes")) {
+                    generateRows(notes: privateNotes)
+                }
+                if !sharedNotes.isEmpty {
+                    Section(header: Text("Shared with me")) {
+                        generateRows(notes: sharedNotes)
+                    }
                 }
             }
             .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
@@ -117,7 +142,15 @@ struct NoteListView: View {
     
     func generateStoriesList() -> some View {
         List {
-            generateRows(nearbyOnly: false)
+            Section(header: Text("Nearby stories")) {
+                generateRows(notes: nearbyStories)
+            }
+            Section(header: Text("Shared with me")) {
+                generateRows(notes: sharedStories)
+            }
+            Section(header: Text("My stories")) {
+                generateRows(notes: myStories)
+            }
         }
         .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
         .onAppear(perform: noteViewModel.refresh)
@@ -155,8 +188,8 @@ struct NoteListView: View {
         }
     }
     
-    func generateRows(nearbyOnly: Bool) -> some View {
-        var notes: [Note]
+    func generateRows(notes: [Note]) -> some View {
+        var notes = notes
 //        switch (nearbyOnly, self.privacyLabel) {
 //        case (true, PrivacyLabel.privateNote):
 ////            notes = viewModel.nearbyPrivateNotes
@@ -171,18 +204,19 @@ struct NoteListView: View {
 ////            notes = viewModel.publicNotes
 //            notes = noteViewModel.publicNotes
 //        }
-        switch (nearbyOnly, self.layout) {
-        case (true, NoteViewLayout.privateNotes):
-            notes = noteViewModel.nearbyPrivateNotes
-        case (true, NoteViewLayout.publicNotes):
-            notes = noteViewModel.nearbyPublicNotes
-        case (false, NoteViewLayout.privateNotes):
-            notes = noteViewModel.privateNotes
-        case (false, NoteViewLayout.publicNotes):
-            notes = noteViewModel.publicNotes
-        case (_, NoteViewLayout.stories):
-            notes = noteViewModel.stories
-        }
+        
+//        switch (nearbyOnly, self.layout) {
+//        case (true, NoteViewLayout.privateNotes):
+//            notes = noteViewModel.nearbyPrivateNotes
+//        case (true, NoteViewLayout.publicNotes):
+//            notes = noteViewModel.nearbyPublicNotes
+//        case (false, NoteViewLayout.privateNotes):
+//            notes = noteViewModel.privateNotes
+//        case (false, NoteViewLayout.publicNotes):
+//            notes = noteViewModel.publicNotes
+//        case (_, NoteViewLayout.stories):
+//            notes = noteViewModel.stories
+//        }
         
         notes = filter(notes: notes)
         notes = sort(notes: notes)

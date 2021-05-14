@@ -14,19 +14,28 @@ public class NoteViewModel: ObservableObject {
     // all notes
     @Published var notes: [Note] = []
     
-    // private notes that the user has written and private notes shared to the user
+    // private notes that the user has written
     @Published var privateNotes: [Note] = []
     
     // only the private notes that are nearby the user
     @Published var nearbyPrivateNotes: [Note] = []
+    
+    // private notes shared to the user
+    @Published var sharedNotes: [Note] = []
     
     // all public notes except for ones written by the user
     @Published var publicNotes: [Note] = []
     
     @Published var nearbyPublicNotes: [Note] = []
     
-    // public nearby stories and private stories shared to the user
-    @Published var stories: [Note] = []
+    // nearby public stories
+    @Published var nearbyStories: [Note] = []
+     
+    // private stories shared to the user
+    @Published var sharedStories: [Note] = []
+    
+    // user's stories
+    @Published var myStories: [Note] = []
         
     private let notesRepository: NotesRepository
     
@@ -58,11 +67,14 @@ public class NoteViewModel: ObservableObject {
         
         self.filterForAllPrivateNotes()
         self.filterForNearbyPrivateNotes()
+        self.filterForSharedNotes()
         
         self.queryAllPublicNotesFromStorage()
         self.filterForNearbyPublicNotes()
         
-        self.filterForStories()
+        self.filterForNearbyStories()
+        self.filterForSharedStories()
+        self.filterForMyStories()
     }
     
     private func queryNotesBy(userId: Int32) -> [Note]? {
@@ -334,6 +346,19 @@ public class NoteViewModel: ObservableObject {
         }
         
         let userId = Int32(UserDefaults.standard.integer(forKey: "userId"))
+        let filteredNotes = self.notes.filter {
+            if $0.isStory == 0 {
+                return $0.userId == userId && $0.privacyId == privacyId
+            } else {
+                return false
+            }
+        }
+        DispatchQueue.main.async {
+            self.privateNotes = filteredNotes
+        }
+    }
+    
+    func filterForSharedNotes() {
         let userServerId = UserDefaults.standard.string(forKey: "serverId") ?? ""
         let filteredNotes = self.notes.filter {
             if $0.isStory == 0 {
@@ -341,14 +366,14 @@ public class NoteViewModel: ObservableObject {
                     let _ = try self.checkIfSharedForLocal(noteId: $0.serverId, receiverId: userServerId)
                     return true
                 } catch {
-                    return $0.userId == userId && $0.privacyId == privacyId
+                    return false
                 }
             } else {
                 return false
             }
         }
         DispatchQueue.main.async {
-            self.privateNotes = filteredNotes
+            self.sharedNotes = filteredNotes
         }
     }
     
@@ -382,59 +407,95 @@ public class NoteViewModel: ObservableObject {
         return try notesRepository.selectNoteBy(noteId: noteId)
     }
     
-    func filterForStories() {
+    func filterForNearbyStories() {
         DispatchQueue.main.async {
-            self.stories.removeAll()
-            var temp: [Note] = []
-            for note in self.notes {
-                let userRadius = UserDefaults.standard.double(forKey: "userRadius")
-//                let userFilterRadiusInMeters = 80467.2 // 50 miles
-                // convert to meters
-                let userFilterRadiusInMeters = userRadius * 1609.344
+            self.nearbyStories.removeAll()
+        }
+        
+        // convert to meters
+        let userRadius = UserDefaults.standard.double(forKey: "userRadius")
+        let userFilterRadiusInMeters = userRadius * 1609.344
+        
+        let temp = filterForStories(validate: { note in
+            
+            // add nearby public stories
+            guard let latitude = Double(String(note.latitude)) else { return false }
+            guard let longitude = Double(String(note.longitude)) else { return false }
+            let distance = self.locationViewModel.getDistanceBetweenNoteAndUser(latitude: latitude, longitude: longitude)
+            if note.privacyId == 2 {
+                if (distance < userFilterRadiusInMeters) {
+                    return true
+                }
+            }
+            return false
+        })
+        
+        DispatchQueue.main.async {
+            self.nearbyStories = temp
+        }
+    }
+    
+    func filterForSharedStories() {
+        DispatchQueue.main.async {
+            self.sharedStories.removeAll()
+        }
+        
+        let userServerId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+        let temp = filterForStories(validate: { note in
+            // add shared private stories
+            do {
+                let _ = try self.checkIfSharedForLocal(noteId: note.serverId, receiverId: userServerId)
+                return true
+            } catch {
                 
-                guard let latitude = Double(String(note.latitude)) else { return }
-                guard let longitude = Double(String(note.longitude)) else { return }
-                
-                let distance = self.locationViewModel.getDistanceBetweenNoteAndUser(latitude: latitude, longitude: longitude)
-                          
-                let now = Double(NSDate().timeIntervalSince1970)
-                let createdAt = Double(note.createdAt)
-                let difference = now - createdAt
-                
-                let userId = UserDefaults.standard.integer(forKey: "userId")
-                
-                // only show stories if they are no older than 24 hours
-                if difference < 86400 {
-//                if difference < 10 {
-                    let userServerId = UserDefaults.standard.string(forKey: "serverId") ?? ""
+                // do not append: either not shared to user or error
+                print("\(error.localizedDescription)")
+                return false
+            }
+        })
+        
+        DispatchQueue.main.async {
+            self.sharedStories = temp
+        }
+    }
+    
+    func filterForMyStories() {
+        DispatchQueue.main.async {
+            self.myStories.removeAll()
+        }
+        
+        let userId = UserDefaults.standard.integer(forKey: "userId")
+        let temp = filterForStories(validate: { note in
+            
+            // add stories that the user themself has written
+            if note.userId == userId {
+                return true
+            }
+            return false
+        })
+        
+        DispatchQueue.main.async {
+            self.myStories = temp
+        }
+    }
+    
+    func filterForStories(validate: (Note) -> Bool) -> [Note] {
+        let now = Double(NSDate().timeIntervalSince1970)
+        var temp: [Note] = []
+        for note in self.notes {
+            let createdAt = Double(note.createdAt)
+            let difference = now - createdAt
+            
+            // only show stories if they are no older than 24 hours
+            if difference < 86400 {
+                if note.isStory == 1 {
                     
-                    if note.isStory == 1 {
-                        
-                        // add nearby public stories
-                        if note.privacyId == 2 {
-                            if (distance < userFilterRadiusInMeters) {
-                                temp.append(note)
-                            }
-                        } else if note.userId == userId {
-                            // add stories that the user themself has written
-                            temp.append(note)
-                        }
-                        else {
-                            // add shared private stories
-                            do {
-                                let _ = try self.checkIfSharedForLocal(noteId: note.serverId, receiverId: userServerId)
-                                temp.append(note)
-                            } catch {
-                                // do not append, not shared to user or error
-                                print("\(error.localizedDescription)")
-                            }
-                        }
+                    if validate(note) {
+                        temp.append(note)
                     }
                 }
             }
-            DispatchQueue.main.async {
-                self.stories = temp
-            }
         }
+        return temp
     }
 }
