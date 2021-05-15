@@ -34,7 +34,6 @@ struct NoteMapView: View {
         }
         .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height/2 - 100, alignment: .center)
         .alert(isPresented: $showingDetails, content: { Alert(title: Text(selectedNote?.title ?? "Unknown"), message: Text(selectedNote?.subtitle ?? "Missing note information."), primaryButton: .default(Text("Open"), action: {
-        //NoteCell(note: annoToNote(selectedNote!))
             showingDetails = true
             searchForMapNote()
             showingDetails = false
@@ -111,16 +110,8 @@ struct NoteMapView: View {
     
     /* Sets search text to the note being viewed on the map */
     private func searchForMapNote(){
-       // print(showingDetails)
-        // print(selectedNote != nil)
         if (showingDetails && selectedNote != nil){
             searchText = selectedNote!.subtitle!
         }
     }
 }
-
-//struct NoteMapView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        NoteMapView()
-//    }
-//}

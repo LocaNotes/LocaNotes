@@ -35,7 +35,6 @@ struct SettingsView: View {
             
             Button(action: {
                 //update password
-                //self.resetPassword()
                 self.showPasswordSheet.toggle()
             }, label: {
                 Text("Update Password")
@@ -59,7 +58,6 @@ struct SettingsView: View {
                 print(url ?? "something happened with the url :(")
                 UIApplication.shared.open(url!)
                 
-                //present(mail!, animated: true, completion: nil)
             }, label: {
                 Text("Send A Support Request")
                     .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
@@ -68,29 +66,6 @@ struct SettingsView: View {
         .navigationTitle("Settings")
     }
     
-   /* class BugReporting: UIViewController, MFMailComposeViewControllerDelegate {
-        
-        func sendEmail(to supportEmail: [String]) {
-            if MFMailComposeViewController.canSendMail(){
-                let mail = MFMailComposeViewController()
-                mail.mailComposeDelegate = self
-                mail.setToRecipients(supportEmail)
-                mail.setSubject("LocaNotes: Bug Report")
-                mail.setMessageBody("<p><p>", isHTML: true)
-                
-                self.present(mail, animated: true, completion: nil)
-            } else{
-                //failure (email might not be set up on phone)
-                let url = URL(string: String("mailto:".appending(supportEmail[0])).appending("?subject=LocaNotes:%20Bug%20Report"))
-                print(url ?? "something happened with the url :(")
-                UIApplication.shared.open(url!)
-            }
-        }
-        
-        func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-            controller.dismiss(animated: true)
-        }
-    }*/
 }
 
 struct EmailResetScreen: View {
@@ -396,9 +371,3 @@ struct UsernameResetScreen: View {
         restService.resetUsername(username: self.newUsername, completion: resetUsernameCallback(response:error:))
     }
 }
-
-//struct SettingsView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SettingsView(viewModel: UserViewModel())
-//    }
-//}

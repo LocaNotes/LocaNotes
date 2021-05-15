@@ -9,7 +9,7 @@ import Foundation
 
 public class UserViewModel {
     
-    let userRepository: UserRepository
+    private let userRepository: UserRepository
         
     init() {
         self.userRepository = UserRepository()

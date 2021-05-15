@@ -224,7 +224,6 @@ struct SignUp: View {
         UserDefaults.standard.set(user.serverId, forKey: "serverId")
         DispatchQueue.main.async {
             withAnimation {
-//                viewRouter.currentPage = .loginPage
                 self.index = 0
             }
         }

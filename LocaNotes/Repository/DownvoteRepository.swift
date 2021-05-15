@@ -8,8 +8,8 @@
 import Foundation
 
 public class DownvoteRepository {
-    let sqliteDatabaseService: SQLiteDatabaseService
-    let restService: RESTService
+    private let sqliteDatabaseService: SQLiteDatabaseService
+    private let restService: RESTService
     
     init() {
         self.sqliteDatabaseService = SQLiteDatabaseService.shared
@@ -41,7 +41,6 @@ public class DownvoteRepository {
     }
     
     func delete(downvoteId: String, completion: RESTService.RestResponseReturnBlock<MongoDownvoteElement>) {
-        //restService.deleteDownvote(downvoteId: downvoteId, completion: completion)
         restService.deleteDownvote(downvoteId: downvoteId, restCompletion: { [self] (response, error, completion) in
             if response == nil {
                 completion?(response, error)
@@ -69,7 +68,6 @@ public class DownvoteRepository {
             let v = response!.v
             
             do {
-                //try sqliteDatabaseService.insertDownvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
                 try self.insertIntoStorage(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
                 completion?(response, error)
             } catch {

@@ -8,8 +8,6 @@
 import Foundation
 
 public class UpvoteViewModel {
-    var upvotes: [Upvote] = []
-
     private let upvoteRepository: UpvoteRepository
 
     public init() {

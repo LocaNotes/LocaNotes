@@ -57,9 +57,3 @@ struct SearchBarView: View {
         .padding([.leading, .trailing, .top])
     }
 }
-
-//struct SearchBarView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SearchBarView(searchText: .constant(""))
-//    }
-//}

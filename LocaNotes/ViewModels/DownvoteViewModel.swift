@@ -8,8 +8,6 @@
 import Foundation
 
 public class DownvoteViewModel {
-    var downvotes: [MongoDownvoteElement] = []
-
     private let downvoteRepository: DownvoteRepository
 
     public init() {

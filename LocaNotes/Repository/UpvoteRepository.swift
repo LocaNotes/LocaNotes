@@ -8,8 +8,8 @@
 import Foundation
 
 public class UpvoteRepository {
-    let sqliteDatabaseService: SQLiteDatabaseService
-    let restService: RESTService
+    private let sqliteDatabaseService: SQLiteDatabaseService
+    private let restService: RESTService
     
     init() {
         self.sqliteDatabaseService = SQLiteDatabaseService.shared
@@ -70,7 +70,6 @@ public class UpvoteRepository {
             let v = response!.v
             
             do {
-                //try sqliteDatabaseService.insertUpvote(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
                 try self.insertIntoStorage(serverId: serverId, userServerId: userServerId, noteServerId: noteServerId, createdAt: createdAt, updatedAt: updatedAt, v: v)
                 completion?(response, error)
             } catch {

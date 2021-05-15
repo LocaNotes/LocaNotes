@@ -21,7 +21,6 @@ class LocationViewModel: NSObject, ObservableObject {
         super.init()
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-//        self.locationManager.requestWhenInUseAuthorization()
         
         // request the user to let the app always use their location
         self.locationManager.requestAlwaysAuthorization()
@@ -44,8 +43,6 @@ class LocationViewModel: NSObject, ObservableObject {
         let noteCoordinate = CLLocation(latitude: latitude, longitude: longitude)
         print("user: lat: \(userLatitude) long: \(userLongitude)")
         print("note: lat: \(latitude) long: \(longitude)")
-//        print(userCoordinate)
-//        print(noteCoordinate)
         
         // compute distance
         let distanceInMeters = userCoordinate.distance(from: noteCoordinate)

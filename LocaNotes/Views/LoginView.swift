@@ -36,9 +36,6 @@ struct Home: View {
     
     var body: some View {
         VStack {
-//            Image("hart_icon")
-//                .resizable()
-//                .frame(width: 200, height: 180)
             
             HStack {
                 
@@ -261,34 +258,10 @@ struct Login: View {
         
         let noteViewModel = NoteViewModel()
         noteViewModel.insertNotesFromServer(notes: response!)
-//        let serverId = response![0].userID
-        
-//        let commentViewModel = CommentViewModel()
-//        commentViewModel.queryCommentsFromServerBy(userId: serverId, completion: queryCommentsFromServerCallback(response:error:))
-//        commentViewModel.queryAllFromServer(completion: queryCommentsFromServerCallback(response:error:))
         
         let downvoteViewModel = DownvoteViewModel()
         downvoteViewModel.queryAllFromServer(completion: queryDownvotesFromServerCallback(response:error:))
     }
-    
-//    private func queryCommentsFromServerCallback(response: [MongoCommentElement]?, error: Error?) {
-//        if response == nil {
-//            if error == nil {
-//                restResponse = "Able to log in but received Unknown Error"
-//                didReceiveRestError.toggle()
-//                return
-//            }
-//            restResponse = "\(error)"
-//            didReceiveRestError.toggle()
-//            return
-//        }
-//
-//        let commentsViewModel = CommentViewModel()
-//        commentsViewModel.insertCommentsFromServer(comments: response!)
-//
-//        let downvoteViewModel = DownvoteViewModel()
-//        downvoteViewModel.queryAllFromServer(completion: queryDownvotesFromServerCallback(response:error:))
-//    }
     
     private func queryDownvotesFromServerCallback(response: [MongoDownvoteElement]?, error: Error?) {
         if response == nil {
@@ -373,7 +346,6 @@ struct Login: View {
                 }
             }
             
-            //let noteViewModel = NoteViewModel()
             let userId = UserDefaults.standard.string(forKey: "serverId") ?? ""
             noteViewModel.getSharedNotesFor(receiverId: userId)
         })

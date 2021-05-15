@@ -8,9 +8,6 @@
 import Foundation
 
 public class CommentViewModel {
-      
-    var comments: [Comment] = []
-
     private let commentsRepository: CommentsRepository
 
     public init() {

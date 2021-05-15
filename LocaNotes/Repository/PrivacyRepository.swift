@@ -8,11 +8,10 @@
 import Foundation
 
 public class PrivacyRepository {
-    let sqliteDatabaseService: SQLiteDatabaseService
-    let restService: RESTService
+    private let sqliteDatabaseService: SQLiteDatabaseService
+    private let restService: RESTService
     
     init() {
-//        self.sqliteDatabaseService = SQLiteDatabaseService()
         self.sqliteDatabaseService = SQLiteDatabaseService.shared
         self.restService = RESTService()
     }

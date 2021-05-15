@@ -26,21 +26,6 @@ struct MongoDownvoteElement: Codable {
 extension MongoDownvoteElement: SQLTable {
     
     // represents the sql statement to create the Note table
-//    static var createStatement: String {
-//        return """
-//            CREATE TABLE Downvote(
-//                DownvoteId INTEGER NOT NULL PRIMARY KEY,
-//                ServerId TEXT NOT NULL,
-//                UserServerId TEXT NOT NULL,
-//                NoteServerId TEXT NOT NULL,
-//                CreatedAt INTEGER NOT NULL,
-//                UpdatedAt INTEGER NOT NULL,
-//                V INTEGER NOT NULL,
-//                FOREIGN KEY(UserServerId) REFERENCES User(ServerId),
-//                FOREIGN KEY(NoteServerId) REFERENCES Note(ServerId)
-//            );
-//        """
-//    }
     static var createStatement: String {
         return """
             CREATE TABLE Downvote(

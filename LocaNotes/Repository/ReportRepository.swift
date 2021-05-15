@@ -8,7 +8,7 @@
 import Foundation
 
 public class ReportRepository {
-    let restService: RESTService
+    private let restService: RESTService
     
     init() {
         self.restService = RESTService()

@@ -5,6 +5,8 @@
 //  Created by Anthony C on 4/21/21.
 //
 
+// Source: https://stackoverflow.com/questions/39677330/how-does-string-substring-work-in-swift
+
 import Foundation
 
 extension String {

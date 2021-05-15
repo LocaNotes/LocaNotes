@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct NoteListView: View {
-//    @ObservedObject var viewModel: NoteViewModel
     
     @EnvironmentObject var noteViewModel: NoteViewModel
     
@@ -19,11 +18,9 @@ struct NoteListView: View {
     @Binding var sortOption: SortOption
     @Binding var filterOption: FilterOption
         
-//    private var privacyLabel: PrivacyLabel
     private var layout: NoteViewLayout
         
     private var privateNotes: [Note] {
-//        return viewModel.privateNotes
         return noteViewModel.privateNotes
     }
     
@@ -32,12 +29,10 @@ struct NoteListView: View {
     }
     
     private var nearbyPrivateNotes: [Note] {
-//        return viewModel.nearbyPrivateNotes
         return noteViewModel.nearbyPrivateNotes
     }
     
     private var filteredSortedPrivateNotes: [Note] {
-//        var notes = viewModel.privateNotes
         var notes = noteViewModel.privateNotes
         notes = filter(notes: notes)
         notes = sort(notes: notes)
@@ -64,21 +59,6 @@ struct NoteListView: View {
         return noteViewModel.myStories
     }
     
-//    init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, privacyLabel: PrivacyLabel) {
-////        self.viewModel = NoteViewModel()
-//        self._searchText = searchText
-//        self._sortOption = sort
-//        self._filterOption = filter
-//        self.privacyLabel = privacyLabel
-//    }
-    
-//    init(viewModel: NoteViewModel, searchText: Binding<String>, sort: Binding<SortOption>, filter: Binding<FilterOption>, layout: NoteViewLayout) {
-//        self._searchText = searchText
-//        self._sortOption = sort
-//        self._filterOption = filter
-//        self.layout = layout
-//    }
-    
     init(viewModel: NoteViewModel, searchText: Binding<String>, isShowingMapView: Binding<Bool>, sort: Binding<SortOption>, filter: Binding<FilterOption>, layout: NoteViewLayout) {
         self._searchText = searchText
         self._isShowingMapView = isShowingMapView
@@ -91,12 +71,6 @@ struct NoteListView: View {
         SearchBarView(searchText: $searchText)
             .frame(width: UIScreen.main.bounds.width + 20, height: 40, alignment: .bottom)
         
-//        switch privacyLabel {
-//        case PrivacyLabel.privateNote:
-//            generatePrivateList()
-//        case PrivacyLabel.publicNote:
-//            generatePublicList()
-//        }
         switch layout {
         case NoteViewLayout.privateNotes:
             generatePrivateList()
@@ -108,7 +82,6 @@ struct NoteListView: View {
     }
     
     func generatePublicList() -> some View {
-//        let nearbyNotes: [Note] = viewModel.nearbyPublicNotes
         let nearbyNotes: [Note] = noteViewModel.nearbyPublicNotes
         return (
             List {
@@ -122,8 +95,6 @@ struct NoteListView: View {
                 }
             }
             .navigationBarItems(leading: HeaderButtons(sort: $sortOption, filter: $filterOption, isShowingMapView: $isShowingMapView), trailing: EditButton())
-//            .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption))
-//            .onAppear(perform: viewModel.refresh)
             .onAppear(perform: noteViewModel.refresh)
         )
     }
@@ -146,8 +117,6 @@ struct NoteListView: View {
                 }
             }
             .navigationBarItems(leading: HeaderButtons(sort: $sortOption, filter: $filterOption, isShowingMapView: $isShowingMapView), trailing: EditButton())
-//            .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
-//            .onAppear(perform: viewModel.refresh)
             .onAppear(perform: noteViewModel.refresh)
         )
     }
@@ -165,7 +134,6 @@ struct NoteListView: View {
             }
         }
         .navigationBarItems(leading: HeaderButtons(sort: $sortOption, filter: $filterOption, isShowingMapView: $isShowingMapView), trailing: EditButton())
-//        .navigationBarItems(leading: FilterSortButtons(sort: $sortOption, filter: $filterOption), trailing: EditButton())
         .onAppear(perform: noteViewModel.refresh)
     }
     
@@ -222,33 +190,6 @@ struct NoteListView: View {
     
     func generateRows(notes: [Note]) -> some View {
         var notes = notes
-//        switch (nearbyOnly, self.privacyLabel) {
-//        case (true, PrivacyLabel.privateNote):
-////            notes = viewModel.nearbyPrivateNotes
-//            notes = noteViewModel.nearbyPrivateNotes
-//        case (true, PrivacyLabel.publicNote):
-////            notes = viewModel.nearbyPublicNotes
-//            notes = noteViewModel.nearbyPublicNotes
-//        case (false, PrivacyLabel.privateNote):
-////            notes = viewModel.privateNotes
-//            notes = noteViewModel.privateNotes
-//        case (false, PrivacyLabel.publicNote):
-////            notes = viewModel.publicNotes
-//            notes = noteViewModel.publicNotes
-//        }
-        
-//        switch (nearbyOnly, self.layout) {
-//        case (true, NoteViewLayout.privateNotes):
-//            notes = noteViewModel.nearbyPrivateNotes
-//        case (true, NoteViewLayout.publicNotes):
-//            notes = noteViewModel.nearbyPublicNotes
-//        case (false, NoteViewLayout.privateNotes):
-//            notes = noteViewModel.privateNotes
-//        case (false, NoteViewLayout.publicNotes):
-//            notes = noteViewModel.publicNotes
-//        case (_, NoteViewLayout.stories):
-//            notes = noteViewModel.stories
-//        }
         
         notes = filter(notes: notes)
         notes = sort(notes: notes)
@@ -258,7 +199,6 @@ struct NoteListView: View {
                 self.searchText.isEmpty ? true :
                     note.body.lowercased().contains(self.searchText.lowercased())
             }), id: \.noteId) { note in
-//                NoteCell(note: note, privacyLabel: privacyLabel)
                 NoteCell(note: note, layout: self.layout)
             }
             .onDelete(perform: deletePrivateNote)
@@ -284,7 +224,6 @@ struct NoteListView: View {
             }
         }
         if index > -1 {
-//            viewModel.deleteNote(at: IndexSet(integer: index))
             noteViewModel.deleteNote(at: IndexSet(integer: index))
         }
     }
@@ -354,7 +293,6 @@ struct NoteCell: View {
     
     private let note: Note
     
-//    private let privacyLabel: PrivacyLabel
     private let layout: NoteViewLayout
     
     private let userViewModel: UserViewModel
@@ -374,19 +312,6 @@ struct NoteCell: View {
     )
     
     @State private var noteTag = ""
-        
-//    init(note: Note, privacyLabel: PrivacyLabel) {
-//        self.note = note
-//        self.privacyLabel = privacyLabel
-//        userViewModel = UserViewModel()
-////        userViewModel.getUserBy(serverId: note.userServerId, completion: { [self] (response, error) in
-////            if response == nil {
-////                print("could not query user from server")
-////                return
-////            }
-////            username = response![0].username
-////        })
-//    }
     
     init(note: Note, layout: NoteViewLayout) {
         self.note = note
@@ -397,7 +322,6 @@ struct NoteCell: View {
     
     var body: some View {
         VStack {
-//            NavigationLink(destination: DetailView(note: note, privacyLabel: privacyLabel)) {
             NavigationLink(destination: DetailView(note: note, author: author, noteTag: noteTag, layout: layout)) {
                 VStack {
                     HStack {
@@ -444,9 +368,3 @@ struct NoteCell: View {
         }
     }
 }
-
-//struct NoteListView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        NoteListView()
-//    }
-//}

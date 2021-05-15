@@ -9,7 +9,6 @@ import SwiftUI
 
 struct CreateNoteView: View {
         
-//    private let noteViewModel: NoteViewModel
     @EnvironmentObject var noteViewModel: NoteViewModel
     
     @Binding var selectedTab: Int
@@ -41,7 +40,6 @@ struct CreateNoteView: View {
     @State private var toastCompletion: () -> Void = {}
     
     init(selectedTab: Binding<Int>) {
-//        noteViewModel = NoteViewModel()
         self._selectedTab = selectedTab
         
         createNoteSuccess = "Successfully created note."
@@ -122,7 +120,6 @@ struct CreateNoteView: View {
     }
     
     private func makeToast(title: String, message: String, completion: @escaping () -> Void) -> Alert {
-//        return Alert(title: Text(title), message: Text(message), dismissButton: .cancel())
         return Alert(title: Text(title), message: Text(message), dismissButton: .destructive(Text("OK")) {
             completion()
         })
@@ -304,9 +301,3 @@ struct StoryRadioButtonsSheet: View {
         .cornerRadius(30)
     }
 }
-
-//struct CreateNoteView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        CreateNoteView(noteViewModel: NoteViewModel(), selectedTab: 0)
-//    }
-//}

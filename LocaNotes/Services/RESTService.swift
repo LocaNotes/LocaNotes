@@ -17,13 +17,6 @@ public class RESTService {
     
     typealias InsertUpvoteReturnBlock<T> = ((MongoUpvote?, Error?, RestResponseReturnBlock<T>) -> Void)?
     
-//    private let sqliteDatebaseService: SQLiteDatabaseService
-//    
-//    init() {
-////        self.sqliteDatebaseService = SQLiteDatabaseService()
-//        self.sqliteDatebaseService = SQLiteDatabaseService.shared
-//    }
-    
     func authenticateUser(username: String, password: String, completion: RestLoginReturnBlock<[MongoUserElement]>) {
         var components = URLComponents()
         components.scheme = "http"
